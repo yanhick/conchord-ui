@@ -1,0 +1,6 @@
+- hosts: all
+  sudo: yes
+  tasks:
+      - name: Install postgreSQL
+        action: apt pkg='postgresql' state=installed update_cache=true
+
