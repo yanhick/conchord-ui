@@ -20,7 +20,8 @@
       "es6"
     ],
     "unmockedModulePathPatterns": [
-      "react"
+      "react",
+      "flux"
     ]
   },
   "author": "Yannick Dominguez",
