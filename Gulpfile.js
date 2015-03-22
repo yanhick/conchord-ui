@@ -71,7 +71,7 @@ gulp.task('browserify', function () {
             debug: process.env.NODE_ENV !== 'production',
             transform: ['babelify']
         }))
-        .pipe(gulp.dest('dist/app.js'));
+        .pipe(gulp.dest('dist'));
 });
 
 gulp.task('watch', ['lint'], function () {
