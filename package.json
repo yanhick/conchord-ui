@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "./node_modules/babel/bin/babel-node server",
-    "test": "jest",
+    "test": "gulp dev && jest",
     "build-client": "./node_modules/browserify/bin/cmd.js --debug client/index.js -t babelify --outfile dist/conchord-ui.js",
     "watch-build-client": "watchify --debug client/index.js -t babelify --outfile dist/conchord-ui.js"
   },
@@ -34,15 +34,16 @@
     "babelify": "^5.0.3",
     "browserify": "^9.0.3",
     "connect-livereload": "^0.5.3",
+    "express": "^4.12.0",
     "gulp": "^3.8.11",
-    "gulp-concat": "^2.5.2",
+    "gulp-browserify": "^0.5.1",
     "gulp-jshint": "^1.9.4",
     "gulp-livereload": "^3.8.0",
+    "gulp-plumber": "^1.0.0",
     "gulp-react": "^3.0.1",
     "gulp-util": "^3.0.4",
     "jest": "^0.1.37",
-    "jest-cli": "^0.4.0",
-    "express": "^4.12.0"
+    "jest-cli": "^0.4.0"
   },
   "dependencies": {
     "flux": "^2.0.1",
