@@ -3,9 +3,9 @@ import Router from 'react-router';
 import { Route, DefaultRoute } from 'react-router';
 
 import App from './app';
-import SongContent from './views/song-content';
-import Search from './views/search';
-import Home from './views/home';
+import SongContent from './components/song-content';
+import Search from './components/search';
+import Home from './components/home';
 
 export default (
     <Route name="app" path="/" handler={App}>
