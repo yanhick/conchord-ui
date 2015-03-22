@@ -33,7 +33,7 @@ function handleError(e) {
 }
 
 // Dev task
-gulp.task('dev', ['clean', 'lint', 'browserify'], function () {});
+gulp.task('dev', ['clean', 'lint', 'static', 'browserify'], function () {});
 
 // Clean output task
 gulp.task('clean', function () {
@@ -58,6 +58,12 @@ gulp.task('lint', function () {
         .pipe(jshint.reporter('default'));
 });
 
+// Copy static files to output folder
+gulp.task('static', function () {
+    gulp.src('static/**/*.*')
+        .pipe(gulp.dest('dist'));
+});
+
 gulp.task('browserify', function () {
     gulp.src('client/index.js')
     .pipe(plumber({ errorHandler: handleError }))
@@ -68,11 +74,11 @@ gulp.task('browserify', function () {
         .pipe(gulp.dest('dist/app.js'));
 });
 
-gulp.task('watch', ['clean', 'lint'], function () {
+gulp.task('watch', ['lint'], function () {
     server.listen(serverPort);
     refresh.listen(livereloadPort);
 
-    gulp.watch(['client/**/*.js'], ['clean', 'lint', 'browserify'])
+    gulp.watch(['client/**/*.js'], ['lint', 'browserify'])
         .on('error', handleError);
 });
 
