@@ -1,11 +1,9 @@
 var gulp = require('gulp'),
+    plumber = require('gulp-plumber'),
     gutil = require('gulp-util'),
     jshint = require('gulp-jshint'),
     react = require('gulp-react'),
-    browserify = require('browserify'),
-    babelify = require('babelify'),
-    concat = require('gulp-concat');
-    fs = require('fs');
+    browserify = require('gulp-browserify');
 
 var express = require('express'),
     refresh = require('gulp-livereload'),
@@ -27,29 +25,37 @@ gulp.task('dev', ['lint', 'browserify'], function () {});
 
 // Lint task
 gulp.task('lint', function () {
+
+    //prevent 'watch' crash in case of error
+    var r = react({ es6module: true });
+    r.on('error', function (e) {
+        gutil.log(e);
+        r.end();
+    });
+
     gulp.src('client/**/*.js')
-        .pipe(react({ es6module: true }))
-        .on('error', gutil.log)
+        .pipe(plumber())
+        .pipe(r)
         .pipe(jshint())
         .pipe(jshint.reporter('default'));
 });
 
 gulp.task('browserify', function () {
-    browserify({ debug: true })
-        .transform(babelify)
-        .require('./client/index.js', { entry: true })
-        .bundle()
-        .pipe(fs.createWriteStream('dist/app.js'));
+    gulp.src('client/index.js')
+        .pipe(plumber())
+        .pipe(browserify({
+            debug: !gulp.env.production,
+            transform: ['babelify']
+        }))
+        .pipe(gulp.dest('dist/app.js'));
 });
 
 gulp.task('watch', ['lint'], function () {
     server.listen(serverPort);
     refresh.listen(livereloadPort);
 
-    gulp.watch(['client/**/*.js'], [
-        'lint',
-        'browserify'
-    ]);
+    gulp.watch(['client/**/*.js'], ['lint', 'browserify'])
+        .on('error', gutil.log);
 });
 
 gulp.task('default', ['dev', 'watch']);
