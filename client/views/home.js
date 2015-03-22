@@ -1,13 +1,12 @@
 import React from 'react';
-import { RouteHandler } from 'react-router';
+
+import Search from './search';
 
 export default React.createClass({
 
     render: function () {
         return (
-            <div>
-                <RouteHandler />
-            </div>
+            <Search onSelect={this.props.onSelect} />
         );
     }
 
