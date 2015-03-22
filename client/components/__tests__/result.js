@@ -8,6 +8,7 @@ describe('Result', () => {
         const TestUtils = React.addons.TestUtils,
               onSelectMock = jest.genMockFunction(),
               data = {
+                  id: 1,
                   title: 'my song',
                   href: '/mysong'
               },
@@ -18,7 +19,7 @@ describe('Result', () => {
         const songLink = TestUtils.findRenderedDOMComponentWithTag(result, 'a');
 
         TestUtils.Simulate.click(songLink);
-        expect(onSelectMock).toBeCalledWith('/mysong');
+        expect(onSelectMock).toBeCalledWith(1);
     });
 });
 
