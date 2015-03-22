@@ -4,7 +4,7 @@ export default React.createClass({
 
     handleClick: function (e) {
         e.preventDefault();
-        this.props.onSelect(this.props.data.href);
+        this.props.onSelect(this.props.data.id);
     },
 
     render: function () {

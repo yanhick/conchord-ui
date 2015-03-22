@@ -25,7 +25,7 @@ describe('Results', () => {
         const songLinks = TestUtils.scryRenderedDOMComponentsWithTag(results, 'a');
 
         TestUtils.Simulate.click(songLinks[1]);
-        expect(onSelectMock).toBeCalledWith('/my-other-song');
+        expect(onSelectMock).toBeCalledWith(2);
     });
 });
 
