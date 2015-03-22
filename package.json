@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "./node_modules/babel/bin/babel-node server",
-    "test": "jest",
+    "test": "gulp dev && jest",
     "build-client": "./node_modules/browserify/bin/cmd.js --debug client/index.js -t babelify --outfile dist/conchord-ui.js",
     "watch-build-client": "watchify --debug client/index.js -t babelify --outfile dist/conchord-ui.js"
   },
