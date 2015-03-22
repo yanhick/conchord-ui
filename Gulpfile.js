@@ -3,6 +3,7 @@ var gulp = require('gulp'),
     gutil = require('gulp-util'),
     jshint = require('gulp-jshint'),
     react = require('gulp-react'),
+    clean = require('gulp-clean'),
     browserify = require('gulp-browserify');
 
 var express = require('express'),
@@ -32,7 +33,13 @@ function handleError(e) {
 }
 
 // Dev task
-gulp.task('dev', ['lint', 'browserify'], function () {});
+gulp.task('dev', ['clean', 'lint', 'browserify'], function () {});
+
+// Clean output task
+gulp.task('clean', function () {
+    gulp.src('dist', { read: false })
+        .pipe(clean());
+});
 
 // Lint task
 gulp.task('lint', function () {
@@ -61,11 +68,11 @@ gulp.task('browserify', function () {
         .pipe(gulp.dest('dist/app.js'));
 });
 
-gulp.task('watch', ['lint'], function () {
+gulp.task('watch', ['clean', 'lint'], function () {
     server.listen(serverPort);
     refresh.listen(livereloadPort);
 
-    gulp.watch(['client/**/*.js'], ['lint', 'browserify'])
+    gulp.watch(['client/**/*.js'], ['clean', 'lint', 'browserify'])
         .on('error', handleError);
 });
 
