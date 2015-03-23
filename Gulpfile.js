@@ -6,20 +6,14 @@ var gulp = require('gulp'),
     clean = require('gulp-clean'),
     browserify = require('gulp-browserify');
 
-var express = require('express'),
+var server = require('./server'),
     refresh = require('gulp-livereload'),
     livereload = require('connect-livereload');
 
 var livereloadPort = 35729,
       serverPort = 5000;
 
-var server = express();
-
 server.use(livereload({port: livereloadPort}));
-
-server.all('/*', function (req, res) {
-    res.sendfile('index.html', {root: 'dist'});
-});
 
 // handle all tasks errors
 function handleError(e) {
@@ -83,6 +77,8 @@ gulp.task('watch', ['lint'], function () {
 
     gulp.watch(['client/**/*.js'], ['lint', 'browserify'])
         .on('error', handleError);
+
+    gulp.watch('./dist/**').on('change', refresh.changed);
 });
 
 gulp.task('default', ['dev', 'watch']);
