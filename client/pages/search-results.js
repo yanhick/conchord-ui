@@ -26,7 +26,7 @@ export default React.createClass({
     },
 
     componentWillUnmount () {
-        Store.off('change', this._onChange);
+        Store.removeListener('change', this._onChange);
     },
 
     componentWillReceiveProps (props) {
