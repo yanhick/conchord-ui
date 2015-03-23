@@ -11,7 +11,7 @@ import Actions from '../../actions/';
 import Store from '../../stores/';
 
 /* wrap the SearchResults to provide a stubbed router */
-const stubRouterContext = () => {
+const stubRouterContext = (stubs) => {
   return React.createClass({
 
     childContextTypes: {
@@ -20,13 +20,13 @@ const stubRouterContext = () => {
 
     getChildContext () {
       return {
-          router: {
+          router: assign({
               getCurrentQuery () {
                   return {
                       q: 'search query'
                   };
               }
-          }
+          }, stubs)
       };
     },
 
@@ -64,10 +64,9 @@ describe('SearchResults', () => {
 
     it('allows selecting a song among results', () => {
 
-        Actions.getSong = jest.genMockFunction();
-
         const TestUtils = React.addons.TestUtils,
-              WrappedSearchResults = stubRouterContext(),
+              transitionToStub = jest.genMockFunction(),
+              WrappedSearchResults = stubRouterContext({transitionTo: transitionToStub}),
               searchResults = TestUtils.renderIntoDocument(
                   <WrappedSearchResults />
               );
@@ -75,7 +74,7 @@ describe('SearchResults', () => {
         const link = TestUtils.findRenderedDOMComponentWithTag(searchResults, 'a');
         TestUtils.Simulate.click(link);
 
-        expect(Actions.getSong).toBeCalledWith(1);
+        expect(transitionToStub).toBeCalledWith('song', {}, {id: 1});
     });
 });
 
