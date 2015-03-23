@@ -27,7 +27,7 @@ class Actions {
             },
             success: (data) => {
                 Dispatcher.dispatch({
-                    actionType: Constants.UPDATE_SONG,
+                    actionType: Constants.UPDATE_SEARCH_RESULT,
                     data: data
                 });
             }
