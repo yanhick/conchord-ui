@@ -1,24 +1,54 @@
 jest.dontMock('../home');
 jest.dontMock('../../components/search');
+jest.dontMock('object-assign');
 
-import React from 'react/addons';
+import assign from 'object-assign';
+
+import React from 'react';
+import ReactAddons from 'react/addons';
 import Home from '../home';
-import Actions from '../../actions/';
+
+/* wrap the Home to provide a stubbed router */
+const stubRouterContext = (props, stubs) => {
+  return React.createClass({
+
+    childContextTypes: {
+      router: React.PropTypes.object
+    },
+
+    getChildContext () {
+      return {
+          router: assign({
+              transitionTo () {},
+          }, stubs)
+      };
+    },
+
+    render () {
+        return (
+            <Home {...props} />
+        );
+    }
+
+  });
+};
 
 describe('Home', () => {
     it('allows searching for a song', () => {
         const TestUtils = React.addons.TestUtils,
+              transitionToStub = jest.genMockFunction(),
+              WrappedHome = stubRouterContext({}, { transitionTo: transitionToStub }),
               home = TestUtils.renderIntoDocument(
-                  <Home />
+                  <WrappedHome />
               );
 
         const searchInput = TestUtils.scryRenderedDOMComponentsWithTag(home, 'input')[0],
               form  = TestUtils.findRenderedDOMComponentWithTag(home, 'form');
 
-        Actions.searchSong = jest.genMockFunction();
         TestUtils.Simulate.change(searchInput, {target: {value: 'song search'}});
         TestUtils.Simulate.submit(form);
-        expect(Actions.searchSong).toBeCalledWith('song search');
+
+        expect(transitionToStub).toBeCalledWith('search', {query: 'song search'});
     });
 });
 
