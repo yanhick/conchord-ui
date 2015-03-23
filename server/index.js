@@ -38,4 +38,8 @@ server.get('/api/songs/:id', function (req, res) {
 
 server.use(express.static('./dist'));
 
+server.get('*', function (req, res) {
+    res.sendFile('index.html', {root: './dist'});
+});
+
 module.exports = server;
