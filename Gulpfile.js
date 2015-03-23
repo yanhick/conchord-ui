@@ -24,13 +24,6 @@ server.all('/*', function (req, res) {
 // handle all tasks errors
 function handleError(e) {
 
-    // Ignore 'folder already exists' errors.
-    // They happen because there are multiple
-    // tasks moving files to 'dist' folder
-    if (e.code === 'EEXIST') {
-        return;
-    }
-
     gutil.log(e);
 
     //if we are in a testing environement (for example CI server),
@@ -45,7 +38,7 @@ gulp.task('dev', ['clean', 'lint', 'static', 'browserify'], function () {});
 
 // Clean output task
 gulp.task('clean', function () {
-    gulp.src('dist', { read: false })
+    return gulp.src('dist', { read: false })
         .pipe(plumber({ errorHandler: handleError }))
         .pipe(clean());
 });
@@ -60,7 +53,7 @@ gulp.task('lint', function () {
         r.end();
     });
 
-    gulp.src('client/**/*.js')
+    return gulp.src('client/**/*.js')
         .pipe(plumber({ errorHandler: handleError }))
         .pipe(r)
         .pipe(jshint())
@@ -68,20 +61,20 @@ gulp.task('lint', function () {
 });
 
 // Copy static files to output folder
-gulp.task('static', function () {
-    gulp.src('static/**/*.*')
+gulp.task('static', ['clean'], function () {
+    return gulp.src('static/**/*.*')
         .pipe(plumber({ errorHandler: handleError }))
         .pipe(gulp.dest('dist'));
 });
 
-gulp.task('browserify', function () {
-    gulp.src('client/index.js')
+gulp.task('browserify', ['clean'], function () {
+    return gulp.src('client/index.js')
         .pipe(plumber({ errorHandler: handleError }))
         .pipe(browserify({
             debug: process.env.NODE_ENV !== 'production',
             transform: ['babelify']
         }))
-        .pipe(gulp.dest('dist'));
+        .pipe(gulp.dest('dist/js'));
 });
 
 gulp.task('watch', ['lint'], function () {
