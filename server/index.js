@@ -1,8 +1,8 @@
 var express = require('express');
 
-var app = express();
+var server = express();
 
-app.get('/api/search', function (req, res) {
+server.get('/api/search', function (req, res) {
     res.set('Content-Type', 'application/json');
     res.send([{
         id: 1,
@@ -15,7 +15,7 @@ app.get('/api/search', function (req, res) {
     }]);
 });
 
-app.get('/api/songs/:id', function (req, res) {
+server.get('/api/songs/:id', function (req, res) {
     res.set('Content-Type', 'application/json');
     res.send({
         id: 1,
@@ -34,7 +34,6 @@ app.get('/api/songs/:id', function (req, res) {
     });
 });
 
+server.use(express.static('./dist'));
 
-app.use(express.static('./dist'));
-
-app.listen(3000);
+module.exports = server;
