@@ -40,6 +40,11 @@ describe('Song', () => {
 
         Actions.getSong = jest.genMockFunction();
         Store.getSong = jest.genMockFunction();
+        Store.getSong.mockReturnValueOnce({
+            id: 1,
+            meta: {},
+            content: {}
+        });
 
         const TestUtils = React.addons.TestUtils,
               WrappedSong = stubRouterContext(),
