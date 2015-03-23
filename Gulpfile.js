@@ -78,7 +78,9 @@ gulp.task('watch', ['lint'], function () {
     gulp.watch(['client/**/*.js'], ['lint', 'browserify'])
         .on('error', handleError);
 
-    gulp.watch('./dist/**').on('change', refresh.changed);
+    gulp.watch('./dist/**')
+        .on('error', handleError)
+        .on('change', refresh.changed);
 });
 
 gulp.task('default', ['dev', 'watch']);
