@@ -1,6 +1,7 @@
 import React from 'react';
 
 import Search from '../components/search';
+import Actions from '../actions/';
 
 export default React.createClass({
 
@@ -8,11 +9,12 @@ export default React.createClass({
      * appear, don't know why, will have to understand
      */
     contextTypes: {
-        router: React.PropTypes.object.isRequired
+        router: React.PropTypes.func.isRequired
     },
 
     handleSearch: function (query) {
-        this.context.router.transitionTo('search', {}, {q: query});
+        Actions.searchSong(query);
+        this.context.router.transitionTo('search', {query: query});
     },
 
     render: function () {
@@ -22,3 +24,4 @@ export default React.createClass({
     }
 
 });
+

@@ -1,9 +1,10 @@
 import React from 'react';
-import Router from 'react-router';
+import { HistoryLocation } from 'react-router';
+import router from 'react-router';
 
 import routes from './routes';
 
-Router.run(routes, Router.HistoryLocation, function (Handler) {
+router.run(routes, HistoryLocation, function (Handler) {
     React.render(<Handler />, document.body);
 });
 
