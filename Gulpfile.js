@@ -23,6 +23,14 @@ server.all('/*', function (req, res) {
 
 // handle all tasks errors
 function handleError(e) {
+
+    // Ignore 'folder already exists' errors.
+    // They happen because there are multiple
+    // tasks moving files to 'dist' folder
+    if (e.code === 'EEXIST') {
+        return;
+    }
+
     gutil.log(e);
 
     //if we are in a testing environement (for example CI server),
@@ -38,6 +46,7 @@ gulp.task('dev', ['clean', 'lint', 'static', 'browserify'], function () {});
 // Clean output task
 gulp.task('clean', function () {
     gulp.src('dist', { read: false })
+        .pipe(plumber({ errorHandler: handleError }))
         .pipe(clean());
 });
 
@@ -61,12 +70,13 @@ gulp.task('lint', function () {
 // Copy static files to output folder
 gulp.task('static', function () {
     gulp.src('static/**/*.*')
+        .pipe(plumber({ errorHandler: handleError }))
         .pipe(gulp.dest('dist'));
 });
 
 gulp.task('browserify', function () {
     gulp.src('client/index.js')
-    .pipe(plumber({ errorHandler: handleError }))
+        .pipe(plumber({ errorHandler: handleError }))
         .pipe(browserify({
             debug: process.env.NODE_ENV !== 'production',
             transform: ['babelify']
