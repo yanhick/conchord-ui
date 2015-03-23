@@ -19,9 +19,11 @@ server.get('/api/songs/:id', function (req, res) {
     res.set('Content-Type', 'application/json');
     res.send({
         id: 1,
-        title: 'my-title',
-        artist: 'my artist',
-        album: 'my album',
+        meta: {
+            title: 'my-title',
+            artist: 'my artist',
+            album: 'my album',
+        },
         content: [{
             id: 1,
             section: 'Verse',
