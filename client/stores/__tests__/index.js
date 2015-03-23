@@ -22,7 +22,10 @@ describe('Store', () => {
 
     describe('#getSong', () => {
         it('returns the song data', () => {
-            expect(Store.getSong()).toEqual({});
+            expect(Store.getSong()).toEqual({
+                meta: {},
+                content: []
+            });
 
             Dispatcher.dispatch({
                 actionType: Constants.UPDATE_SONG,

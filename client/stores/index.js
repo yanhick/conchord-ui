@@ -6,7 +6,10 @@ import Constants from '../constants/';
 const CHANGE_EVENT = 'change';
 
 let searchResults = [],
-    song = {};
+    song = {
+        meta: {},
+        content: []
+    };
 
 function updateSearchResults(data) {
     searchResults = data;
