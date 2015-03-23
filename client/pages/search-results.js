@@ -38,7 +38,7 @@ export default React.createClass({
     },
 
     handleSelect (id) {
-        Actions.getSong(id);
+        this.context.router.transitionTo('song', {}, {id: id});
     },
 
     render () {
