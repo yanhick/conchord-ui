@@ -29,7 +29,7 @@ function handleError(e) {
 }
 
 // Dev task
-gulp.task('dev', ['clean', 'lint', 'static', 'browserify'], function () {});
+gulp.task('dev', ['clean', 'compass', 'lint', 'static', 'browserify'], function () {});
 
 // Clean output task
 gulp.task('clean', function () {
@@ -74,6 +74,7 @@ gulp.task('browserify', ['clean'], function () {
 
 gulp.task('compass', ['clean'], function () {
     return gulp.src('sass/**/*')
+        .pipe(plumber({ errorHandler: handleError }))
         .pipe(compass({
             sass: 'sass',
             css: 'stylesheets'
@@ -86,6 +87,9 @@ gulp.task('watch', ['lint'], function () {
     refresh.listen(livereloadPort);
 
     gulp.watch(['client/**/*.js'], ['lint', 'browserify'])
+        .on('error', handleError);
+
+    gulp.watch('./sass/**/*.scss', ['compass'])
         .on('error', handleError);
 
     gulp.watch('./dist/**')
