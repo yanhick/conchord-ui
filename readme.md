@@ -1,5 +1,7 @@
 Conchord UI
 ===========
+[![Build Status](https://travis-ci.org/yanhick/conchord-ui.svg?branch=master)](https://travis-ci.org/yanhick/conchord-ui)
+
 
 A UI to display songs in the conchord format
 
