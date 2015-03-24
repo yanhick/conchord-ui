@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server/app",
     "test": "NODE_ENV=test gulp dev && jest",
-    "release": "gulp dev && git add dist && git commit -m'release' && git push heroku master && git reset --hard HEAD~",
+    "release": "gulp dev && git add dist && git commit -m'release' && git push heroku master -f && git reset --hard HEAD~",
     "postinstall": "bower install"
   },
   "jest": {
