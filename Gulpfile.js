@@ -5,6 +5,7 @@ var gulp = require('gulp'),
     react = require('gulp-react'),
     clean = require('gulp-clean'),
     compass = require('gulp-compass'),
+    bower = require('gulp-bower'),
     browserify = require('gulp-browserify');
 
 var server = require('./server'),
@@ -73,12 +74,26 @@ gulp.task('browserify', ['clean'], function () {
         .pipe(gulp.dest('dist/js'));
 });
 
-gulp.task('compass', ['clean'], function () {
-    return gulp.src('sass/**/*')
+gulp.task('bower', ['clean'], function () {
+    return bower()
+        .pipe(gulp.dest('./bower_components/'));
+});
+
+gulp.task('icons', ['clean'], function () {
+    return gulp.src('./bower_components/fontawesome/fonts/**.*')
+        .pipe(gulp.dest('dist/fonts'));
+});
+
+gulp.task('compass', ['clean', 'bower', 'icons'], function () {
+    return gulp.src('sass/style.scss')
         .pipe(plumber({ errorHandler: handleError }))
         .pipe(compass({
-            sass: 'sass',
-            css: 'stylesheets'
+            style: 'compressed',
+            import_path: [
+                'sass',
+                './bower_components/bootstrap-sass-official/assets/stylesheets',
+                './bower_components/fontawesome/scss',
+            ]
         }))
         .pipe(gulp.dest('dist/css'));
 });
