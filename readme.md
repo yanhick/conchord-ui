@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/yanhick/conchord-ui.png?label=ready&title=Ready)](https://waffle.io/yanhick/conchord-ui)
 Conchord UI
 ===========
 [![Build Status](https://travis-ci.org/yanhick/conchord-ui.svg?branch=master)](https://travis-ci.org/yanhick/conchord-ui)
