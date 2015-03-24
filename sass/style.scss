@@ -4,3 +4,14 @@ $font-family-base: 'Raleway', sans-serif;
 @import "bootstrap";
 @import "font-awesome";
 
+@import "compass/css3";
+
+main {
+    @include column-width(400px);
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
