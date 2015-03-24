@@ -102,10 +102,7 @@ gulp.task('watch', ['lint'], function () {
     server.listen(serverPort);
     refresh.listen(livereloadPort);
 
-    gulp.watch(['client/**/*.js'], ['lint', 'browserify'])
-        .on('error', handleError);
-
-    gulp.watch('./sass/**/*.scss', ['compass'])
+    gulp.watch(['client/**/*.js', 'sass/**/*.scss'], ['dev'])
         .on('error', handleError);
 
     gulp.watch('./dist/**')
