@@ -21,9 +21,10 @@ function handleError(e) {
 
     gutil.log(e);
 
-    //if we are in a testing environement (for example CI server),
+    //if we are in a testing or production environement
+    //(for example CI server or deploy procedure),
     //we want to crash the process instead of ignoring the error
-    if (process.env.NODE_ENV === 'test') {
+    if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'production') {
         throw e;
     }
 }
