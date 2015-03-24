@@ -4,6 +4,7 @@ var gulp = require('gulp'),
     jshint = require('gulp-jshint'),
     react = require('gulp-react'),
     clean = require('gulp-clean'),
+    compass = require('gulp-compass'),
     browserify = require('gulp-browserify');
 
 var server = require('./server'),
@@ -69,6 +70,15 @@ gulp.task('browserify', ['clean'], function () {
             transform: ['babelify']
         }))
         .pipe(gulp.dest('dist/js'));
+});
+
+gulp.task('compass', ['clean'], function () {
+    return gulp.src('sass/**/*')
+        .pipe(compass({
+            sass: 'sass',
+            css: 'stylesheets'
+        }))
+        .pipe(gulp.dest('dist/css'));
 });
 
 gulp.task('watch', ['lint'], function () {
