@@ -17,24 +17,74 @@ server.get('/api/search', function (req, res) {
 
 server.get('/api/songs/:id', function (req, res) {
     res.set('Content-Type', 'application/json');
-    res.send({
+    res.send(createStubSong());
+});
+
+/* create stub song */
+
+function createStubSong () {
+    var sections = [
+        'Intro',
+        'Verse1',
+        'Chorus',
+        'Verse2',
+        'Chorus',
+        'Bridge',
+        'Chorus'
+    ];
+
+    var buildSection = createSectionBuilder();
+    var content = sections.map(buildSection);
+
+    return {
         id: 1,
         meta: {
             title: 'my-title',
             artist: 'my artist',
             album: 'my album',
         },
-        content: [{
-            id: 1,
-            section: 'Verse',
-            lines: [{
-                id: 1,
+        content: content
+    };
+}
+
+function createSectionBuilder() {
+    var id = 0;
+    return function (name) {
+        var createLines = createLinesBuilder();
+        return {
+            id: ++id,
+            section: name,
+            lines: createLines()
+        };
+    };
+}
+
+function createLinesBuilder() {
+    var id = 0;
+    return function () {
+        var lines = [];
+        for (var i = 0; i < 6; i++) {
+            lines.push({
+                id: ++id,
                 chordName: 'A',
-                content: 'my lyrics'
-            }]
-        }]
-    });
-});
+                content: createLine()
+            });
+        }
+        return lines;
+    };
+}
+
+function createLine () {
+    var length = Math.ceil(Math.random() * 15),
+        words = ['List', 'of', 'random', 'song', 'words', 'with', 'different', 'lengths'],
+        line = [];
+
+        for (var i = 0; i < length; i++) {
+            line.push(words[Math.floor(Math.random() * words.length)]);
+        }
+
+        return line.join(' ');
+}
 
 server.use(express.static('./dist'));
 
