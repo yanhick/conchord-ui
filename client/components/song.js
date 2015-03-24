@@ -9,7 +9,8 @@ export default React.createClass({
         return (
             <main>
                 <SongMeta data={this.props.data.meta} />
-                <SongContent data={this.props.data.content} />
+                <SongContent data={this.props.data.content}
+                             fontSize={this.props.fontSize} />
             </main>
         );
     }

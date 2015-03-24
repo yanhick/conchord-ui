@@ -1,13 +1,15 @@
 import React from 'react';
 
 import Store from '../stores/';
+import UIStore from '../stores/ui';
 import Actions from '../actions/';
 
 import Song from '../components/song';
 
 function getState() {
     return {
-        song: Store.getSong()
+        song: Store.getSong(),
+        songTextSize: UIStore.getSongTextRelativeSize()
     };
 }
 
@@ -40,7 +42,8 @@ export default React.createClass({
 
     render () {
         return (
-            <Song data={this.state.song} />
+            <Song data={this.state.song}
+                  fontSize={this.state.songTextSize} />
         );
     }
 
