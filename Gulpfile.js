@@ -4,6 +4,7 @@ var gulp = require('gulp'),
     jshint = require('gulp-jshint'),
     react = require('gulp-react'),
     clean = require('gulp-clean'),
+    compass = require('gulp-compass'),
     browserify = require('gulp-browserify');
 
 var server = require('./server'),
@@ -28,7 +29,7 @@ function handleError(e) {
 }
 
 // Dev task
-gulp.task('dev', ['clean', 'lint', 'static', 'browserify'], function () {});
+gulp.task('dev', ['clean', 'compass', 'lint', 'static', 'browserify'], function () {});
 
 // Clean output task
 gulp.task('clean', function () {
@@ -71,11 +72,24 @@ gulp.task('browserify', ['clean'], function () {
         .pipe(gulp.dest('dist/js'));
 });
 
+gulp.task('compass', ['clean'], function () {
+    return gulp.src('sass/**/*')
+        .pipe(plumber({ errorHandler: handleError }))
+        .pipe(compass({
+            sass: 'sass',
+            css: 'stylesheets'
+        }))
+        .pipe(gulp.dest('dist/css'));
+});
+
 gulp.task('watch', ['lint'], function () {
     server.listen(serverPort);
     refresh.listen(livereloadPort);
 
     gulp.watch(['client/**/*.js'], ['lint', 'browserify'])
+        .on('error', handleError);
+
+    gulp.watch('./sass/**/*.scss', ['compass'])
         .on('error', handleError);
 
     gulp.watch('./dist/**')
