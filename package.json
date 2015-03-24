@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server/app",
     "test": "NODE_ENV=test gulp dev && jest",
-    "postinstall": "gulp dev"
+    "release": "gulp dev && git add dist && git commit -m'release' && git push heroku master && git reset --hard HEAD~"
   },
   "jest": {
     "scriptPreprocessor": "<rootDir>/node_modules/babel-jest",
