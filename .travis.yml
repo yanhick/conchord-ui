@@ -1,5 +1,6 @@
 sudo: false
 language: node_js
+before_install: gem install compass
 node_js:
     - "0.10"
 cache:
