@@ -13,6 +13,7 @@ READ
 - search by artist and album
 - export song (plain text format)
 - not found page
+- highlight chorus about to be collapsed
 
 - localization (should be kept to a minimum)
 - search by chord (for example no barred chord for beginners)
