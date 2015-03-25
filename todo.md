@@ -17,6 +17,13 @@ READ
 - highlight mousehovered chord diagram
 - collapse chorus on click
 - visually separate chorus
+- toggle showing individual chords
+- toggle showing/hiding all chords
+- highlight chord diagram on mouseover
+- chords list should only appear if at least one chord
+selected by user
+- shown chords should have a specific color
+- there should be a shortcut to add and remove all chords
 
 - localization (should be kept to a minimum)
 - search by chord (for example no barred chord for beginners)

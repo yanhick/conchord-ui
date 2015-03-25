@@ -6,7 +6,8 @@ import UIConstants from '../constants/ui';
 const CHANGE_EVENT = 'change';
 
 let songTextRelativeSize = 100,
-    showDuplicatedChoruses = true;
+    showDuplicatedChoruses = true,
+    showChords = true;
 
 function incrementFontSize() {
     songTextRelativeSize += 10;
@@ -23,6 +24,11 @@ function setShowDuplicatedChoruses(value) {
     this.emit(CHANGE_EVENT);
 }
 
+function setShowChords(value) {
+    showChords = value;
+    this.emit(CHANGE_EVENT);
+}
+
 class UIStore extends events.EventEmitter {
 
     getSongTextRelativeSize() {
@@ -31,6 +37,10 @@ class UIStore extends events.EventEmitter {
 
     getShowDuplicatedChoruses() {
         return showDuplicatedChoruses;
+    }
+
+    getShowChords() {
+        return showChords;
     }
 }
 
@@ -57,6 +67,10 @@ Dispatcher.register(function (action) {
 
         case UIConstants.TOGGLE_SHOW_DUPLICATED_CHORUSES:
             setShowDuplicatedChoruses.call(uiStore, !showDuplicatedChoruses);
+            break;
+
+        case UIConstants.TOGGLE_SHOW_CHORDS:
+            setShowChords.call(uiStore, !showChords);
             break;
 
         default:

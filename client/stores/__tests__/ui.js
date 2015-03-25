@@ -48,5 +48,18 @@ describe('UIStore', () => {
             expect(UIStore.getShowDuplicatedChoruses()).toBe(false);
         });
     });
+
+    describe('#getShowChords', () => {
+        it('returns whether chords should be shown', () => {
+            expect(UIStore.getShowChords()).toBe(true);
+
+            Dispatcher.dispatch({
+                actionType: UIConstants.TOGGLE_SHOW_CHORDS
+            });
+
+            expect(UIStore.getShowDuplicatedChoruses()).toBe(false);
+
+        });
+    });
 });
 

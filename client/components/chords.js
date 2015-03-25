@@ -13,8 +13,14 @@ export default React.createClass({
             );
         });
 
+        let classString = '';
+
+        if (!this.props.showChords) {
+            classString += 'no-chords';
+        }
+
         return (
-            <ul>
+            <ul className={classString}>
                 {chordList}
             </ul>
         );

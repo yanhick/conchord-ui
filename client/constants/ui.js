@@ -28,7 +28,12 @@ export default {
     /**
      * Toggle hiding/showing choruses
      */
-    TOGGLE_SHOW_DUPLICATED_CHORUSES: 'TOGGLE_SHOW_DUPLICATED_CHORUSES'
+    TOGGLE_SHOW_DUPLICATED_CHORUSES: 'TOGGLE_SHOW_DUPLICATED_CHORUSES',
+
+    /**
+     * Toggle showing/hiding the song chords
+     */
+    TOGGLE_SHOW_CHORDS: 'TOGGLE_SHOW_CHORDS'
 
 };
 

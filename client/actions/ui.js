@@ -33,6 +33,12 @@ class UIActions {
         });
     }
 
+    toggleShowChords() {
+        Dispatcher.dispatch({
+            actionType: UIConstants.TOGGLE_SHOW_CHORDS
+        });
+    }
+
 }
 
 export default new UIActions();

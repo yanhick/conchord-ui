@@ -61,6 +61,17 @@ describe('UIActions', () => {
         });
     });
 
+    describe('#toggleShowChords', () => {
+        it('toggles hiding/showing the song chords', () => {
+
+            UIActions.toggleShowChords();
+
+            expect(Dispatcher.dispatch).toBeCalledWith({
+                actionType: UIConstants.TOGGLE_SHOW_CHORDS
+            });
+        });
+    });
+
 });
 
 

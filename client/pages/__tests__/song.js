@@ -53,6 +53,9 @@ describe('Song', () => {
 
         UIStore.getShowDuplicatedChoruses= jest.genMockFunction();
         UIStore.getShowDuplicatedChoruses.mockReturnValueOnce(false);
+
+        UIStore.getShowChords = jest.genMockFunction();
+        UIStore.getShowChords.mockReturnValueOnce(false);
     });
 
     it('fetches the song with the current query params', () => {
@@ -85,6 +88,16 @@ describe('Song', () => {
               );
 
         expect(UIStore.getShowDuplicatedChoruses).toBeCalled();
+    });
+
+    it('gets wheter to display ', () => {
+        const TestUtils = React.addons.TestUtils,
+              WrappedSong = stubRouterContext(),
+              song = TestUtils.renderIntoDocument(
+                  <WrappedSong />
+              );
+
+        expect(UIStore.getShowChords).toBeCalled();
     });
 });
 
