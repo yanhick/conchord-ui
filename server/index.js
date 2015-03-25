@@ -38,12 +38,42 @@ function createStubSong () {
 
     return {
         id: 1,
+        chords: createStubChords(),
         meta: {
             title: 'my-title',
             artist: 'my artist',
             album: 'my album',
         },
         content: content
+    };
+}
+
+function createStubChords () {
+    return {
+        'G': {
+            'e': 3,
+            'B': 3,
+            'G': '-',
+            'D': '-',
+            'A': 2,
+            'E': 3
+        },
+        'C': {
+            'e': 5,
+            'B': 2,
+            'G': '-',
+            'D': '-',
+            'A': 3,
+            'E': 1
+        },
+        'F': {
+            'e': 4,
+            'B': 1,
+            'G': '-',
+            'D': '-',
+            'A': 3,
+            'E': 2
+        }
     };
 }
 
