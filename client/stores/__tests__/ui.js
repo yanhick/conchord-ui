@@ -24,5 +24,29 @@ describe('UIStore', () => {
             expect(UIStore.getSongTextRelativeSize()).toEqual(100);
         });
     });
+
+    describe('#getShowDuplicatedChoruses', () => {
+        it('returns whether duplicated choruses should be shown', () => {
+            expect(UIStore.getShowDuplicatedChoruses()).toBe(true);
+
+            Dispatcher.dispatch({
+                actionType: UIConstants.HIDE_DUPLICATED_CHORUSES
+            });
+
+            expect(UIStore.getShowDuplicatedChoruses()).toBe(false);
+
+            Dispatcher.dispatch({
+                actionType: UIConstants.SHOW_DUPLICATED_CHORUSES
+            });
+
+            expect(UIStore.getShowDuplicatedChoruses()).toBe(true);
+
+            Dispatcher.dispatch({
+                actionType: UIConstants.TOGGLE_SHOW_DUPLICATED_CHORUSES
+            });
+
+            expect(UIStore.getShowDuplicatedChoruses()).toBe(false);
+        });
+    });
 });
 

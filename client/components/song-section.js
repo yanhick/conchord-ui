@@ -12,7 +12,7 @@ export default React.createClass({
         });
 
         return (
-            <section>
+            <section className={this.props.data.section}>
                 {this.props.data.section}
                 <ul>
                     {songLines}

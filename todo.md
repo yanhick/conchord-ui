@@ -15,6 +15,8 @@ READ
 - not found page
 
 - localization (should be kept to a minimum)
+- search by chord (for example no barred chord for beginners)
+- tuner
 
 WRITE
 - user accounts (only with github, fb...)
