@@ -27,6 +27,7 @@ WRITE
 TEST/REALEASE
 - e2e tests (saucelabs)
 - release on push tag with travis
+- include jest in gulp watch
 
 SOCIAL
 - comments

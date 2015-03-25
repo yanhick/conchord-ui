@@ -8,7 +8,7 @@ import Dispatcher from '../../dispatcher/';
 import Constants from '../../constants/';
 import Actions from '../';
 
-describe('Store', () => {
+describe('Actions', () => {
     describe('#getSong', () => {
         it('fetches the song with the provided id', () => {
 
