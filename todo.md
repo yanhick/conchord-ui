@@ -13,11 +13,16 @@ READ
 - search by artist and album
 - export song (plain text format)
 - not found page
-- highlight chorus about to be collapsed
+- highlight chorus about to be collapsed when mouse over button
+- highlight mousehovered chord diagram
+- collapse chorus on click
+- visually separate chorus
 
 - localization (should be kept to a minimum)
 - search by chord (for example no barred chord for beginners)
 - tuner
+- cookie/local storage for settings
+- go to home button
 
 WRITE
 - user accounts (only with github, fb...)
@@ -29,7 +34,7 @@ WRITE
 
 TEST/REALEASE
 - e2e tests (saucelabs)
-- release on push tag with travis
+- release on push tag with travis -> issue with heroku and lack of ruby/compass
 - include jest in gulp watch
 
 SOCIAL
