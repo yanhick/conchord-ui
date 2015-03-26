@@ -14,11 +14,9 @@ describe('SongShowChords', () => {
                       onToggleShowChords={onToggleShowChordsMock} />
               );
 
-        const checkbox = TestUtils.findRenderedDOMComponentWithTag(songShowChords, 'input');
+        const button = TestUtils.findRenderedDOMComponentWithTag(songShowChords, 'button');
 
-        expect(checkbox.getDOMNode().checked).toBe(true);
-
-        TestUtils.Simulate.change(checkbox);
+        TestUtils.Simulate.click(button);
         expect(onToggleShowChordsMock).toBeCalled();
     });
 });

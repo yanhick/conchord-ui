@@ -14,15 +14,19 @@ export default React.createClass({
 
         return (
             <main>
-                <SongTextSize
-                    onIncrement={this.props.onIncrementFontSize}
-                    onDecrement={this.props.onDecrementFontSize} />
-                <SongShowChords
-                    onToggleShowChords={this.props.onToggleShowChords}
-                    showChords={this.props.showChords} />
-                <SongShowDuplicatedChoruses
-                    onToggleShowDuplicatedChoruses={this.props.onToggleShowDuplicatedChoruses}
-                    showDuplicatedChoruses={this.props.showDuplicatedChoruses} />
+                <aside>
+                    <ul>
+                        <SongTextSize
+                            onIncrement={this.props.onIncrementFontSize}
+                            onDecrement={this.props.onDecrementFontSize} />
+                        <SongShowChords
+                            onToggleShowChords={this.props.onToggleShowChords}
+                            showChords={this.props.showChords} />
+                        <SongShowDuplicatedChoruses
+                            onToggleShowDuplicatedChoruses={this.props.onToggleShowDuplicatedChoruses}
+                            showDuplicatedChoruses={this.props.showDuplicatedChoruses} />
+                    </ul>
+                </aside>
                 <SongMeta data={this.props.data.meta} />
                 <Chords
                     showChords={this.props.showChords}

@@ -13,10 +13,10 @@ export default React.createClass({
 
         return (
             <section className={this.props.data.section}>
-                {this.props.data.section}
-                <ul>
+                <h2>{this.props.data.section}</h2>
+                <p>
                     {songLines}
-                </ul>
+                </p>
             </section>
         );
 

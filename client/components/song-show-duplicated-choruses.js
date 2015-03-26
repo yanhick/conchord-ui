@@ -1,16 +1,22 @@
 import React from 'react';
+import classNames from 'classnames';
 
 export default React.createClass({
 
     render: function () {
+
+        const classString = classNames(
+            'fa fa-folder fa-2x btn btn-default',
+            {'active': this.props.showDuplicatedChoruses}
+        );
+
         return (
-            <form>
-                <input
-                    type="checkbox"
-                    onChange={this.props.onToggleShowDuplicatedChoruses}
-                    checked={this.props.showDuplicatedChoruses}
+            <li>
+                <button
+                    className={classString}
+                    onClick={this.props.onToggleShowDuplicatedChoruses}
                 />
-            </form>
+            </li>
         );
     }
 

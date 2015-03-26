@@ -14,11 +14,9 @@ describe('SongShowDuplicatedChoruses', () => {
                       onToggleShowDuplicatedChoruses={onToggleShowDuplicatedChorusesMock} />
               );
 
-        const checkbox = TestUtils.findRenderedDOMComponentWithTag(songShowDuplicatedChoruses, 'input');
+        const button = TestUtils.findRenderedDOMComponentWithTag(songShowDuplicatedChoruses, 'button');
 
-        expect(checkbox.getDOMNode().checked).toBe(true);
-
-        TestUtils.Simulate.change(checkbox);
+        TestUtils.Simulate.click(button);
         expect(onToggleShowDuplicatedChorusesMock).toBeCalled();
     });
 });

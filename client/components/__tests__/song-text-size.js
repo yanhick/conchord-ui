@@ -13,7 +13,7 @@ describe('SongTextSize', () => {
                    <SongTextSize onIncrement={onIncrementMock} />
               );
 
-        const incrementButton = TestUtils.scryRenderedDOMComponentsWithTag(songTextSize, 'button')[0];
+        const incrementButton = TestUtils.scryRenderedDOMComponentsWithTag(songTextSize, 'button')[1];
 
         TestUtils.Simulate.click(incrementButton);
         expect(onIncrementMock).toBeCalled();
@@ -26,7 +26,7 @@ describe('SongTextSize', () => {
                    <SongTextSize onDecrement={onDecrementMock} />
               );
 
-        const decrementButton = TestUtils.scryRenderedDOMComponentsWithTag(songTextSize, 'button')[1];
+        const decrementButton = TestUtils.scryRenderedDOMComponentsWithTag(songTextSize, 'button')[0];
 
         TestUtils.Simulate.click(decrementButton);
         expect(onDecrementMock).toBeCalled();

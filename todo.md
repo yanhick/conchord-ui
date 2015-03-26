@@ -24,7 +24,16 @@ READ
 selected by user
 - shown chords should have a specific color
 - there should be a shortcut to add and remove all chords
+- chords name collapse (only show for first verse and chorus)
+- underline chord correspondance to lyric
+- learning mode: hide chords or lyrics, joke if both hidden ?
+- timer for autoscroll, give you time it took to reach bottom as a reference
+for future usage. Or store previous autoscroll speed when coming back
+- toggle columns
+- add print
+- add raw text
 
+- “not my f***cking rythm” 404
 - localization (should be kept to a minimum)
 - search by chord (for example no barred chord for beginners)
 - tuner

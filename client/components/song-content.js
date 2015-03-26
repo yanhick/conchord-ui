@@ -24,9 +24,11 @@ export default React.createClass({
         }
 
         return (
-            <ul style={styles} className={classString}>
-                {songSections}
-            </ul>
+            <article>
+                <ul style={styles} className={classString}>
+                    {songSections}
+                </ul>
+            </article>
         );
 
     }
