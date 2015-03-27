@@ -2,10 +2,9 @@ import React from 'react';
 
 import SongMeta from './song-meta';
 import SongContent from './song-content';
-import SongTextSize from './song-text-size';
-import SongShowDuplicatedChoruses from './song-show-duplicated-choruses';
-import SongShowChords from './song-show-chords';
+import SongToolbar from './song-toolbar';
 import Chords from './chords';
+import Header from './header';
 
 export default React.createClass({
 
@@ -15,21 +14,9 @@ export default React.createClass({
         return (
             <main>
                 <aside>
-                    <ul>
-                        <button
-                            className="fa fa-home fa-2x btn btn-default"
-                            onClick={this.props.onGoHome}
-                            value="home" />
-                        <SongTextSize
-                            onIncrement={this.props.onIncrementFontSize}
-                            onDecrement={this.props.onDecrementFontSize} />
-                        <SongShowChords
-                            onToggleShowChords={this.props.onToggleShowChords}
-                            showChords={this.props.showChords} />
-                        <SongShowDuplicatedChoruses
-                            onToggleShowDuplicatedChoruses={this.props.onToggleShowDuplicatedChoruses}
-                            showDuplicatedChoruses={this.props.showDuplicatedChoruses} />
-                    </ul>
+                    <Header onGoHome={this.props.onGoHome}>
+                        <SongToolbar {...this.props}/>
+                    </Header>
                 </aside>
                 <SongMeta data={this.props.data.meta} />
                 <Chords

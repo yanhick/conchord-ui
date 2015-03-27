@@ -43,7 +43,13 @@ main {
     }
 
 
-    header {
+    aside header {
+        margin: 0;
+        border-bottom: none;
+        display: inline-flex;
+    }
+
+    aside ~ header {
         margin: $margins $margins 0 $margins;
         padding-bottom: $margins;
         display: inline-flex;

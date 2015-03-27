@@ -22,7 +22,8 @@
     ],
     "unmockedModulePathPatterns": [
       "react",
-      "flux"
+      "flux",
+      "classnames"
     ]
   },
   "author": "Yannick Dominguez",
