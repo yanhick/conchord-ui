@@ -16,6 +16,10 @@ export default React.createClass({
             <main>
                 <aside>
                     <ul>
+                        <button
+                            className="fa fa-home fa-2x btn btn-default"
+                            onClick={this.props.onGoHome}
+                            value="home" />
                         <SongTextSize
                             onIncrement={this.props.onIncrementFontSize}
                             onDecrement={this.props.onDecrementFontSize} />

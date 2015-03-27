@@ -45,6 +45,10 @@ export default React.createClass({
         this.setState(getState());
     },
 
+    handleGoHome () {
+        this.context.router.transitionTo('/');
+    },
+
     render () {
         return (
             <Song data={this.state.song}
@@ -55,6 +59,7 @@ export default React.createClass({
                 onIncrementFontSize={UIActions.incrementFontSize}
                 onDecrementFontSize={UIActions.decrementFontSize}
                 onToggleShowDuplicatedChoruses={UIActions.toggleShowDuplicatedChoruses}
+                onGoHome={this.handleGoHome}
                 />
         );
     }
