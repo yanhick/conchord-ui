@@ -23,6 +23,7 @@ describe('Store', () => {
     describe('#getSong', () => {
         it('returns the song data', () => {
             expect(Store.getSong()).toEqual({
+                chords: {},
                 meta: {},
                 content: []
             });

@@ -15,6 +15,30 @@ class UIActions {
         });
     }
 
+    hideDuplicatedChoruses() {
+        Dispatcher.dispatch({
+            actionType: UIConstants.HIDE_DUPLICATED_CHORUSES,
+        });
+    }
+
+    showDuplicatedChoruses() {
+        Dispatcher.dispatch({
+            actionType: UIConstants.SHOW_DUPLICATED_CHORUSES,
+        });
+    }
+
+    toggleShowDuplicatedChoruses() {
+        Dispatcher.dispatch({
+            actionType: UIConstants.TOGGLE_SHOW_DUPLICATED_CHORUSES
+        });
+    }
+
+    toggleShowChords() {
+        Dispatcher.dispatch({
+            actionType: UIConstants.TOGGLE_SHOW_CHORDS
+        });
+    }
+
 }
 
 export default new UIActions();

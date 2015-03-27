@@ -17,10 +17,18 @@ export default React.createClass({
             fontSize: formatSongTextSize(this.props.fontSize)
         };
 
+        let classString = '';
+
+        if (!this.props.showDuplicatedChoruses) {
+            classString += 'no-duplicated-choruses';
+        }
+
         return (
-            <ul style={styles}>
-                {songSections}
-            </ul>
+            <article>
+                <ul style={styles} className={classString}>
+                    {songSections}
+                </ul>
+            </article>
         );
 
     }

@@ -15,13 +15,23 @@ describe('SongContent', () => {
     });
 
     it('applies the font size to the song content', () => {
-        const songContent = createSongContent(123);
+        const songContent = createSongContent(123),
+              TestUtils = React.addons.TestUtils,
+              ul = TestUtils.scryRenderedDOMComponentsWithTag(songContent, 'ul')[0];
 
-        expect(songContent.getDOMNode().style.fontSize).toBe('123%');
+        expect(ul.getDOMNode().style.fontSize).toBe('123%');
+    });
+
+    it('adds a class to hide duplicated choruses', () => {
+        const songContent = createSongContent(123, false),
+              TestUtils = React.addons.TestUtils,
+              ul = TestUtils.scryRenderedDOMComponentsWithTag(songContent, 'ul')[0];
+
+        expect(ul.getDOMNode().className).toBe('no-duplicated-choruses');
     });
 });
 
-function createSongContent(fontSize = 100) {
+function createSongContent(fontSize = 100, showDuplicatedChoruses = true) {
     const TestUtils = React.addons.TestUtils,
           data = [{
               id: 1,
@@ -33,7 +43,9 @@ function createSongContent(fontSize = 100) {
               }]
           }],
           songContent = TestUtils.renderIntoDocument(
-              <SongContent data={data} fontSize={fontSize}/>
+              <SongContent data={data}
+                           fontSize={fontSize}
+                           showDuplicatedChoruses={showDuplicatedChoruses}/>
           );
 
     return songContent;

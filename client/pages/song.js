@@ -10,7 +10,9 @@ import Song from '../components/song';
 function getState() {
     return {
         song: Store.getSong(),
-        songTextSize: UIStore.getSongTextRelativeSize()
+        songTextSize: UIStore.getSongTextRelativeSize(),
+        showChords: UIStore.getShowChords(),
+        showDuplicatedChoruses: UIStore.getShowDuplicatedChoruses()
     };
 }
 
@@ -47,8 +49,12 @@ export default React.createClass({
         return (
             <Song data={this.state.song}
                 fontSize={this.state.songTextSize}
+                showChords={this.state.showChords}
+                onToggleShowChords={UIActions.toggleShowChords}
+                showDuplicatedChoruses={this.state.showDuplicatedChoruses}
                 onIncrementFontSize={UIActions.incrementFontSize}
                 onDecrementFontSize={UIActions.decrementFontSize}
+                onToggleShowDuplicatedChoruses={UIActions.toggleShowDuplicatedChoruses}
                 />
         );
     }

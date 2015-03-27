@@ -7,6 +7,7 @@ const CHANGE_EVENT = 'change';
 
 let searchResults = [],
     song = {
+        chords: {},
         meta: {},
         content: []
     };

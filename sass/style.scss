@@ -1,17 +1,161 @@
-@import url(http://fonts.googleapis.com/css?family=Raleway:400,700,300);
-$font-family-base: 'Raleway', sans-serif;
+@import url(http://fonts.googleapis.com/css?family=Source+Serif+Pro);
+$font-family-base: 'Source Serif Pro', sans-serif;
 // Import bootstrap and fontawesome
 @import "bootstrap";
 @import "font-awesome";
 
 @import "compass/css3";
 
+$header-height: 50px;
+$title-heigth: 60px;
+$margins: 50px;
+
+$bgcolor: rgb(254, 254, 254);
+
+html {
+    box-sizing: border-box;
+}
+
+body {
+    background: $bgcolor;
+}
 main {
-    @include column-width(400px);
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
+    display: flex;
+    flex-direction: column;
+
+    aside {
+        height: $header-height;
+        background-color: black;
+
+        ul {
+            padding: 0;
+            list-style: none;
+        }
+        
+        li {
+            display: inline;
+        }
+
+        .fa {
+            height: $header-height;
+            width: $header-height;
+        }
+    }
+
+
+    header {
+        margin: $margins $margins 0 $margins;
+        padding-bottom: $margins;
+        display: inline-flex;
+        h1 {
+            font-size: 3rem;
+            text-transform: uppercase;
+            margin: 0;
+            margin-right: $margins;
+        }
+
+        border-bottom: solid black 1px;
+
+        div {
+        }
+
+        h2 {
+            color: gray;
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        h3 {
+            color: gray;
+            font-size: 1.5rem;
+            margin: 0;
+        }
+    }
+
+    article {
+        margin: $margins;
+        @include column-width(400px);
+        @include column-count(3);
+        @include column-gap(50px);
+        /*position: fixed;*/
+        top: $header-height + $title-heigth;
+        right: 0;
+        bottom: 0;
+        left: 0;
+
+        background: $bgcolor;
+        ul {
+            margin: 0;
+            padding: 0;
+            background: white;
+        }
+
+        section {
+
+            h2 {
+                text-transform: uppercase;
+                font-size: 1.5rem;
+                margin-top: 0;
+                margin-bottom: 10px;
+
+            }
+
+            &.Chorus h2 {
+                font-weight: bold;
+            }
+
+
+            p {
+                white-space: pre-line;
+            }
+
+            span {
+                position:relative;
+            }
+
+            b {
+                padding: 2px;
+                margin: 2px;
+                border-radius: 2px;
+                color: blue;
+            }
+
+            // add space after regular lines
+            span:after {
+                content: ' ';
+            }
+
+            // add line break if line end with "."
+            span[data-lyrics$="."]:after {
+                content: '\A';
+            }
+
+            p {
+                margin-left: 15px;
+                margin-bottom: 15px;
+                text-align: justify;
+            }
+
+            padding: 0;
+            margin: 0;
+            line-height: 2;
+        }
+    }
+
+
+    // hides all choruses but first one
+    .no-duplicated-choruses .Chorus ~ .Chorus {
+        display: none;
+    }
+
+}
+
+main > ul {
+    display: none;
+}
+
+//hides chords display
+.no-chords {
+    display: none;
 }
 

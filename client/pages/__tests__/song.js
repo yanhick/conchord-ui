@@ -50,6 +50,12 @@ describe('Song', () => {
 
         UIStore.getSongTextRelativeSize = jest.genMockFunction();
         UIStore.getSongTextRelativeSize.mockReturnValueOnce(123);
+
+        UIStore.getShowDuplicatedChoruses= jest.genMockFunction();
+        UIStore.getShowDuplicatedChoruses.mockReturnValueOnce(false);
+
+        UIStore.getShowChords = jest.genMockFunction();
+        UIStore.getShowChords.mockReturnValueOnce(false);
     });
 
     it('fetches the song with the current query params', () => {
@@ -70,6 +76,28 @@ describe('Song', () => {
               song = TestUtils.renderIntoDocument(
                   <WrappedSong />
               );
+
+        expect(UIStore.getSongTextRelativeSize).toBeCalled();
+    });
+
+    it('gets wheter to display duplicated choruses', () => {
+        const TestUtils = React.addons.TestUtils,
+              WrappedSong = stubRouterContext(),
+              song = TestUtils.renderIntoDocument(
+                  <WrappedSong />
+              );
+
+        expect(UIStore.getShowDuplicatedChoruses).toBeCalled();
+    });
+
+    it('gets wheter to display ', () => {
+        const TestUtils = React.addons.TestUtils,
+              WrappedSong = stubRouterContext(),
+              song = TestUtils.renderIntoDocument(
+                  <WrappedSong />
+              );
+
+        expect(UIStore.getShowChords).toBeCalled();
     });
 });
 
