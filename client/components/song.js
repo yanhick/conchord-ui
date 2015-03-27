@@ -3,8 +3,7 @@ import React from 'react';
 import SongMeta from './song-meta';
 import SongContent from './song-content';
 import SongTextSize from './song-text-size';
-import SongShowDuplicatedChoruses from './song-show-duplicated-choruses';
-import SongShowChords from './song-show-chords';
+import PushDownButton from './widgets/push-down-button';
 import Chords from './chords';
 import Header from './header';
 
@@ -21,12 +20,14 @@ export default React.createClass({
                             <SongTextSize
                                 onIncrement={this.props.onIncrementFontSize}
                                 onDecrement={this.props.onDecrementFontSize} />
-                            <SongShowChords
-                                onToggleShowChords={this.props.onToggleShowChords}
-                                showChords={this.props.showChords} />
-                            <SongShowDuplicatedChoruses
-                                onToggleShowDuplicatedChoruses={this.props.onToggleShowDuplicatedChoruses}
-                                showDuplicatedChoruses={this.props.showDuplicatedChoruses} />
+                            <PushDownButton
+                                onClick={this.props.onToggleShowChords}
+                                icon="folder"
+                                active={this.props.showChords} />
+                            <PushDownButton
+                                onClick={this.props.onToggleShowDuplicatedChoruses}
+                                icon="folder"
+                                active={this.props.showDuplicatedChoruses} />
                         </ul>
                     </Header>
                 </aside>
