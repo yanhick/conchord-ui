@@ -1,1 +1,1 @@
-web: npm start
+web: ./dist/build/conchord-ui/conchord-ui
