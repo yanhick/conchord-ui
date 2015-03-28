@@ -24,3 +24,7 @@ main = scotty 3000 $ do
       SearchResult 1 "my-song" "/my-song",
       SearchResult 2 "mo other song" "my-other-song"
     ]
+
+  get "/api/songs/:id" $ do
+    setHeader "Content-Type" "application/json"
+    file "server/song.json"
