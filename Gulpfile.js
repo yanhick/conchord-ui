@@ -6,16 +6,8 @@ var gulp = require('gulp'),
     clean = require('gulp-clean'),
     compass = require('gulp-compass'),
     bower = require('gulp-bower'),
+    shell = require('gulp-shell'),
     browserify = require('gulp-browserify');
-
-var server = require('./server'),
-    refresh = require('gulp-livereload'),
-    livereload = require('connect-livereload');
-
-var livereloadPort = 35729,
-      serverPort = 5000;
-
-server.use(livereload({port: livereloadPort}));
 
 // handle all tasks errors
 function handleError(e) {
@@ -99,15 +91,14 @@ gulp.task('compass', ['clean', 'bower', 'icons'], function () {
 });
 
 gulp.task('watch', ['lint'], function () {
-    server.listen(serverPort);
-    refresh.listen(livereloadPort);
+    // start haskell server, there is probably
+    // a cleaner way to do this
+    gulp.src('*', {read: false})
+        .pipe(shell('cabal run'));
 
     gulp.watch(['client/**/*.js', 'sass/**/*.scss'], ['dev'])
         .on('error', handleError);
 
-    gulp.watch('./dist/**')
-        .on('error', handleError)
-        .on('change', refresh.changed);
 });
 
 gulp.task('default', ['dev', 'watch']);
