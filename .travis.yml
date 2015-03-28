@@ -1,8 +1,18 @@
 sudo: false
-language: node_js
+language: haskell
+
+#all travis vm have ruby installed
 before_install: gem install compass
-node_js:
-    - "0.10"
+
+install: 
+    #all travis vm have node.js installed
+    - npm install
+    - cabal install --only-dependencies --enable-tests
+script:
+    - npm test
+    - cabal configure --enable-tests && cabal build && cabal test
+
 cache:
+    cabal: true
     directories:
         - node_modules
