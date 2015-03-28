@@ -16,6 +16,8 @@ main :: IO ()
 main = scotty 3000 $ do
 
   get "/" $ file "dist/index.html"
+  get "/search" $ file "dist/index.html"
+  get "/song" $ file "dist/index.html"
 
   middleware $ staticPolicy (noDots >-> addBase "dist")
 
@@ -28,3 +30,4 @@ main = scotty 3000 $ do
   get "/api/songs/:id" $ do
     setHeader "Content-Type" "application/json"
     file "server/song.json"
+
