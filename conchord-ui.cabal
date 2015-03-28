@@ -26,6 +26,7 @@ executable conchord-ui
                      , resourcet
                      , scotty
                      , text
+                     , aeson
                      , bytestring
                      , wai-middleware-static
                      , wai-extra
