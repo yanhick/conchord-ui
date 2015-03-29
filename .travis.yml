@@ -1,18 +1,23 @@
-sudo: false
-language: haskell
-
-#all travis vm have ruby installed
-before_install: gem install compass
-
-install: 
-    #all travis vm have node.js installed
-    - npm install
-    - cabal install --only-dependencies --enable-tests
+language: sh
+before_install:
+- gem install compass
+- sudo mkdir -p /app
+- sudo chown $USER /app
+- git clone https://github.com/mietek/halcyon.git
+- mv halcyon /app
+install:
+- npm install
+- /app/halcyon/halcyon build
+- /app/halcyon/halcyon paths > halcyon-env
+- ln -sf /app/sandbox/cabal.sandbox.config cabal.sandbox.config
 script:
-    - npm test
-    - cabal configure --enable-tests && cabal build && cabal test
-
+- npm test
+- source halcyon-env && cabal configure --enable-tests && cabal test
 cache:
-    cabal: true
-    directories:
-        - node_modules
+  directories:
+  - node_modules
+env:
+  global:
+  - secure: XXPslHI7w1gPSlFDroeD/3W2TcXy75qCJkcTTnl1R6Agl615ffWdjTzf4mgH9o2gXOretsDq62Z2nKlyKGvkunFVgORi7tPnyR0IS0l1hqXbLyISP8umGmuMW6ck2MSpQuCUVsCJaXxO4EcXOTBndYY9251TFyzKtIEVEe0I7Z8=
+  - secure: FAeXVOepgw5rdNynFenOBa1d4Jh4Ma9C+UD93JuVUz80QUJrWdwzuT1LfzUCjAarKe7JtFSQxKjiLJuXBpl/oCaMztb8GYXe5wpB8D52PsZjZc6oXaphvHCWBbClrarFJ66YNtkCivzhpIl2jjs1w3SY1y0fLaf0M3CXfO1h/qA=
+  - secure: Y7+J4EzYb9MDmgFvIidCT6/DN7vA09K1mp+8q480+ytqmXzgFeznWq0CwDi0bGeORZ1k1WPOXvM2U10Ahh7LwRdtY73jZp7l07aKa59Lfa470HQshTdA6moJtMkFnUdeGTjUZRpqEEtsYT07kf7sEoQzOUx5QZbWqwLIo06rqVA=
