@@ -6,7 +6,7 @@ version:             0.1.0.0
 -- synopsis:            
 -- description:         
 license:             GPL-2
-license-file:        LICENSE
+license-file:        licence.md
 author:              yannick
 maintainer:          yannick.dominguez@gmail.com
 -- copyright:           
@@ -19,7 +19,7 @@ executable conchord-ui
   main-is:             Main.hs
   -- other-modules:       
   -- other-extensions:    
-  build-depends:       base ==4.6.*
+  build-depends:       base
                      , wai
                      , warp
                      , http-types
