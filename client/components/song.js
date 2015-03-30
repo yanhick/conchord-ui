@@ -12,20 +12,20 @@ export default React.createClass({
 
 
         return (
-            <main>
-                <aside>
-                    <Header onGoHome={this.props.onGoHome}>
-                        <SongToolbar {...this.props}/>
-                    </Header>
-                </aside>
-                <SongMeta data={this.props.data.meta} />
-                <Chords
-                    showChords={this.props.showChords}
-                    data={this.props.data.chords} />
-                <SongContent data={this.props.data.content}
-                             showDuplicatedChoruses={this.props.showDuplicatedChoruses}
-                             fontSize={this.props.fontSize} />
-            </main>
+            <div>
+                <Header onGoHome={this.props.onGoHome}>
+                    <SongToolbar {...this.props}/>
+                </Header>
+                <main>
+                    <SongMeta data={this.props.data.meta} />
+                    <Chords
+                        showChords={this.props.showChords}
+                        data={this.props.data.chords} />
+                    <SongContent data={this.props.data.content}
+                                 showDuplicatedChoruses={this.props.showDuplicatedChoruses}
+                                 fontSize={this.props.fontSize} />
+                </main>
+            </div>
         );
     }
 

@@ -77,7 +77,7 @@ gulp.task('icons', ['clean'], function () {
 });
 
 gulp.task('compass', ['clean', 'bower', 'icons'], function () {
-    return gulp.src('sass/style.scss')
+    return gulp.src('sass/main.scss')
         .pipe(plumber({ errorHandler: handleError }))
         .pipe(compass({
             style: 'compressed',

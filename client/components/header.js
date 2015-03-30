@@ -5,10 +5,12 @@ export default React.createClass({
     render: function () {
         return (
             <header>
-                <button
-                    className="fa fa-home fa-2x"
-                    onClick={this.props.onGoHome}
-                    value="home" />
+                <nav>
+                    <button
+                        className="fa fa-home fa-2x"
+                        onClick={this.props.onGoHome}
+                        value="home" />
+                </nav>
                 {this.props.children}
             </header>
         );

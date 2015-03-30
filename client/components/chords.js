@@ -20,9 +20,11 @@ export default React.createClass({
         }
 
         return (
-            <ul className={classString}>
-                {chordList}
-            </ul>
+            <aside className={classString}>
+                <ul>
+                    {chordList}
+                </ul>
+            </aside>
         );
     }
 

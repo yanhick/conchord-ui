@@ -1,0 +1,15 @@
+$header-height: 50px;
+
+header {
+
+    background-color: black;
+    height: $header-height;
+
+    nav, ul, li {
+        display: inline;
+    }
+
+    button {
+        @include header-button();
+    }
+}

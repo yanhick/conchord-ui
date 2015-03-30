@@ -1,0 +1,24 @@
+// Load custom font
+@import url(https://fonts.googleapis.com/css?family=Source+Serif+Pro);
+
+@import "compass/reset";
+@import "compass/css3";
+
+// Import bootstrap and fontawesome
+@import "bootstrap";
+@import "font-awesome";
+
+@import "base/all";
+@import "components/all";
+@import "layout/all";
+@import "pages/all";
+
+html {
+    @include box-sizing(border-box);
+}
+
+body {
+    font-family: $base-font-family;
+    color: $base-font-color;
+}
+
