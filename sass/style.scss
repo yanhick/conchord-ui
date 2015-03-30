@@ -6,19 +6,18 @@ $font-family-base: 'Source Serif Pro', sans-serif;
 
 @import "compass/css3";
 
+$primary-color: #6A92FF;
+$secondary-color: #76B223;
+$tertiary-color: #CC5D42;
+
 $header-height: 50px;
 $title-heigth: 60px;
 $margins: 50px;
-
-$bgcolor: rgb(254, 254, 254);
 
 html {
     box-sizing: border-box;
 }
 
-body {
-    background: $bgcolor;
-}
 main {
     display: flex;
     flex-direction: column;
@@ -37,13 +36,15 @@ main {
         }
 
         .fa {
-            height: $header-height;
-            width: $header-height;
+            height: 40px;
+            width: 40px;
         }
 
         button {
-            background: none;
+            background: $primary-color;
+            margin: 5px 0 5px 5px;
             color: white;
+            border-radius: 5px;
             border: none;
         }
     }
@@ -100,7 +101,6 @@ main {
             @include break-inside(avoid);
         }
 
-        background: $bgcolor;
         ul {
             margin: 0;
             padding: 0;
@@ -135,7 +135,7 @@ main {
                 padding: 2px;
                 margin: 2px;
                 border-radius: 2px;
-                color: blue;
+                color: $primary-color;
             }
 
             // add space after regular lines
