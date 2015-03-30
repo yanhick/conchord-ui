@@ -11,12 +11,12 @@ A UI to display songs in the conchord format
 Demo
 ----
 
-[https://obscure-retreat-6927.herokuapp.com](https://obscure-retreat-6927.herokuapp.com)
+[https://rocky-lake-6297.herokuapp.com/](https://rocky-lake-6297.herokuapp.com/)
 
 Install
 -------
 
-You’ll need node.js v0.10 and npm.
+You’ll need node.js v0.10, npm and Haskell and Cabal installed.
 
 ```
 npm install
