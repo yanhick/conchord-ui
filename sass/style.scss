@@ -104,13 +104,11 @@ main {
         ul {
             margin: 0;
             padding: 0;
-            background: white;
         }
 
         section {
 
             h2 {
-                break-before: column;
                 text-transform: uppercase;
                 font-size: 1.5rem;
                 margin-top: 0;
@@ -119,7 +117,15 @@ main {
             }
 
             &.Chorus h2 {
-                font-weight: bold;
+                position: relative;
+            }
+
+            &.Chorus h2:before {
+                content: '\25b6';
+                color: $tertiary-color;
+                position: absolute;
+                top: 0;
+                left: -15px;
             }
 
 
@@ -154,7 +160,7 @@ main {
                 text-align: justify;
             }
 
-            padding: 0;
+            padding: 20px;
             margin: 0;
             line-height: 2;
         }
