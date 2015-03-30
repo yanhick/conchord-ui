@@ -6,7 +6,7 @@ export default React.createClass({
     render: function () {
 
         const classString = classNames(
-            `fa fa-${this.props.icon} fa-2x btn btn-default`,
+            `fa fa-${this.props.icon} fa-2x`,
             {'active': this.props.active}
         );
 
