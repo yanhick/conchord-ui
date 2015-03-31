@@ -1,6 +1,8 @@
 import React from 'react';
 
 import Results from '../components/results';
+import Header from '../components/header';
+
 import Actions from '../actions/';
 import Store from '../stores/';
 
@@ -41,9 +43,16 @@ export default React.createClass({
         this.context.router.transitionTo('song', {}, {id: id});
     },
 
+    handleGoHome () {
+        this.context.router.transitionTo('/');
+    },
+
     render () {
         return (
-            <Results data={this.state.searchResults} onSelect={this.handleSelect} />
+            <div>
+                <Header onGoHome={this.handleGoHome} />
+                <Results data={this.state.searchResults} onSelect={this.handleSelect} />
+            </div>
         );
     }
 

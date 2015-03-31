@@ -12,7 +12,7 @@ export default React.createClass({
         });
 
         return (
-            <ul>
+            <ul className="song-metas">
                 {resultList}
             </ul>
         );

@@ -11,6 +11,8 @@ data SearchResult = SearchResult {
   id :: Int
 , title :: String
 , href :: String
+, artist :: String
+, album :: String
 } deriving (Show, Generic)
 
 instance ToJSON SearchResult
@@ -28,12 +30,11 @@ main = do
     middleware $ staticPolicy (noDots >-> addBase "dist")
 
     get "/api/search" $
-      json $ [
-        SearchResult 1 "my-song" "/my-song",
-        SearchResult 2 "mo other song" "my-other-song"
-      ]
+      json $ [makeSearchResult x | x <- [1..10::Int]]
 
     get "/api/songs/:id" $ do
       setHeader "Content-Type" "application/json"
       file "server/song.json"
 
+makeSearchResult :: Int -> SearchResult
+makeSearchResult resultId = SearchResult resultId "Tokyo vampires and wolves" "/my-song" "The Wombats" "This modern glitch"

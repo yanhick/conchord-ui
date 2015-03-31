@@ -1,0 +1,23 @@
+form {
+    display: flex;
+    position: fixed;
+
+    top: $header-height;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    align-items: center;
+    justify-content: center;
+
+    input[type="search"] {
+        height: 50px;
+        width: 400px;
+    }
+
+    button {
+        @include header-button();
+        height: 50px;
+        width: 100px;
+    }
+}

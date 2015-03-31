@@ -10,10 +10,14 @@ export default React.createClass({
     render: function () {
         return (
             <li>
-                <a href={this.props.data.href}
-                   onClick={this.handleClick}>
-                    {this.props.data.title}
-                </a>
+                <section>
+                    <a href={this.props.data.href}
+                       onClick={this.handleClick}>
+                       <h1>{this.props.data.title}</h1>
+                       <h2>{this.props.data.artist}</h2>
+                       <h3>{this.props.data.album}</h3>
+                    </a>
+                </section>
             </li>
         );
     }
