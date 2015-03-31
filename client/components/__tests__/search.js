@@ -12,10 +12,10 @@ describe('Search', () => {
               );
 
         const searchInput = TestUtils.scryRenderedDOMComponentsWithTag(search, 'input')[0],
-              form  = TestUtils.findRenderedDOMComponentWithTag(search, 'form');
+              button = TestUtils.findRenderedDOMComponentWithTag(search, 'button');
 
         TestUtils.Simulate.change(searchInput, {target: {value: 'test search'}});
-        TestUtils.Simulate.submit(form);
+        TestUtils.Simulate.click(button);
         expect(onSearchMock).toBeCalledWith('test search');
     });
 });

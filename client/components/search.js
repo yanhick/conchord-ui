@@ -22,12 +22,15 @@ export default React.createClass({
     render: function () {
         const value = this.state.value;
         return (
-            <form onSubmit={this.handleSubmit}>
+            <form>
                 <input ref="search"
                        value={value}
                        type="search"
                        onChange={this.handleChange} />
-                <input type="submit" />
+                <button
+                      value="search"
+                      onClick={this.handleSubmit}
+                      className="fa fa-search fa-2x" />
             </form>
         );
     }

@@ -43,10 +43,10 @@ describe('Home', () => {
               );
 
         const searchInput = TestUtils.scryRenderedDOMComponentsWithTag(home, 'input')[0],
-              form  = TestUtils.findRenderedDOMComponentWithTag(home, 'form');
+              button = TestUtils.findRenderedDOMComponentWithTag(home, 'button');
 
         TestUtils.Simulate.change(searchInput, {target: {value: 'song search'}});
-        TestUtils.Simulate.submit(form);
+        TestUtils.Simulate.click(button);
 
         expect(transitionToStub).toBeCalledWith('search', {}, {q: 'song search'});
     });

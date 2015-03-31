@@ -1,6 +1,7 @@
 import React from 'react';
 
 import Search from '../components/search';
+import Header from '../components/header';
 
 export default React.createClass({
 
@@ -15,9 +16,16 @@ export default React.createClass({
         this.context.router.transitionTo('search', {}, {q: query});
     },
 
+    handleGoHome () {
+        this.context.router.transitionTo('/');
+    },
+
     render: function () {
         return (
-            <Search onSearch={this.handleSearch} />
+            <div>
+                <Header onGoHome={this.handleGoHome} />
+                <Search onSearch={this.handleSearch} />
+            </div>
         );
     }
 
