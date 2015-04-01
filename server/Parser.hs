@@ -17,15 +17,18 @@ data SongMeta = SongMeta {
 } deriving Show
 
 getSongMetaType :: String -> SongMetaType
-getSongMetaType s
-  | (filter (\x -> x == s) getStandardSongMetaType) /= [] = Other s
-  | otherwise = Other s
+getSongMetaType s =
+  case getStandardSongMetaType s of
+    Just x -> Standard x
+    Nothing -> Other s
 
-getMatchingSongMeta :: String -> [String]
-getMatchingSongMeta s = filter (==s) getStandardSongMetaType
-
-getStandardSongMetaType :: [String]
-getStandardSongMetaType = fmap (\x -> fmap toUpper x) (fmap show [Title .. Album])
+getStandardSongMetaType :: String -> Maybe StandardSongMetaType
+getStandardSongMetaType s =
+  case fmap toLower s of
+    "title" -> Just Title
+    "artist" -> Just Artist
+    "Album" -> Just Album
+    _ -> Nothing
 
 parseMeta :: String -> Maybe SongMeta
 parseMeta s =
