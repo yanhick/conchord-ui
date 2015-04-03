@@ -4,7 +4,6 @@ module SongMetaParserString
 ) where
 
 import Data.Char
-import Data.Maybe
 import Control.Applicative
 
 data SongMetaType
@@ -17,6 +16,8 @@ data StandardSongMetaType
   | Artist
   | Album
   deriving (Show, Enum, Read, Eq)
+
+type SongMetaParseError = String
 
 type SongMetaValue = String
 data SongMeta = SongMeta (SongMetaType, SongMetaValue) deriving (Show, Eq)
@@ -32,15 +33,15 @@ getStandardSongMetaType s =
   case fmap toLower s of
     "title" -> Just Title
     "artist" -> Just Artist
-    "Album" -> Just Album
+    "album" -> Just Album
     _ -> Nothing
 
-parseMeta :: String -> Maybe SongMeta
+parseMeta :: String -> Either SongMetaParseError SongMeta
 parseMeta s =
   case words s of
-    [k, v] -> Just (SongMeta (getSongMetaType k, v))
-    _ -> Nothing
+    [k, v] -> Right (SongMeta (getSongMetaType k, v))
+    _ -> Left "wrong number of args"
 
 
-parseSongMeta:: String -> [Maybe SongMeta]
-parseSongMeta l = filter isJust (parseMeta <$> lines l)
+parseSongMeta:: String -> [Either SongMetaParseError SongMeta]
+parseSongMeta l = parseMeta <$> lines l
