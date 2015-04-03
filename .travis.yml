@@ -10,6 +10,7 @@ script:
 - npm test
 - cabal configure --enable-tests && cabal test
 cache:
+  bundler: true
   directories:
   - node_modules
   - .cabal-sandbox
