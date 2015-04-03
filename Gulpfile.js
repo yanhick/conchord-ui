@@ -1,10 +1,13 @@
 var gulp = require('gulp'),
     plumber = require('gulp-plumber'),
     gutil = require('gulp-util'),
+    uglify = require('gulp-uglify'),
+    buffer = require('vinyl-buffer'),
     jshint = require('gulp-jshint'),
     react = require('gulp-react'),
     clean = require('gulp-clean'),
     compass = require('gulp-compass'),
+    sourcemaps = require('gulp-sourcemaps'),
     bower = require('gulp-bower'),
     shell = require('gulp-shell'),
     browserify = require('gulp-browserify');
@@ -63,6 +66,10 @@ gulp.task('browserify', ['clean'], function () {
             debug: process.env.NODE_ENV !== 'production',
             transform: ['babelify']
         }))
+        .pipe(sourcemaps.init({loadMaps: process.env.NODE_ENV !== 'production'}))
+        .pipe(buffer())
+        .pipe(uglify())
+        .pipe(sourcemaps.write('./'))
         .pipe(gulp.dest('dist/js'));
 });
 
