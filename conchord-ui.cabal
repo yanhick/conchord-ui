@@ -26,10 +26,23 @@ executable conchord-ui
                      , resourcet
                      , scotty
                      , text
+                     , hspec
                      , aeson
                      , bytestring
                      , wai-middleware-static
                      , wai-extra
                      , time
-  hs-source-dirs:      server
+  hs-source-dirs:      server/src
   default-language:    Haskell2010
+
+test-suite spec
+  type: exitcode-stdio-1.0
+  hs-source-dirs: server/src
+  hs-source-dirs: server/test
+  default-language:    Haskell2010
+
+  main-is: Spec.hs
+
+  build-depends: base
+               , hspec
+

@@ -1,4 +1,4 @@
-module SongMetaParserString
+module SongMetaParser
 (
   parseSongMeta
 ) where
