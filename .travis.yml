@@ -13,4 +13,5 @@ cache:
   bundler: true
   directories:
   - node_modules
+  - bower_components
   - .cabal-sandbox
