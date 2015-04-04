@@ -1,5 +1,7 @@
 module SongChordsParser where
 
+import Control.Applicative
+
 {- refine (major, minor...) -}
 data ChordName = ChordName String deriving Show
 
@@ -47,7 +49,7 @@ data GuitarStrings a = GuitarStrings {
 data Chord = Chord {
   name :: ChordName
 , baseFret :: Fret
-, notes :: Maybe ChordNotes
+, notes :: Either ChordParserError ChordNotes
 , fingerings :: Maybe ChordFingerings
 } deriving Show
 
@@ -75,16 +77,16 @@ instance Read Fret where
 parseChordName :: String -> ChordName
 parseChordName = ChordName
 
-parseChordNotes :: String -> Maybe ChordNotes
+parseChordNotes :: String -> Either ChordParserError ChordNotes
 parseChordNotes ns =
   case ns of
-    [lE, a, d, g, b, hE] -> Just $ GuitarStrings (parseNote lE)
+    [lE, a, d, g, b, hE] -> Right $ GuitarStrings (parseNote lE)
                                               (parseNote a)
                                               (parseNote d)
                                               (parseNote g)
                                               (parseNote b)
                                               (parseNote hE)
-    _ -> Nothing
+    _ -> Left "wrong number of chord notes"
   where parseNote '-' = COpened
         parseNote 'x' = CMuted
         {--TODO: manage parse error (unknow char, return Maybe ?) --}
@@ -103,9 +105,9 @@ parseChordFingerings fs =
   where parseFingering '-' = FOpened
         parseFingering f = FPressed $ read [f]
 
-type ChordParseError = String
+type ChordParserError = String
 
-parseChord :: String -> Either ChordParseError Chord
+parseChord :: String -> Either ChordParserError Chord
 parseChord s =
   case words s of
     [chordName, chordNotes] -> Right Chord {
@@ -130,3 +132,5 @@ parseChord s =
 
     _ -> Left "wrong number of args"
 
+parseSongChords :: String -> [Either ChordParserError Chord]
+parseSongChords l = parseChord <$> lines l
