@@ -30,7 +30,7 @@ main = do
     middleware $ staticPolicy (noDots >-> addBase "dist")
 
     get "/api/search" $
-      json $ [makeSearchResult x | x <- [1..10::Int]]
+      json [makeSearchResult x | x <- [1..10::Int]]
 
     get "/api/songs/:id" $ do
       setHeader "Content-Type" "application/json"
