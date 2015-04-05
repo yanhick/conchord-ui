@@ -8,6 +8,7 @@ install:
 - cabal install --only-dependencies --enable-tests
 script:
 - npm test
+- ./.cabal-sandbox/bin/hlint server/src
 - cabal configure --enable-tests && cabal test
 cache:
   bundler: true
