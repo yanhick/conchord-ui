@@ -98,11 +98,6 @@ gulp.task('compass', ['clean', 'bower', 'icons'], function () {
 });
 
 gulp.task('watch', ['lint'], function () {
-    // start haskell server, there is probably
-    // a cleaner way to do this
-    gulp.src('*', {read: false})
-        .pipe(shell('PORT=5000 cabal run'));
-
     gulp.watch(['client/**/*.js', 'sass/**/*.scss'], ['dev'])
         .on('error', handleError);
 
