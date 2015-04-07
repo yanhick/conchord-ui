@@ -7,6 +7,13 @@ import Actions from '../../actions/';
 import Store from '../../stores/';
 import UIStore from '../../stores/ui';
 
+/* stub the router with just what's needed */
+const routerStub = {
+    router: {
+        getCurrentQuery: function () {return {id: 1};}
+    }
+};
+
 /* wrap the Song to provide a stubbed router */
 const stubRouterContext = () => {
   return React.createClass({
@@ -16,15 +23,7 @@ const stubRouterContext = () => {
     },
 
     getChildContext () {
-      return {
-          router: {
-              getCurrentQuery () {
-                  return {
-                      id: 1
-                  };
-              }
-          }
-      };
+      return routerStub;
     },
 
     render () {
