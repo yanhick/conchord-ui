@@ -1,6 +1,6 @@
 {
   "name": "conchord-ui",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A UI for the conchord file format",
   "main": "index.js",
   "scripts": {
