@@ -4,6 +4,7 @@ var gulp = require('gulp'),
     uglify = require('gulp-uglify'),
     buffer = require('vinyl-buffer'),
     jshint = require('gulp-jshint'),
+    jest = require('gulp-jest'),
     react = require('gulp-react'),
     clean = require('gulp-clean'),
     compass = require('gulp-compass'),
@@ -26,7 +27,7 @@ function handleError(e) {
 }
 
 // Dev task
-gulp.task('dev', ['clean', 'compass', 'lint', 'static', 'browserify'], function () {});
+gulp.task('dev', ['clean', 'compass', 'lint', 'static', 'browserify', 'test'], function () {});
 
 // Clean output task
 gulp.task('clean', function () {
@@ -71,6 +72,24 @@ gulp.task('browserify', ['clean'], function () {
         .pipe(uglify())
         .pipe(sourcemaps.write('./'))
         .pipe(gulp.dest('dist/js'));
+});
+
+gulp.task('test', function () {
+    return gulp.src('client').pipe(jest({
+        scriptPreprocessor: "../node_modules/babel-jest",
+        testFileExtensions: [
+          "js"
+        ],
+        moduleFileExtensions: [
+          "js",
+          "json"
+        ],
+        unmockedModulePathPatterns: [
+          "react",
+          "flux",
+          "classnames"
+        ]
+    }));
 });
 
 gulp.task('bower', ['clean'], function () {
