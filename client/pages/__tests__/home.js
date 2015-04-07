@@ -8,8 +8,15 @@ import React from 'react';
 import ReactAddons from 'react/addons';
 import Home from '../home';
 
+/* stub the router with just what's needed */
+const routerStub = {
+    router: {
+        transitionTo: jest.genMockFunction()
+    }
+};
+
 /* wrap the Home to provide a stubbed router */
-const stubRouterContext = (props, stubs) => {
+const stubRouterContext = () => {
   return React.createClass({
 
     childContextTypes: {
@@ -17,16 +24,12 @@ const stubRouterContext = (props, stubs) => {
     },
 
     getChildContext () {
-      return {
-          router: assign({
-              transitionTo () {},
-          }, stubs)
-      };
+      return routerStub;
     },
 
     render () {
         return (
-            <Home {...props} />
+            <Home />
         );
     }
 
@@ -37,7 +40,7 @@ describe('Home', () => {
     it('allows searching for a song', () => {
         const TestUtils = React.addons.TestUtils,
               transitionToStub = jest.genMockFunction(),
-              WrappedHome = stubRouterContext({}, { transitionTo: transitionToStub }),
+              WrappedHome = stubRouterContext(),
               home = TestUtils.renderIntoDocument(
                   <WrappedHome />
               );
@@ -48,7 +51,7 @@ describe('Home', () => {
         TestUtils.Simulate.change(searchInput, {target: {value: 'song search'}});
         TestUtils.Simulate.click(button);
 
-        expect(transitionToStub).toBeCalledWith('search', {}, {q: 'song search'});
+        expect(routerStub.router.transitionTo).toBeCalledWith('search', {}, {q: 'song search'});
     });
 });
 

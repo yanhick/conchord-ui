@@ -10,6 +10,14 @@ import SearchResults from '../search-results';
 import Actions from '../../actions/';
 import Store from '../../stores/';
 
+/* stub the router with just what's needed */
+const routerStub = {
+    router: {
+        getCurrentQuery: function () {return {q: 'search query'};},
+        transitionTo: jest.genMockFunction()
+    }
+};
+
 /* wrap the SearchResults to provide a stubbed router */
 const stubRouterContext = (stubs) => {
   return React.createClass({
@@ -19,15 +27,7 @@ const stubRouterContext = (stubs) => {
     },
 
     getChildContext () {
-      return {
-          router: assign({
-              getCurrentQuery () {
-                  return {
-                      q: 'search query'
-                  };
-              }
-          }, stubs)
-      };
+      return routerStub;
     },
 
     render () {
@@ -66,7 +66,7 @@ describe('SearchResults', () => {
 
         const TestUtils = React.addons.TestUtils,
               transitionToStub = jest.genMockFunction(),
-              WrappedSearchResults = stubRouterContext({transitionTo: transitionToStub}),
+              WrappedSearchResults = stubRouterContext(),
               searchResults = TestUtils.renderIntoDocument(
                   <WrappedSearchResults />
               );
@@ -74,7 +74,7 @@ describe('SearchResults', () => {
         const link = TestUtils.findRenderedDOMComponentWithTag(searchResults, 'a');
         TestUtils.Simulate.click(link);
 
-        expect(transitionToStub).toBeCalledWith('song', {}, {id: 1});
+        expect(routerStub.router.transitionTo).toBeCalledWith('song', {}, {id: 1});
     });
 });
 
