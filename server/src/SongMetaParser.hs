@@ -31,7 +31,7 @@ getStandardSongMetaType s
   | match s "artist" = Just Artist
   | match s "album" = Just Album
   | otherwise = Nothing
-  where match s n = T.toLower s == (T.pack n)
+  where match s n = T.toLower s == T.pack n
 
 parseMeta :: T.Text -> Either SongMetaParseError SongMeta
 parseMeta s =
