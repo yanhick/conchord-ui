@@ -1,11 +1,11 @@
 module SongMetaParser where
 
-import Data.Char
 import Control.Applicative
+import qualified Data.Text as T
 
 data SongMetaType
   = Standard StandardSongMetaType
-  | Other String
+  | Other T.Text
   deriving (Show, Eq)
 
 data StandardSongMetaType
@@ -16,29 +16,29 @@ data StandardSongMetaType
 
 type SongMetaParseError = String
 
-type SongMetaValue = String
+type SongMetaValue = T.Text
 data SongMeta = SongMeta (SongMetaType, SongMetaValue) deriving (Show, Eq)
 
-getSongMetaType :: String -> SongMetaType
+getSongMetaType :: T.Text -> SongMetaType
 getSongMetaType s =
   case getStandardSongMetaType s of
     Just x -> Standard x
     Nothing -> Other s
 
-getStandardSongMetaType :: String -> Maybe StandardSongMetaType
-getStandardSongMetaType s =
-  case fmap toLower s of
-    "title" -> Just Title
-    "artist" -> Just Artist
-    "album" -> Just Album
-    _ -> Nothing
+getStandardSongMetaType :: T.Text -> Maybe StandardSongMetaType
+getStandardSongMetaType s
+  | match s "title" = Just Title
+  | match s "artist" = Just Artist
+  | match s "album" = Just Album
+  | otherwise = Nothing
+  where match s n = T.toLower s == T.pack n
 
-parseMeta :: String -> Either SongMetaParseError SongMeta
+parseMeta :: T.Text -> Either SongMetaParseError SongMeta
 parseMeta s =
-  case words s of
+  case T.words s of
     [k, v] -> Right (SongMeta (getSongMetaType k, v))
     _ -> Left "wrong number of args"
 
 
-parseSongMeta:: String -> [Either SongMetaParseError SongMeta]
-parseSongMeta l = parseMeta <$> lines l
+parseSongMeta:: T.Text -> [Either SongMetaParseError SongMeta]
+parseSongMeta l = parseMeta <$> T.lines l

@@ -1,9 +1,10 @@
 module SongChordsParser where
 
 import Control.Applicative
+import qualified Data.Text as T
 
 {- refine (major, minor...) -}
-data ChordName = ChordName String deriving Show
+data ChordName = ChordName T.Text deriving Show
 
 data ChordNote
   = CPressed Fret
@@ -74,12 +75,12 @@ instance Read Fret where
   readsPrec _ "6" = [(FSix, "")]
   readsPrec _ _  = []
 
-parseChordName :: String -> ChordName
+parseChordName :: T.Text -> ChordName
 parseChordName = ChordName
 
-parseChordNotes :: String -> Either ChordParserError ChordNotes
+parseChordNotes :: T.Text -> Either ChordParserError ChordNotes
 parseChordNotes ns =
-  case ns of
+  case T.unpack ns of
     [lE, a, d, g, b, hE] -> Right $ GuitarStrings (parseNote lE)
                                               (parseNote a)
                                               (parseNote d)
@@ -92,9 +93,9 @@ parseChordNotes ns =
         {--TODO: manage parse error (unknow char, return Maybe ?) --}
         parseNote n = CPressed $ read [n]
 
-parseChordFingerings:: String -> Maybe ChordFingerings
+parseChordFingerings:: T.Text -> Maybe ChordFingerings
 parseChordFingerings fs =
-  case fs of
+  case T.unpack fs of
     [lE, a, d, g, b, hE] -> Just $ GuitarStrings (parseFingering lE)
                                                 (parseFingering a)
                                                 (parseFingering d)
@@ -103,13 +104,13 @@ parseChordFingerings fs =
                                                 (parseFingering hE)
     _ -> Nothing
   where parseFingering '-' = FOpened
-        parseFingering f = FPressed $ read [f]
+        parseFingering t = FPressed $ read [t]
 
 type ChordParserError = String
 
-parseChord :: String -> Either ChordParserError Chord
+parseChord :: T.Text -> Either ChordParserError Chord
 parseChord s =
-  case words s of
+  case T.words s of
     [chordName, chordNotes] -> Right Chord {
                     name = parseChordName chordName
                   , notes = parseChordNotes chordNotes
@@ -120,17 +121,17 @@ parseChord s =
                     name = parseChordName chordName
                   , notes = parseChordNotes chordNotes
                   , fingerings = Nothing
-                  , baseFret = read baseFret
+                  , baseFret = read (T.unpack baseFret)
                   }
 
     [chordName, chordNotes, baseFret, chordFingerings] -> Right Chord {
                     name = parseChordName chordName
                   , notes = parseChordNotes chordNotes
                   , fingerings = parseChordFingerings chordFingerings
-                  , baseFret = read baseFret
+                  , baseFret = read (T.unpack baseFret)
                   }
 
     _ -> Left "wrong number of args"
 
-parseSongChords :: String -> [Either ChordParserError Chord]
-parseSongChords l = parseChord <$> lines l
+parseSongChords :: T.Text -> [Either ChordParserError Chord]
+parseSongChords l = parseChord <$> T.lines l
