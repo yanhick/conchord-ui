@@ -4,38 +4,25 @@
   "description": "A UI for the conchord file format",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_ENV=test gulp dev && jest",
+    "test": "NODE_ENV=test gulp dev",
     "release": "gulp dev && git add dist && git commit -m'release' && git push heroku master -f && git reset --hard HEAD~",
     "postinstall": "bower install"
-  },
-  "jest": {
-    "scriptPreprocessor": "<rootDir>/node_modules/babel-jest",
-    "testFileExtensions": [
-      "es6",
-      "js"
-    ],
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "es6"
-    ],
-    "unmockedModulePathPatterns": [
-      "react",
-      "flux",
-      "classnames"
-    ]
   },
   "author": "Yannick Dominguez",
   "license": "MIT",
   "devDependencies": {
+    "babel": "^4.4.5",
+    "babel-core": "^4.7.16",
     "babel-jest": "^4.0.0",
-    "jest": "^0.1.37",
-    "jest-cli": "^0.4.0",
+    "babelify": "^5.0.3",
+    "browserify": "^9.0.3",
+    "connect-livereload": "^0.5.3",
     "gulp": "^3.8.11",
     "gulp-bower": "0.0.10",
     "gulp-browserify": "^0.5.1",
     "gulp-clean": "^0.3.1",
     "gulp-compass": "^2.0.4",
+    "gulp-jest": "^0.4.0",
     "gulp-jshint": "^1.9.4",
     "gulp-livereload": "^3.8.0",
     "gulp-plumber": "^1.0.0",
@@ -44,11 +31,8 @@
     "gulp-sourcemaps": "^1.5.1",
     "gulp-uglify": "^1.1.0",
     "gulp-util": "^3.0.4",
-    "babel": "^4.4.5",
-    "babel-core": "^4.7.16",
-    "babelify": "^5.0.3",
-    "connect-livereload": "^0.5.3",
-    "browserify": "^9.0.3",
+    "jest": "^0.1.37",
+    "jest-cli": "^0.4.0",
     "vinyl-buffer": "^1.0.0"
   },
   "dependencies": {
