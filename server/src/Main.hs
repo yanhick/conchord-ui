@@ -7,13 +7,8 @@ import GHC.Generics
 import Control.Monad
 import System.Environment
 
-data SearchResult = SearchResult {
-  id :: Int
-, title :: String
-, href :: String
-, artist :: String
-, album :: String
-} deriving (Show, Generic)
+data SearchResult = SearchResult Int String String String String
+  deriving (Show, Generic)
 
 instance ToJSON SearchResult
 
