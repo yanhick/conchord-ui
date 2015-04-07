@@ -19,6 +19,7 @@ executable conchord-ui
   main-is:             Main.hs
   -- other-modules:       
   -- other-extensions:    
+  ghc-options:         -W -Werror
   build-depends:       base
                      , hlint
                      , wai
@@ -41,6 +42,7 @@ test-suite spec
   type: exitcode-stdio-1.0
   hs-source-dirs: server/src
   hs-source-dirs: server/test
+  ghc-options:         -W -Werror
   default-language:    Haskell2010
 
   main-is: Spec.hs
