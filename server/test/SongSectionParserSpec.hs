@@ -10,11 +10,11 @@ spec = do
       it "parses a song section" $ do
         parseSongSection (pack "NAME\n  lyrics\n  |A\n//") `shouldSatisfy`
           (\x -> case x of
-            SongSection [
-              Right (SectionName _),
-              Right (LyricsLine _),
-              Right (ChordsLine _),
-              Right (AnnotationLine _) ] -> True
+            Right (SongSection [
+              SectionName _,
+              LyricsLine _,
+              ChordsLine _,
+              AnnotationLine _ ]) -> True
             _ -> False)
 
 main :: IO ()

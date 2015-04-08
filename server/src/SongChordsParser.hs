@@ -133,5 +133,13 @@ parseChord s =
 
     _ -> Left "wrong number of args"
 
-parseSongChords :: T.Text -> [Either ChordParserError Chord]
-parseSongChords l = parseChord <$> T.lines l
+parseAllSongChords :: [T.Text] -> [Chord] -> Either ChordParserError [Chord]
+parseAllSongChords [] cs = Right cs
+parseAllSongChords (x:xs) cs =
+  case parseChord x of
+    Left e -> Left e
+    Right c -> parseAllSongChords xs (c:cs)
+
+
+parseSongChords :: T.Text -> Either ChordParserError [Chord]
+parseSongChords l = reverse <$> parseAllSongChords (T.lines l) []
