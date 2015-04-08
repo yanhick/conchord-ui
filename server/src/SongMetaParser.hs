@@ -40,5 +40,12 @@ parseMeta s =
     _ -> Left "wrong number of args"
 
 
-parseSongMeta:: T.Text -> [Either SongMetaParseError SongMeta]
-parseSongMeta l = parseMeta <$> T.lines l
+parseAllSongMeta :: [T.Text] -> [SongMeta] -> Either SongMetaParseError [SongMeta]
+parseAllSongMeta [] ms = Right ms
+parseAllSongMeta (x:xs) ms =
+  case parseMeta x of
+    Left e -> Left e
+    Right m -> parseAllSongMeta xs (m:ms)
+
+parseSongMeta:: T.Text -> Either SongMetaParseError [SongMeta]
+parseSongMeta t = reverse <$> parseAllSongMeta (T.lines t) []
