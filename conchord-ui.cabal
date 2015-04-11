@@ -21,19 +21,19 @@ executable conchord-ui
   -- other-extensions:    
   ghc-options:         -W -Werror
   build-depends:       base
-                     , hlint
-                     , wai
-                     , warp
-                     , http-types
-                     , split
-                     , resourcet
-                     , scotty
-                     , text
-                     , hspec
-                     , aeson
+                     , hlint ==1.9.19
+                     , wai ==3.0.2.3
+                     , warp ==3.0.11
+                     , http-types ==0.8.6
+                     , split ==0.2.2
+                     , resourcet ==1.1.4.1
+                     , scotty ==0.9.1
+                     , text ==1.2.0.4
+                     , hspec ==2.1.5
+                     , aeson ==0.8.0.2
                      , bytestring
-                     , wai-middleware-static
-                     , wai-extra
+                     , wai-middleware-static ==0.6.0.1
+                     , wai-extra ==3.0.6.1
                      , time
   hs-source-dirs:      server/src
   default-language:    Haskell2010
