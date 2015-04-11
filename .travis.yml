@@ -1,10 +1,12 @@
 sudo: false
 language: haskell
+ghc: 7.8
 before_install:
 - gem install compass
 install:
 - npm install
 - cabal sandbox init
+- cabal install happy
 - cabal install --only-dependencies --enable-tests
 script:
 - npm test
