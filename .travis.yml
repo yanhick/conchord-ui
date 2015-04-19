@@ -5,16 +5,17 @@ before_install:
 - gem install compass
 install:
 - npm install
-- cabal sandbox init
-- cabal install happy
+- cabal install cabal-install
+- cabal update
+- cabal install alex happy
 - cabal install --only-dependencies --enable-tests
 script:
 - npm test
-- ./.cabal-sandbox/bin/hlint server/src
-- cabal configure --enable-tests && cabal test
+- $HOME/.cabal/bin/hlint server/src
+- cabal configure --enable-tests && cabal build && cabal test
 cache:
   bundler: true
   directories:
   - node_modules
   - bower_components
-  - .cabal-sandbox
+  - $HOME/.cabal
