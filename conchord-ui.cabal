@@ -20,17 +20,16 @@ executable conchord-ui
   -- other-modules:       
   -- other-extensions:    
   ghc-options:         -W -Werror
-  build-depends:       base >=4.6
+  build-depends:       base
                      , hlint
-                     , wai ==3.0.2.3
-                     , warp ==3.0.11
-                     , split ==0.2.2
-                     , resourcet ==1.1.4.1
-                     , happy ==1.19.5
-                     , scotty ==0.9.1
-                     , text ==1.2.0.4
-                     , aeson ==0.8.0.2
-                     , wai-middleware-static ==0.6.0.1
+                     , wai
+                     , warp
+                     , split
+                     , resourcet
+                     , scotty
+                     , text
+                     , aeson
+                     , wai-middleware-static
   hs-source-dirs:      server/src
   default-language:    Haskell2010
 
@@ -43,8 +42,7 @@ test-suite spec
 
   main-is: Spec.hs
 
-  build-depends: base >=4.6
-               , text ==1.2.0.4
-               , happy ==1.19.5
+  build-depends: base
+               , text
                , hspec
 

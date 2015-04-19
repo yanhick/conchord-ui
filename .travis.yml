@@ -5,6 +5,9 @@ before_install:
 - gem install compass
 install:
 - npm install
+- cabal install cabal-install
+- cabal update
+- cabal install alex happy
 - cabal install --only-dependencies --enable-tests
 script:
 - npm test
