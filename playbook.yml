@@ -1,6 +1,27 @@
+---
 - hosts: all
   sudo: yes
   tasks:
-      - name: Install postgreSQL
-        action: apt pkg='postgresql' state=installed update_cache=true
+      - name: Install packages
+        action: apt pkg={{item}} state=installed update_cache=true
+        with_items:
+            - wget
+            - python-pip
 
+      - name: Download Docker
+        get_url: url=https://get.docker.com dest=/tmp/docker.sh validate_certs=no
+
+      - name: Make Docker installer executable
+        file: path=/tmp/docker.sh mode=0775
+
+      - name: Install Docker
+        command: /tmp/docker.sh
+
+      - name: Install docker-py
+        pip: name=docker-py
+
+      - name: Start conchord-ui container
+        docker:
+            name: conchord-ui
+            image: yanhick/conchord-ui
+            ports: "80:80"
