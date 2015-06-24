@@ -1,21 +1,28 @@
 language: haskell
+ghc:
+    - 7.8
 
 before_install:
-- gem install compass
-- wget -q -O- http://download.fpcomplete.com/ubuntu/fpco.key | sudo apt-key add -
-- echo 'deb http://download.fpcomplete.com/ubuntu/precise stable main' | sudo tee /etc/apt/sources.list.d/fpco.list
-- sudo apt-get update
-- sudo apt-get install stack -y
+- if [[ $TARGET == 'client' ]]; then gem install compass ; fi
+- if [[ $TARGET == 'server' ]]; then wget -q -O- http://download.fpcomplete.com/ubuntu/fpco.key | sudo apt-key add - ; fi
+- if [[ $TARGET == 'server' ]]; then echo 'deb http://download.fpcomplete.com/ubuntu/precise stable main' | sudo tee /etc/apt/sources.list.d/fpco.list ; fi
+- if [[ $TARGET == 'server' ]]; then sudo apt-get update ; fi
+- if [[ $TARGET == 'server' ]]; then sudo apt-get install stack -y ; fi
 
 install:
-- npm install
-- stack setup
+- if [[ $TARGET == 'client' ]]; then npm install ; fi
+- if [[ $TARGET == 'server' ]]; then stack setup ; fi
+
 script:
-- npm test
-- stack test
+- if [[ $TARGET == 'client' ]]; then npm test ; fi
+- if [[ $TARGET == 'server' ]]; then stack test ; fi
+
 cache:
   bundler: true
   directories:
   - node_modules
   - bower_components
-  - $HOME/.cabal
+
+env:
+    - TARGET=client
+    - TARGET=server
