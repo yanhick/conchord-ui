@@ -1,6 +1,7 @@
 module Main where
 
 import Prelude
+import Halogen
 import Control.Monad.Eff
 import Control.Monad.Eff.Console
 
