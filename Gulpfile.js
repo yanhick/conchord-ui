@@ -11,7 +11,8 @@ var gulp = require('gulp'),
     sourcemaps = require('gulp-sourcemaps'),
     bower = require('gulp-bower'),
     shell = require('gulp-shell'),
-    browserify = require('gulp-browserify');
+    browserify = require('gulp-browserify'),
+    babel = require('gulp-babel');
 
 // handle all tasks errors
 function handleError(e) {
@@ -27,7 +28,7 @@ function handleError(e) {
 }
 
 // Dev task
-gulp.task('dev', ['clean', 'compass', 'lint', 'static', 'browserify', 'test'], function () {});
+gulp.task('dev', ['clean', 'compass', 'lint', 'static'], function () {});
 
 // Clean output task
 gulp.task('clean', function () {
@@ -58,38 +59,6 @@ gulp.task('static', ['clean'], function () {
     return gulp.src('static/**/*.*')
         .pipe(plumber({ errorHandler: handleError }))
         .pipe(gulp.dest('dist'));
-});
-
-gulp.task('browserify', ['clean'], function () {
-    return gulp.src('client/index.js')
-        .pipe(plumber({ errorHandler: handleError }))
-        .pipe(browserify({
-            debug: process.env.NODE_ENV !== 'production',
-            transform: ['babelify']
-        }))
-        .pipe(sourcemaps.init({loadMaps: process.env.NODE_ENV !== 'production'}))
-        .pipe(buffer())
-        .pipe(uglify())
-        .pipe(sourcemaps.write('./'))
-        .pipe(gulp.dest('dist/js'));
-});
-
-gulp.task('test', function () {
-    return gulp.src('client').pipe(jest({
-        scriptPreprocessor: "../node_modules/babel-jest",
-        testFileExtensions: [
-          "js"
-        ],
-        moduleFileExtensions: [
-          "js",
-          "json"
-        ],
-        unmockedModulePathPatterns: [
-          "react",
-          "flux",
-          "classnames"
-        ]
-    }));
 });
 
 gulp.task('bower', ['clean'], function () {

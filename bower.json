@@ -15,6 +15,9 @@
   ],
   "dependencies": {
     "bootstrap-sass-official": "~3.3.4",
-    "fontawesome": "~4.3.0"
+    "fontawesome": "~4.5.0",
+    "purescript-console": "^0.1.1",
+    "purescript-prelude": "^0.1.4",
+    "purescript-eff": "^0.1.2"
   }
 }
