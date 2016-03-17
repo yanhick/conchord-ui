@@ -7,40 +7,57 @@ import Control.Monad.Eff (Eff())
 import Control.Monad.Eff.Exception (throwException)
 import Data.Functor.Coproduct (Coproduct())
 import Data.Generic (Generic, gEq, gCompare)
+import Data.Either
 
 import Halogen
 import Halogen.Util (appendToBody, onLoad)
+import Halogen.Component.ChildPath (ChildPath(), cpL, cpR)
 import qualified Halogen.HTML.Indexed as H
 import qualified Halogen.HTML.Events.Indexed as E
+import qualified Search as S
 
 type State = { on :: Boolean, label :: String }
+
+
 
 initialState :: State
 initialState = { on: false, label: "" }
 
-newtype ToggleSlot = ToggleSlot String
+data ToggleSlot = ToggleSlot
 
 derive instance genericToggleSlot :: Generic ToggleSlot
 instance eqToggleSlot :: Eq ToggleSlot where eq = gEq
 instance ordToggleSlot :: Ord ToggleSlot where compare = gCompare
 
-data Query a = ReadToggle a
+data Query a = ReadStates a
+
+type ChildState = Either S.State ToggleState
+type ChildQuery = Coproduct S.Query ToggleQuery
+type ChildSlot = Either S.Slot ToggleSlot
+
+cpToggle :: ChildPath State ChildState ToggleQuery ChildQuery ToggleSlot ChildSlot
+cpToggle = cpR
+
+cpSearch :: ChildPath S.State ChildState S.Query ChildQuery S.Slot ChildSlot
+cpSearch = cpL
 
 
-type StateP g = InstalledState State ToggleState Query ToggleQuery g ToggleSlot
-type QueryP = Coproduct Query (ChildF ToggleSlot ToggleQuery)
+type StateP g = InstalledState State ChildState Query ChildQuery g ChildSlot
+type QueryP = Coproduct Query (ChildF ChildSlot ChildQuery)
 
 ui :: forall g. (Functor g) => Component (StateP g) QueryP g
-ui = parentComponent' render eval (const (pure unit))
+ui = parentComponent render eval
     where
 
-    render :: State -> ParentHTML ToggleState Query ToggleQuery g ToggleSlot
+    render :: State -> ParentHTML ChildState Query ChildQuery g ChildSlot
     render st =
         H.div_
-            [ H.text "Hello" ]
+            [ H.text "Hello"
+            , H.slot' cpSearch S.Slot \_ -> { component: S.search, initialState: S.initState}
+            ]
 
-    eval :: Natural Query (ParentDSL State ToggleState Query ToggleQuery g ToggleSlot)
-    eval (ReadToggle next) = pure next
+    eval :: Natural Query (ParentDSL State ChildState Query ChildQuery g ChildSlot)
+    eval (ReadStates next) = pure next
 
 type ToggleState = { on :: Boolean, label :: String }
 
