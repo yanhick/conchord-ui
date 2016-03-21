@@ -24,7 +24,7 @@ initState :: State
 initState = { q: "" }
 
 search :: forall g. (Functor g) => Component State Query g
-search = component render eval
+search = component { render, eval }
     where
 
     render :: State -> ComponentHTML Query

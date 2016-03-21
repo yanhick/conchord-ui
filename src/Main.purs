@@ -8,9 +8,10 @@ import Control.Monad.Eff.Exception (throwException)
 import Data.Functor.Coproduct (Coproduct())
 import Data.Generic (Generic, gEq, gCompare)
 import Data.Either
+import Data.Maybe
 
 import Halogen
-import Halogen.Util (appendToBody, onLoad)
+import Halogen.Util (runHalogenAff, awaitBody)
 import Halogen.Component.ChildPath (ChildPath(), cpL, cpR)
 import qualified Halogen.HTML.Indexed as H
 import qualified Halogen.HTML.Events.Indexed as E
@@ -42,11 +43,11 @@ cpSearch :: ChildPath S.State ChildState S.Query ChildQuery S.Slot ChildSlot
 cpSearch = cpL
 
 
-type StateP g = InstalledState State ChildState Query ChildQuery g ChildSlot
+type StateP g = ParentState State ChildState Query ChildQuery g ChildSlot
 type QueryP = Coproduct Query (ChildF ChildSlot ChildQuery)
 
 ui :: forall g. (Functor g) => Component (StateP g) QueryP g
-ui = parentComponent render eval
+ui = parentComponent { render, eval, peek: Nothing }
     where
 
     render :: State -> ParentHTML ChildState Query ChildQuery g ChildSlot
@@ -65,7 +66,7 @@ data ToggleQuery a = Toggle a | ToggleUpdateLabel a
 
 
 toggleButton :: forall g. (Functor g) => Component ToggleState ToggleQuery g
-toggleButton = component render eval
+toggleButton = component { render, eval }
     where
         render :: ToggleState -> ComponentHTML ToggleQuery
         render state =
@@ -94,6 +95,6 @@ toggleButton = component render eval
 
 
 main :: Eff (HalogenEffects ()) Unit
-main = runAff throwException (const (pure unit)) $ do
-    app <- runUI ui (installedState initialState)
-    onLoad $ appendToBody app.node
+main = runHalogenAff do
+    body <- awaitBody
+    runUI ui (parentState initialState) body
