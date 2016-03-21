@@ -9,6 +9,7 @@ import Data.Functor.Coproduct (Coproduct())
 import Data.Generic (Generic, gEq, gCompare)
 import Data.Either
 import Data.Maybe
+import Data.Functor
 
 import Halogen
 import Halogen.Util (runHalogenAff, awaitBody)
@@ -16,82 +17,44 @@ import Halogen.Component.ChildPath (ChildPath(), cpL, cpR)
 import qualified Halogen.HTML.Indexed as H
 import qualified Halogen.HTML.Events.Indexed as E
 import qualified Search as S
+import qualified Results as R
 
 type State = { on :: Boolean, label :: String }
-
 
 
 initialState :: State
 initialState = { on: false, label: "" }
 
-data ToggleSlot = ToggleSlot
-
-derive instance genericToggleSlot :: Generic ToggleSlot
-instance eqToggleSlot :: Eq ToggleSlot where eq = gEq
-instance ordToggleSlot :: Ord ToggleSlot where compare = gCompare
-
 data Query a = ReadStates a
 
-type ChildState = Either S.State ToggleState
-type ChildQuery = Coproduct S.Query ToggleQuery
-type ChildSlot = Either S.Slot ToggleSlot
+type ChildState g = Either S.State (R.State g)
+type ChildQuery = Coproduct S.Query R.Query
+type ChildSlot = Either S.Slot R.Slot
 
-cpToggle :: ChildPath State ChildState ToggleQuery ChildQuery ToggleSlot ChildSlot
-cpToggle = cpR
-
-cpSearch :: ChildPath S.State ChildState S.Query ChildQuery S.Slot ChildSlot
+cpSearch :: forall g. ChildPath S.State (ChildState g) S.Query ChildQuery S.Slot ChildSlot
 cpSearch = cpL
 
+{--cpResults :: forall g. ChildPath R.List ChildState  R.Query ChildQuery R.Slot ChildSlot--}
+{--cpResults = cpR--}
 
-type StateP g = ParentState State ChildState Query ChildQuery g ChildSlot
+
+type StateP g = ParentState State (ChildState g) Query ChildQuery g ChildSlot
 type QueryP = Coproduct Query (ChildF ChildSlot ChildQuery)
 
 ui :: forall g. (Functor g) => Component (StateP g) QueryP g
 ui = parentComponent { render, eval, peek: Nothing }
     where
 
-    render :: State -> ParentHTML ChildState Query ChildQuery g ChildSlot
+    render :: State -> ParentHTML (ChildState g) Query ChildQuery g ChildSlot
     render st =
         H.div_
             [ H.text "Hello"
             , H.slot' cpSearch S.Slot \_ -> { component: S.search, initialState: S.initState}
+            {--, H.slot' cpResults R.Slot \_ -> { component: R.results, initialState: (parentState R.initState)}--}
             ]
 
-    eval :: Natural Query (ParentDSL State ChildState Query ChildQuery g ChildSlot)
+    eval :: Natural Query (ParentDSL State (ChildState g) Query ChildQuery g ChildSlot)
     eval (ReadStates next) = pure next
-
-type ToggleState = { on :: Boolean, label :: String }
-
-data ToggleQuery a = Toggle a | ToggleUpdateLabel a
-
-
-toggleButton :: forall g. (Functor g) => Component ToggleState ToggleQuery g
-toggleButton = component { render, eval }
-    where
-        render :: ToggleState -> ComponentHTML ToggleQuery
-        render state =
-            H.div_
-                [ H.h1
-                    [ E.onMouseOver (E.input_ ToggleUpdateLabel) ]
-                    [ H.text state.label]
-                , H.p_
-                    [ H.text "Why not toggle this button:" ]
-                , H.button
-                    [ E.onClick (E.input_ Toggle) ]
-                    [ H.text
-                        if not state.on
-                        then "Don't push me"
-                        else "I said don't push me!"
-                    ]
-                ]
-
-        eval :: Natural ToggleQuery (ComponentDSL ToggleState ToggleQuery g)
-        eval (Toggle next) = do
-            modify (\state -> state { on = not state.on })
-            pure next
-        eval (ToggleUpdateLabel next) = do
-            modify (\state -> state { label = state.label <> "!" })
-            pure next
 
 
 main :: Eff (HalogenEffects ()) Unit
