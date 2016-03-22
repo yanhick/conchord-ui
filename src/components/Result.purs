@@ -10,12 +10,6 @@ import qualified Halogen.HTML.Indexed as H
 type State = { id :: Int, title :: String, desc :: String }
 data Query a = Select a
 
-newtype Slot = Slot Int
-
-derive instance genericSlot :: Generic Slot
-instance eqSlot :: Eq Slot where eq = gEq
-instance ordSlot :: Ord Slot where compare = gCompare
-
 initState :: State
 initState = { title: "Hello", desc: "world", id: 1 }
 

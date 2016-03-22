@@ -21,6 +21,12 @@ import qualified Results as R
 
 type State = { on :: Boolean, label :: String }
 
+data ListSlot = ListSlot
+
+derive instance genericSlot :: Generic ListSlot
+instance eqSlot :: Eq ListSlot where eq = gEq
+instance ordSlot :: Ord ListSlot where compare = gCompare
+
 
 initialState :: State
 initialState = { on: false, label: "" }
@@ -29,13 +35,13 @@ data Query a = ReadStates a
 
 type ChildState g = Either S.State (R.State g)
 type ChildQuery = Coproduct S.Query R.Query
-type ChildSlot = Either S.Slot R.Slot
+type ChildSlot = Either S.Slot ListSlot
 
 cpSearch :: forall g. ChildPath S.State (ChildState g) S.Query ChildQuery S.Slot ChildSlot
 cpSearch = cpL
 
-{--cpResults :: forall g. ChildPath R.List ChildState  R.Query ChildQuery R.Slot ChildSlot--}
-{--cpResults = cpR--}
+cpResults :: forall g. ChildPath (R.State g) (ChildState g)  R.Query ChildQuery ListSlot ChildSlot
+cpResults = cpR
 
 
 type StateP g = ParentState State (ChildState g) Query ChildQuery g ChildSlot
@@ -50,7 +56,7 @@ ui = parentComponent { render, eval, peek: Nothing }
         H.div_
             [ H.text "Hello"
             , H.slot' cpSearch S.Slot \_ -> { component: S.search, initialState: S.initState}
-            {--, H.slot' cpResults R.Slot \_ -> { component: R.results, initialState: (parentState R.initState)}--}
+            , H.slot' cpResults ListSlot \_ -> { component: R.results, initialState: (parentState R.initState)}
             ]
 
     eval :: Natural Query (ParentDSL State (ChildState g) Query ChildQuery g ChildSlot)

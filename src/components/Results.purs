@@ -9,31 +9,41 @@ import Halogen
 import qualified Halogen.HTML.Indexed as H
 import qualified Result as R
 
-type List = { q :: String }
+newtype List = List { resultIds :: Array Int }
 data ListQuery a = ListQuery a
-type State g = ParentState List R.State ListQuery R.Query g Slot
-type Query = Coproduct ListQuery (ChildF Slot R.Query)
+type State g = ParentState List R.State ListQuery R.Query g ResultSlot
+type Query = Coproduct ListQuery (ChildF ResultSlot R.Query)
 
-data Slot = Slot String
+newtype ResultSlot = ResultSlot Int
 
-derive instance genericSlot :: Generic Slot
-instance eqSlot :: Eq Slot where eq = gEq
-instance ordSlot :: Ord Slot where compare = gCompare
+derive instance genericSlot :: Generic ResultSlot
+instance eqSlot :: Eq ResultSlot where eq = gEq
+instance ordSlot :: Ord ResultSlot where compare = gCompare
 
 initState :: List
-initState = { q: "" }
+initState = List { resultIds: [0, 1] }
 
 results :: forall g. (Functor g) => Component (State g) Query g
 results = parentComponent { render, eval, peek: Just peek }
     where
 
-        render :: List -> ParentHTML R.State ListQuery R.Query g Slot
-        render st =
-            H.div_ [H.h1_ [ H.text "Results" ]]
+        render :: List -> ParentHTML R.State ListQuery R.Query g ResultSlot
+        render (List st) =
+            H.div_ [ H.h1_ [ H.text "Results" ]
+                   , H.ul_
+                        (map renderResult st.resultIds)
+                   ]
 
-        eval :: Natural ListQuery (ParentDSL List R.State ListQuery R.Query g Slot)
+        renderResult :: Int -> ParentHTML R.State ListQuery R.Query g ResultSlot
+        renderResult resultId = 
+            H.li_
+                [ H.slot (ResultSlot resultId) \_ ->
+                    { component: R.result, initialState: R.initState}
+                ]
+
+        eval :: Natural ListQuery (ParentDSL List R.State ListQuery R.Query g ResultSlot)
         eval (ListQuery next) = pure next
 
-        peek :: forall a. ChildF Slot R.Query a -> ParentDSL List R.State ListQuery R.Query g Slot Unit
+        peek :: forall a. ChildF ResultSlot R.Query a -> ParentDSL List R.State ListQuery R.Query g ResultSlot Unit
         peek (ChildF p q) = case q of
             _ -> pure unit
