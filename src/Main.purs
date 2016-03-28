@@ -5,7 +5,8 @@ import Prelude
 import Control.Monad.Aff (runAff)
 import Control.Monad.Eff (Eff())
 import Control.Monad.Eff.Exception (throwException)
-import Data.Functor.Coproduct (Coproduct())
+import Control.Monad
+import Data.Functor.Coproduct
 import Data.Generic (Generic, gEq, gCompare)
 import Data.Either
 import Data.Maybe
@@ -19,7 +20,7 @@ import qualified Halogen.HTML.Events.Indexed as E
 import qualified Search as S
 import qualified Results as R
 
-type State = { on :: Boolean, label :: String }
+type State = { label :: String }
 
 data ListSlot = ListSlot
 
@@ -29,7 +30,7 @@ instance ordSlot :: Ord ListSlot where compare = gCompare
 
 
 initialState :: State
-initialState = { on: false, label: "" }
+initialState = { label: "" }
 
 data Query a = ReadStates a
 
@@ -48,19 +49,29 @@ type StateP g = ParentState State (ChildState g) Query ChildQuery g ChildSlot
 type QueryP = Coproduct Query (ChildF ChildSlot ChildQuery)
 
 ui :: forall g. (Functor g) => Component (StateP g) QueryP g
-ui = parentComponent { render, eval, peek: Nothing }
+ui = parentComponent { render, eval, peek: Just peek }
     where
 
     render :: State -> ParentHTML (ChildState g) Query ChildQuery g ChildSlot
     render st =
         H.div_
             [ H.text "Hello"
-            , H.slot' cpSearch S.Slot \_ -> { component: S.search, initialState: S.initState}
+            , H.div_
+                [
+                    H.text st.label
+                ]
+            , H.slot' cpSearch (S.Slot 0) \_ -> { component: S.search, initialState: S.initState}
             , H.slot' cpResults ListSlot \_ -> { component: R.results, initialState: (parentState R.initState)}
             ]
 
     eval :: Natural Query (ParentDSL State (ChildState g) Query ChildQuery g ChildSlot)
     eval (ReadStates next) = pure next
+
+    peek (ChildF p q) = case q of
+        (Coproduct (Left (S.Submit _))) -> do
+            search <- query' cpSearch (S.Slot 0) (request S.GetQuery)
+            modify \st -> st {label = fromMaybe "sdaf" search}
+        _ -> pure unit
 
 
 main :: Eff (HalogenEffects ()) Unit
