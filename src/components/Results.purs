@@ -51,6 +51,4 @@ results = parentComponent { render, eval, peek: Just peek }
             pure (continue Nothing)
 
         peek :: forall a. ChildF ResultSlot R.Query a -> ParentDSL List R.State ListQuery R.Query g ResultSlot Unit
-        peek (ChildF p q) = case q of
-            R.Select _ -> modify (\(List st) -> List $ st { selected = Just p })
-            _ -> pure unit
+        peek (ChildF p (R.Select _)) = modify (\(List st) -> List $ st { selected = Just p })

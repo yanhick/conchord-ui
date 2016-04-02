@@ -1,7 +1,6 @@
 module Result where
 
 import Prelude
-import Data.Generic (Generic, gEq, gCompare)
 
 import Halogen
 import qualified Halogen.HTML.Indexed as H

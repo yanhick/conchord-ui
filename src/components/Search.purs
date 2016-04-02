@@ -6,7 +6,6 @@ import Data.Generic (Generic, gEq, gCompare)
 
 import Halogen
 import Data.Functor (($>))
-import Control.Monad.Eff.Console
 import qualified Halogen.HTML.Events.Handler as EH
 import qualified Halogen.HTML.Indexed as H
 import qualified Halogen.HTML.Properties.Indexed as P
