@@ -2,14 +2,14 @@ module Search where
 
 import Prelude
 
-import Data.Generic (Generic, gEq, gCompare)
+import Data.Generic (class Generic, gEq, gCompare)
 
-import Halogen
+import Halogen (ComponentDSL, Natural, ComponentHTML, Component, component, gets, modify, action)
 import Data.Functor (($>))
-import qualified Halogen.HTML.Events.Handler as EH
-import qualified Halogen.HTML.Indexed as H
-import qualified Halogen.HTML.Properties.Indexed as P
-import qualified Halogen.HTML.Events.Indexed as E
+import Halogen.HTML.Events.Handler as EH
+import Halogen.HTML.Indexed as H
+import Halogen.HTML.Properties.Indexed as P
+import Halogen.HTML.Events.Indexed as E
 
 type State = { q :: String }
 data Query a = Submit a 

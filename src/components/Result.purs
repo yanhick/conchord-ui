@@ -2,9 +2,10 @@ module Result where
 
 import Prelude
 
-import Halogen
-import qualified Halogen.HTML.Indexed as H
-import qualified Halogen.HTML.Events.Indexed as E
+import Halogen (ComponentDSL, Natural, ComponentHTML, Component, component)
+
+import Halogen.HTML.Indexed as H
+import Halogen.HTML.Events.Indexed as E
 
 
 type State = { id :: Int, title :: String, desc :: String }

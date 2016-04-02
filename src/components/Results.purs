@@ -1,13 +1,13 @@
 module Results where
 
 import Prelude
-import Data.Maybe
+import Data.Maybe (Maybe (Just, Nothing))
 import Data.Functor.Coproduct (Coproduct())
-import Data.Generic (Generic, gEq, gCompare)
+import Data.Generic (class Generic, gEq, gCompare)
 
-import Halogen
-import qualified Halogen.HTML.Indexed as H
-import qualified Result as R
+import Halogen (ParentDSL, Natural, ParentHTML, Component, ParentState, ChildF(ChildF), parentComponent, modify)
+import Halogen.HTML.Indexed as H
+import Result as R
 
 newtype List = List { resultIds :: Array Int, selected :: Maybe ResultSlot }
 type State g = ParentState List R.State ListQuery R.Query g ResultSlot

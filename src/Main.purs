@@ -3,18 +3,21 @@ module Main where
 import Prelude
 
 import Control.Monad.Eff (Eff())
-import Data.Functor.Coproduct
-import Data.Generic (Generic, gEq, gCompare)
-import Data.Either
-import Data.Maybe
+import Data.Functor.Coproduct (Coproduct, coproduct)
+import Data.Generic (class Generic, gEq, gCompare)
+import Data.Either (Either(Left))
+import Data.Maybe (Maybe (Just, Nothing), fromMaybe)
 
-import Halogen
+import Halogen (HalogenEffects, ParentDSL, Natural,
+               ParentHTML, Component, ParentState, ChildF(ChildF),
+               parentState, runUI, parentComponent, modify, request, query'
+               )
 import Halogen.Util (runHalogenAff, awaitBody)
 import Halogen.Component.ChildPath (ChildPath(), cpL, cpR)
-import qualified Halogen.HTML.Indexed as H
-import qualified Search as S
-import qualified Results as R
-import qualified Result as Re
+import Halogen.HTML.Indexed as H
+import Search as S
+import Results as R
+import Result as Re
 
 type State = { label :: String, selected :: Maybe R.ResultSlot }
 
