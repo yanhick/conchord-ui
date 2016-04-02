@@ -5,6 +5,7 @@ import Data.Generic (Generic, gEq, gCompare)
 
 import Halogen
 import qualified Halogen.HTML.Indexed as H
+import qualified Halogen.HTML.Events.Indexed as E
 
 
 type State = { id :: Int, title :: String, desc :: String }
@@ -19,7 +20,13 @@ result = component { render, eval }
 
         render :: State -> ComponentHTML Query
         render r =
-            H.li_ [ H.text r.title ]
+            H.li_
+                [ H.h2_
+                    [ H.text (show r.id) ]
+                , H.button
+                    [ E.onClick (E.input_ Select) ]
+                    [ H.text "select" ]
+                ]
 
         eval :: Natural Query (ComponentDSL State Query g)
         eval (Select next) = pure next

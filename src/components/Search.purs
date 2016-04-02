@@ -12,7 +12,7 @@ import qualified Halogen.HTML.Indexed as H
 import qualified Halogen.HTML.Properties.Indexed as P
 import qualified Halogen.HTML.Events.Indexed as E
 
-type State = { q :: String }
+newtype Search = Search { q :: String }
 data Query a = Submit a 
              | Change String a
              | GetQuery (String -> a)
@@ -23,15 +23,15 @@ derive instance genericSlot :: Generic Slot
 instance eqSlot :: Eq Slot where eq = gEq
 instance ordSlot :: Ord Slot where compare = gCompare
 
-initState :: State
-initState = { q: "" }
+initState :: Search
+initState = Search { q: "" }
 
-search :: forall g. (Functor g) => Component State Query g
+search :: forall g. (Functor g) => Component Search Query g
 search = component { render, eval }
     where
 
-    render :: State -> ComponentHTML Query
-    render st =
+    render :: Search -> ComponentHTML Query
+    render (Search st) =
         H.form
         [ E.onSubmit \_ -> EH.preventDefault $> action Submit ]
         [ H.input [ P.inputType P.InputText
@@ -41,11 +41,11 @@ search = component { render, eval }
                   , H.input [ P.inputType P.InputSubmit ]
         ]
 
-    eval :: Natural Query (ComponentDSL State Query g)
+    eval :: Natural Query (ComponentDSL Search Query g)
     eval ( Submit next ) = pure next
     eval ( Change desc next ) = do
-        modify (_ { q = desc })
+        modify (\(Search st) -> Search $ st { q = desc })
         pure next
     eval ( GetQuery continue ) = do
-        q <- gets _.q
+        q <- gets (\(Search st) -> st.q)
         pure (continue q)
