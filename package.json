@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "pulp test",
+    "build": "pulp build",
     "dev": "pulp server",
     "release": "pulp browserify > dist && git add dist && git commit -m'release' && git push heroku master -f && git reset --hard HEAD~",
     "postinstall": "bower install"
