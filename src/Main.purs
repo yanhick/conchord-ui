@@ -30,11 +30,11 @@ initialState = { label: "", selected: Nothing }
 
 data Query a = ReadStates a
 
-type ChildState g = Either S.Search (R.State g)
+type ChildState g = Either S.State (R.State g)
 type ChildQuery = Coproduct S.Query R.Query
 type ChildSlot = Either S.Slot ListSlot
 
-cpSearch :: forall g. ChildPath S.Search (ChildState g) S.Query ChildQuery S.Slot ChildSlot
+cpSearch :: forall g. ChildPath S.State (ChildState g) S.Query ChildQuery S.Slot ChildSlot
 cpSearch = cpL
 
 cpResults :: forall g. ChildPath (R.State g) (ChildState g)  R.Query ChildQuery ListSlot ChildSlot
@@ -68,19 +68,16 @@ ui = parentComponent { render, eval, peek: Just peek }
     eval (ReadStates next) = pure next
 
     peek :: forall a. ChildF ChildSlot ChildQuery a -> PeekP g
-    peek (ChildF _ q) = coproduct peekSearch peekResults q
+    peek (ChildF p q) = coproduct (peekSearch p) peekResults q
 
-    peekSearch :: forall a. S.Query a -> PeekP g
-    peekSearch (S.Submit _) = do
-        search <- query' cpSearch (S.Slot 0) (request S.GetQuery)
+    peekSearch :: forall a. ChildSlot -> S.Query a -> PeekP g
+    peekSearch (Left p) (S.Submit _) = do
+        search <- query' cpSearch p (request S.GetQuery)
         modify \st -> st {label = fromMaybe "" search}
-    peekSearch _ = pure unit
+    peekSearch _ _ = pure unit
 
     peekResults :: forall a. R.Query a -> PeekP g
-    peekResults = coproduct peekList peekResult
-
-    peekList :: forall a. R.ListQuery a -> PeekP g
-    peekList _ = pure unit
+    peekResults = coproduct (const (pure unit)) peekResult
 
     peekResult :: forall a. ChildF R.ResultSlot Re.Query a -> PeekP g
     peekResult (ChildF p (Re.Select _)) = modify \st -> st {selected = Just p}
