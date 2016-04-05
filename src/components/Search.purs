@@ -16,12 +16,6 @@ data Query a = Submit a
              | Change String a
              | GetQuery (String -> a)
 
-data Slot = Slot Int
-
-derive instance genericSlot :: Generic Slot
-instance eqSlot :: Eq Slot where eq = gEq
-instance ordSlot :: Ord Slot where compare = gCompare
-
 initState :: State
 initState = { q: "" }
 
