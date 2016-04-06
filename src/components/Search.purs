@@ -10,20 +10,20 @@ import Halogen.HTML.Events.Handler as EH
 import Halogen.HTML.Indexed as H
 import Halogen.HTML.Properties.Indexed as P
 import Halogen.HTML.Events.Indexed as E
+import Model as M
 
-type State = { q :: String }
 data Query a = Submit a 
              | Change String a
              | GetQuery (String -> a)
 
-initState :: State
+initState :: M.Search
 initState = { q: "" }
 
-search :: forall g. (Functor g) => Component State Query g
+search :: forall g. (Functor g) => Component M.Search Query g
 search = component { render, eval }
     where
 
-    render :: State -> ComponentHTML Query
+    render :: M.Search -> ComponentHTML Query
     render st =
         H.form
         [ E.onSubmit \_ -> EH.preventDefault $> action Submit ]
@@ -34,7 +34,7 @@ search = component { render, eval }
                   , H.input [ P.inputType P.InputSubmit ]
         ]
 
-    eval :: Natural Query (ComponentDSL State Query g)
+    eval :: Natural Query (ComponentDSL M.Search Query g)
     eval ( Submit next ) = pure next
     eval ( Change desc next ) = do
         modify (\st -> st { q = desc })

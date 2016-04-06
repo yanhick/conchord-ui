@@ -6,19 +6,19 @@ import Halogen (ComponentDSL, Natural, ComponentHTML, Component, component)
 
 import Halogen.HTML.Indexed as H
 import Halogen.HTML.Events.Indexed as E
+import Model as M
 
 
-type State = { id :: Int, title :: String, desc :: String }
 data Query a = Select a
 
-initState :: State
+initState :: M.Result
 initState = { title: "Hello", desc: "world", id: 1 }
 
-result :: forall g. (Functor g) => Component State Query g
+result :: forall g. (Functor g) => Component M.Result Query g
 result = component { render, eval }
     where
 
-        render :: State -> ComponentHTML Query
+        render :: M.Result -> ComponentHTML Query
         render r =
             H.li_
                 [ H.h2_
@@ -28,6 +28,6 @@ result = component { render, eval }
                     [ H.text "select" ]
                 ]
 
-        eval :: Natural Query (ComponentDSL State Query g)
+        eval :: Natural Query (ComponentDSL M.Result Query g)
         eval (Select next) = pure next
 

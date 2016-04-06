@@ -19,8 +19,9 @@ import Search as S
 import Results as R
 import Result as Re
 import Detail as D
+import Model as M
 
-type State = { label :: String, selected :: Maybe R.ResultSlot }
+type State = { label :: String }
 
 data ListSlot = ListSlot
 data DetailSlot = DetailSlot
@@ -39,18 +40,18 @@ instance eqSearchSlot :: Eq SearchSlot where eq = gEq
 instance ordSearchSlot :: Ord SearchSlot where compare = gCompare
 
 initialState :: State
-initialState = { label: "", selected: Nothing }
+initialState = { label: "" }
 
 data Query a = ReadStates a
 
-type ChildState g = Either S.State (Either (R.State g) D.State)
-type ChildQuery = Coproduct S.Query (Coproduct R.Query D.Query)
+type ChildState g = Either M.Search (Either (R.StateP g) D.State)
+type ChildQuery = Coproduct S.Query (Coproduct R.QueryP D.Query)
 type ChildSlot = Either SearchSlot (Either ListSlot DetailSlot)
 
-cpSearch :: forall g. ChildPath S.State (ChildState g) S.Query ChildQuery SearchSlot ChildSlot
+cpSearch :: forall g. ChildPath M.Search (ChildState g) S.Query ChildQuery SearchSlot ChildSlot
 cpSearch = cpL
 
-cpResults :: forall g. ChildPath (R.State g) (ChildState g)  R.Query ChildQuery ListSlot ChildSlot
+cpResults :: forall g. ChildPath (R.StateP g) (ChildState g)  R.QueryP ChildQuery ListSlot ChildSlot
 cpResults = cpR :> cpL
 
 cpDetail :: forall g. ChildPath D.State (ChildState g)  D.Query ChildQuery DetailSlot ChildSlot
@@ -72,13 +73,9 @@ ui = parentComponent { render, eval, peek: Just peek }
                 [
                     H.text st.label
                 ]
-            , H.div_
-                [
-                    H.text $ show st.selected
-                ]
             , H.slot' cpSearch SearchSlot \_ -> { component: S.search, initialState: S.initState}
-            , H.slot' cpResults ListSlot \_ -> { component: R.results, initialState: (parentState (R.List { resultIds: [0, 1], selected: st.selected })) }
-            , H.slot' cpDetail DetailSlot \_ -> { component: D.detail , initialState: ({title: st.selected, desc:"sadf", id:3}) }
+            , H.slot' cpResults ListSlot \_ -> { component: R.results, initialState: (parentState R.initState) }
+            , H.slot' cpDetail DetailSlot \_ -> { component: D.detail , initialState: D.initState }
             ]
 
     eval :: Natural Query (ParentDSL State (ChildState g) Query ChildQuery g ChildSlot)
@@ -93,15 +90,14 @@ ui = parentComponent { render, eval, peek: Just peek }
         modify \st -> st {label = fromMaybe "" search}
     peekSearch _ _ = pure unit
 
-    peekListAndDetail :: forall a. Coproduct R.Query D.Query a -> PeekP g
+    peekListAndDetail :: forall a. Coproduct R.QueryP D.Query a -> PeekP g
     peekListAndDetail = coproduct peekResults (const (pure unit))
 
-    peekResults :: forall a. R.Query a -> PeekP g
+    peekResults :: forall a. R.QueryP a -> PeekP g
     peekResults = coproduct (const (pure unit)) peekResult
 
     peekResult :: forall a. ChildF R.ResultSlot Re.Query a -> PeekP g
     peekResult (ChildF p (Re.Select _)) = do
-        modify \st -> st {selected = Just p}
         query' cpDetail DetailSlot (action (D.SetTitle $ show p))
         pure unit
 
