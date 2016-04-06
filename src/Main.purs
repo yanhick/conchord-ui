@@ -21,8 +21,6 @@ import Result as Re
 import Detail as D
 import Model as M
 
-type State = { label :: String }
-
 data ListSlot = ListSlot
 data DetailSlot = DetailSlot
 data SearchSlot = SearchSlot
@@ -39,10 +37,7 @@ derive instance genericSearchSlot :: Generic SearchSlot
 instance eqSearchSlot :: Eq SearchSlot where eq = gEq
 instance ordSearchSlot :: Ord SearchSlot where compare = gCompare
 
-initialState :: State
-initialState = { label: "" }
-
-data Query a = ReadStates a
+data Query a = Query a
 
 type ChildState g = Either M.Search (Either (R.StateP g) D.State)
 type ChildQuery = Coproduct S.Query (Coproduct R.QueryP D.Query)
@@ -58,28 +53,25 @@ cpDetail :: forall g. ChildPath D.State (ChildState g)  D.Query ChildQuery Detai
 cpDetail = cpR :> cpR
 
 
-type StateP g = ParentState State (ChildState g) Query ChildQuery g ChildSlot
+type StateP g = ParentState Unit (ChildState g) Query ChildQuery g ChildSlot
 type QueryP = Coproduct Query (ChildF ChildSlot ChildQuery)
-type PeekP g = ParentDSL State (ChildState g) Query ChildQuery g ChildSlot Unit
+type PeekP g = ParentDSL Unit (ChildState g) Query ChildQuery g ChildSlot Unit
 
 ui :: forall g. (Functor g) => Component (StateP g) QueryP g
 ui = parentComponent { render, eval, peek: Just peek }
     where
 
-    render :: State -> ParentHTML (ChildState g) Query ChildQuery g ChildSlot
-    render st =
+    render :: Unit -> ParentHTML (ChildState g) Query ChildQuery g ChildSlot
+    render _ =
         H.div_
-            [ H.div_
-                [
-                    H.text st.label
-                ]
-            , H.slot' cpSearch SearchSlot \_ -> { component: S.search, initialState: S.initState}
+            [
+              H.slot' cpSearch SearchSlot \_ -> { component: S.search, initialState: S.initState}
             , H.slot' cpResults ListSlot \_ -> { component: R.results, initialState: (parentState R.initState) }
             , H.slot' cpDetail DetailSlot \_ -> { component: D.detail , initialState: D.initState }
             ]
 
-    eval :: Natural Query (ParentDSL State (ChildState g) Query ChildQuery g ChildSlot)
-    eval (ReadStates next) = pure next
+    eval :: Natural Query (ParentDSL Unit (ChildState g) Query ChildQuery g ChildSlot)
+    eval (Query next) = pure next
 
     peek :: forall a. ChildF ChildSlot ChildQuery a -> PeekP g
     peek (ChildF p q) = coproduct (peekSearch p) peekListAndDetail q
@@ -87,7 +79,7 @@ ui = parentComponent { render, eval, peek: Just peek }
     peekSearch :: forall a. ChildSlot -> S.Query a -> PeekP g
     peekSearch (Left p) (S.Submit _) = do
         search <- query' cpSearch p (request S.GetQuery)
-        modify \st -> st {label = fromMaybe "" search}
+        pure unit
     peekSearch _ _ = pure unit
 
     peekListAndDetail :: forall a. Coproduct R.QueryP D.Query a -> PeekP g
@@ -105,4 +97,4 @@ ui = parentComponent { render, eval, peek: Just peek }
 main :: Eff (HalogenEffects ()) Unit
 main = runHalogenAff do
     body <- awaitBody
-    runUI ui (parentState initialState) body
+    runUI ui (parentState unit) body
