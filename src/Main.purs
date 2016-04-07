@@ -3,7 +3,7 @@ module Main where
 import Prelude
 
 import Control.Monad.Eff (Eff())
-import Data.Functor.Coproduct (Coproduct, coproduct)
+import Data.Functor.Coproduct (Coproduct, coproduct, left)
 import Data.Generic (class Generic, gEq, gCompare)
 import Data.Either (Either(Left))
 import Data.Maybe (Maybe (Just, Nothing), fromMaybe)
@@ -20,6 +20,7 @@ import Results as R
 import Result as Re
 import Detail as D
 import Model as M
+import DummyData as DD
 
 data ListSlot = ListSlot
 data DetailSlot = DetailSlot
@@ -79,6 +80,7 @@ ui = parentComponent { render, eval, peek: Just peek }
     peekSearch :: forall a. ChildSlot -> S.Query a -> PeekP g
     peekSearch (Left p) (S.Submit _) = do
         search <- query' cpSearch p (request S.GetQuery)
+        query' cpResults ListSlot $ left (action (R.SetResults $ Just DD.dummyList))
         pure unit
     peekSearch _ _ = pure unit
 

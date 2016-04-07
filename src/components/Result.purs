@@ -21,8 +21,9 @@ result = component { render, eval }
         render :: M.Result -> ComponentHTML Query
         render r =
             H.li_
-                [ H.h2_
-                    [ H.text (show r.id) ]
+                [ H.h2_ [ H.text (show r.id) ]
+                , H.h3_ [ H.text (r.title) ]
+                , H.p_  [ H.text (r.desc) ]
                 , H.button
                     [ E.onClick (E.input_ Select) ]
                     [ H.text "select" ]

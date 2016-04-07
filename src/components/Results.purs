@@ -1,7 +1,7 @@
 module Results where
 
 import Prelude
-import Data.Maybe (Maybe (Just, Nothing))
+import Data.Maybe (Maybe (Just, Nothing), fromMaybe)
 import Data.Functor.Coproduct (Coproduct())
 import Data.Generic (class Generic, gEq, gCompare)
 
@@ -10,10 +10,11 @@ import Halogen.HTML.Indexed as H
 import Result as R
 import Model as M
 
-type StateP g = ParentState M.List M.Result Query R.Query g ResultSlot
+type State = Maybe M.List
+type StateP g = ParentState State M.Result Query R.Query g ResultSlot
 type QueryP = Coproduct Query (ChildF ResultSlot R.Query)
 
-data Query a = Query a
+data Query a = SetResults State a
 
 newtype ResultSlot = ResultSlot Int
 
@@ -24,18 +25,18 @@ instance ordSlot :: Ord ResultSlot where compare = gCompare
 instance showSlot :: Show ResultSlot where
     show (ResultSlot i) = show i
 
-initState :: M.List
-initState = []
+initState :: State
+initState = Nothing
 
 results :: forall g. (Functor g) => Component (StateP g) QueryP g
 results = parentComponent { render, eval, peek: Nothing }
     where
 
-        render :: M.List -> ParentHTML M.Result Query R.Query g ResultSlot
+        render :: State -> ParentHTML M.Result Query R.Query g ResultSlot
         render st =
             H.div_ [ H.h1_ [ H.text "Results" ]
                    , H.ul_
-                        (map renderResult st)
+                        (renderResult <$> fromMaybe [] st)
                    ]
 
         renderResult :: M.Result -> ParentHTML M.Result Query R.Query g ResultSlot
@@ -45,5 +46,7 @@ results = parentComponent { render, eval, peek: Nothing }
                     { component: R.result, initialState: (R.initState { id = id })}
                 ]
 
-        eval :: Natural Query (ParentDSL M.List M.Result Query R.Query g ResultSlot)
-        eval (Query next) = pure next
+        eval :: Natural Query (ParentDSL State M.Result Query R.Query g ResultSlot)
+        eval (SetResults r next) = do
+            modify \_ -> r
+            pure next
