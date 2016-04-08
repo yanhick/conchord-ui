@@ -7,6 +7,8 @@ import Data.Functor.Coproduct (Coproduct, coproduct, left)
 import Data.Generic (class Generic, gEq, gCompare)
 import Data.Either (Either(Left))
 import Data.Maybe (Maybe (Just, Nothing), fromMaybe)
+import Control.Monad.Aff (Aff())
+import Network.HTTP.Affjax (AJAX(), post)
 
 import Halogen (HalogenEffects, ParentDSL, Natural,
                ParentHTML, Component, ParentState, ChildF(ChildF),
@@ -21,6 +23,9 @@ import Result as Re
 import Detail as D
 import Model as M
 import DummyData as DD
+
+type AppEffects eff = HalogenEffects (ajax :: AJAX | eff)
+type Affect eff = Aff (AppEffects eff)
 
 data ListSlot = ListSlot
 data DetailSlot = DetailSlot
@@ -58,11 +63,11 @@ type StateP g = ParentState Unit (ChildState g) Query ChildQuery g ChildSlot
 type QueryP = Coproduct Query (ChildF ChildSlot ChildQuery)
 type PeekP g = ParentDSL Unit (ChildState g) Query ChildQuery g ChildSlot Unit
 
-ui :: forall g. (Functor g) => Component (StateP g) QueryP g
+ui :: forall eff. Component (StateP (Affect eff)) QueryP (Affect eff)
 ui = parentComponent { render, eval, peek: Just peek }
     where
 
-    render :: Unit -> ParentHTML (ChildState g) Query ChildQuery g ChildSlot
+    render :: Unit -> ParentHTML (ChildState (Affect eff)) Query ChildQuery (Affect eff) ChildSlot
     render _ =
         H.div_
             [
@@ -71,32 +76,32 @@ ui = parentComponent { render, eval, peek: Just peek }
             , H.slot' cpDetail DetailSlot \_ -> { component: D.detail , initialState: D.initState }
             ]
 
-    eval :: Natural Query (ParentDSL Unit (ChildState g) Query ChildQuery g ChildSlot)
+    eval :: Natural Query (ParentDSL Unit (ChildState (Affect eff)) Query ChildQuery (Affect eff) ChildSlot)
     eval (Query next) = pure next
 
-    peek :: forall a. ChildF ChildSlot ChildQuery a -> PeekP g
+    peek :: forall a. ChildF ChildSlot ChildQuery a -> PeekP (Affect eff)
     peek (ChildF p q) = coproduct (peekSearch p) peekListAndDetail q
 
-    peekSearch :: forall a. ChildSlot -> S.Query a -> PeekP g
+    peekSearch :: forall a. ChildSlot -> S.Query a -> PeekP (Affect eff)
     peekSearch (Left p) (S.Submit _) = do
         search <- query' cpSearch p (request S.GetQuery)
         query' cpResults ListSlot $ left (action (R.SetResults $ Just DD.dummyList))
         pure unit
     peekSearch _ _ = pure unit
 
-    peekListAndDetail :: forall a. Coproduct R.QueryP D.Query a -> PeekP g
+    peekListAndDetail :: forall a. Coproduct R.QueryP D.Query a -> PeekP (Affect eff)
     peekListAndDetail = coproduct peekResults (const (pure unit))
 
-    peekResults :: forall a. R.QueryP a -> PeekP g
+    peekResults :: forall a. R.QueryP a -> PeekP (Affect eff)
     peekResults = coproduct (const (pure unit)) peekResult
 
-    peekResult :: forall a. ChildF R.ResultSlot Re.Query a -> PeekP g
-    peekResult (ChildF p (Re.Select _)) = do
-        query' cpDetail DetailSlot (action (D.SetTitle $ show p))
+    peekResult :: forall a. ChildF R.ResultSlot Re.Query a -> PeekP (Affect eff)
+    peekResult (ChildF (R.ResultSlot p) (Re.Select _)) = do
+        query' cpDetail DetailSlot (action (D.Load (Just p)))
         pure unit
 
 
-main :: Eff (HalogenEffects ()) Unit
+main :: Eff (AppEffects ()) Unit
 main = runHalogenAff do
     body <- awaitBody
     runUI ui (parentState unit) body
