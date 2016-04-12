@@ -20,7 +20,7 @@ data Query a = Query a | Load (Maybe Int) a
 type AppEffects eff = HalogenEffects (ajax :: AJAX | eff)
 
 initState :: State
-initState = { title: Nothing, desc: "world", id: Nothing }
+initState = { title: Nothing, desc: "", id: Nothing }
 
 detail :: forall eff. Component State Query (Aff (AppEffects eff))
 detail = component { render, eval }

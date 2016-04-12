@@ -14,6 +14,7 @@
     "purescript-console": "^0.1.0",
     "purescript-halogen": "^0.6.0",
     "purescript-generics": "^0.7.2",
-    "purescript-affjax": "^0.13.0"
+    "purescript-affjax": "^0.13.0",
+    "purescript-routing": "^0.4.0"
   }
 }
