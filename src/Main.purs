@@ -23,7 +23,7 @@ import Control.Monad.Eff.Exception
 import Halogen (HalogenEffects, ParentDSL, Natural,
                ParentHTML, Component, ParentState, ChildF(ChildF),
                parentState, runUI, parentComponent, modify, request, query', action,
-               Driver
+               Driver, HTML, SlotConstructor
                )
 import Halogen.Util (runHalogenAff, awaitBody)
 import Halogen.Component.ChildPath (ChildPath(), cpL, cpR, (:>))
@@ -101,11 +101,14 @@ ui = parentComponent { render, eval, peek: Just peek }
         H.div_
             [
 
-              H.slot' cpSearch SearchSlot \_ -> { component: S.search, initialState: S.initState}
-            , H.slot' cpResults ListSlot \_ -> { component: R.results, initialState: (parentState R.initState) }
-            , H.slot' cpDetail DetailSlot \_ -> { component: D.detail , initialState: D.initState }
+              getPage st.currentPage
             , H.div_ [ H.text $ show st.currentPage ]
             ]
+
+    getPage :: Routes -> HTML (SlotConstructor (ChildState (Affect eff)) ChildQuery (Affect eff) ChildSlot) Query
+    getPage SearchResult = H.slot' cpResults ListSlot \_ -> { component: R.results, initialState: (parentState R.initState) }
+    getPage Home = H.slot' cpSearch SearchSlot \_ -> { component: S.search, initialState: S.initState}
+    getPage DetailResult = H.slot' cpDetail DetailSlot \_ -> { component: D.detail , initialState: D.initState }
 
     eval :: Natural Query (ParentDSL State (ChildState (Affect eff)) Query ChildQuery (Affect eff) ChildSlot)
     eval (Goto p next) = do
@@ -144,7 +147,10 @@ routeSignal driver = do
 redirects :: forall eff. Driver QueryP eff -> Maybe Routes -> Routes -> Aff (Effects eff) Unit
 redirects driver _ SearchResult = do
     driver $ left (action (Goto SearchResult))
-redirects _ _ _ = pure unit
+redirects driver _ Home = do
+    driver $ left (action (Goto Home))
+redirects driver _ DetailResult = do
+    driver $ left (action (Goto DetailResult))
 
 main :: Eff (AppEffects ()) Unit
 main = runHalogenAff do
