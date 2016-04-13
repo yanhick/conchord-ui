@@ -6,9 +6,12 @@ import Data.Functor ((<$))
 import Routing
 import Routing.Match
 import Routing.Match.Class
+import Routing.Hash
 import Control.Apply ((<*))
 import Control.Alt ((<|>))
+import Control.Monad.Free (liftF)
 import Control.Monad.Eff (Eff())
+import Control.Monad.Eff.Class
 import Data.Functor.Coproduct (Coproduct, coproduct, left)
 import Data.Generic (class Generic, gEq, gCompare)
 import Data.Either (Either(Left))
@@ -23,7 +26,7 @@ import Control.Monad.Eff.Exception
 import Halogen (HalogenEffects, ParentDSL, Natural,
                ParentHTML, Component, ParentState, ChildF(ChildF),
                parentState, runUI, parentComponent, modify, request, query', action,
-               Driver, HTML, SlotConstructor
+               Driver, HTML, SlotConstructor, fromEff
                )
 import Halogen.Util (runHalogenAff, awaitBody)
 import Halogen.Component.ChildPath (ChildPath(), cpL, cpR, (:>))
@@ -130,10 +133,15 @@ ui = parentComponent { render, eval, peek: Just peek }
 
     peekResult :: forall a. ChildF R.ResultSlot Re.Query a -> PeekP (Affect eff)
     peekResult (ChildF (R.ResultSlot p) (Re.Select _)) = do
-        modify _ { currentPage = DetailResult }
+        changePage DetailResult
         query' cpDetail DetailSlot (action (D.Load (Just p)))
         pure unit
 
+
+changePage :: forall eff. Routes -> PeekP (Affect eff)
+changePage r = do
+    modify _ { currentPage = r }
+    fromEff $ modifyHash \_ -> show r
 
 type Effects e = (dom :: DOM, avar :: AVAR, err :: EXCEPTION | e)
 
