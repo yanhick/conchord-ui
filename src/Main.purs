@@ -100,15 +100,11 @@ ui = parentComponent { render, eval, peek: Just peek }
     render st =
         H.div_
             [
-
-              getPage st.currentPage
+              H.slot' cpResults ListSlot \_ -> { component: R.results, initialState: (parentState R.initState) }
+            , H.slot' cpSearch SearchSlot \_ -> { component: S.search, initialState: S.initState}
+            , H.slot' cpDetail DetailSlot \_ -> { component: D.detail , initialState: D.initState }
             , H.div_ [ H.text $ show st.currentPage ]
             ]
-
-    getPage :: Routes -> HTML (SlotConstructor (ChildState (Affect eff)) ChildQuery (Affect eff) ChildSlot) Query
-    getPage SearchResult = H.slot' cpResults ListSlot \_ -> { component: R.results, initialState: (parentState R.initState) }
-    getPage Home = H.slot' cpSearch SearchSlot \_ -> { component: S.search, initialState: S.initState}
-    getPage DetailResult = H.slot' cpDetail DetailSlot \_ -> { component: D.detail , initialState: D.initState }
 
     eval :: Natural Query (ParentDSL State (ChildState (Affect eff)) Query ChildQuery (Affect eff) ChildSlot)
     eval (Goto p next) = do
@@ -120,6 +116,7 @@ ui = parentComponent { render, eval, peek: Just peek }
 
     peekSearch :: forall a. ChildSlot -> S.Query a -> PeekP (Affect eff)
     peekSearch (Left p) (S.Submit _) = do
+        modify _ { currentPage = SearchResult }
         search <- query' cpSearch p (request S.GetQuery)
         query' cpResults ListSlot $ left (action (R.SetResults $ Just DD.dummyList))
         pure unit
@@ -133,6 +130,7 @@ ui = parentComponent { render, eval, peek: Just peek }
 
     peekResult :: forall a. ChildF R.ResultSlot Re.Query a -> PeekP (Affect eff)
     peekResult (ChildF (R.ResultSlot p) (Re.Select _)) = do
+        modify _ { currentPage = DetailResult }
         query' cpDetail DetailSlot (action (D.Load (Just p)))
         pure unit
 
