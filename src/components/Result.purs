@@ -11,15 +11,15 @@ import Model as M
 
 data Query a = Select a
 
-initState :: M.Result
-initState = { title: "Hello", desc: "world", id: 1 }
+initState :: Int -> M.Result
+initState id = M.Result { title: "Hello", desc: "world", id: id }
 
 result :: forall g. (Functor g) => Component M.Result Query g
 result = component { render, eval }
     where
 
         render :: M.Result -> ComponentHTML Query
-        render r =
+        render (M.Result r) =
             H.li_
                 [ H.h2_ [ H.text (show r.id) ]
                 , H.h3_ [ H.text (r.title) ]
