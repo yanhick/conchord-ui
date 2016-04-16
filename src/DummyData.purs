@@ -1,12 +1,11 @@
 module DummyData where
 
 import Model as M
-
-dummyList :: M.List
-dummyList = [
-               M.Result {id: 0, title: "first", desc: "this is the first"}
-             , M.Result {id: 1, title: "second", desc: "this is the second"}
-            ]
+import Data.Foreign.Class (readJSON)
+import Data.Foreign (F)
 
 dummyListJson :: String
-dummyListJson = "[{id: 0, title: \"first\", desc: \"this is the first\"}]"
+dummyListJson = "[{\"id\": 0, \"title\": \"first\", \"desc\": \"this is the first\"}]"
+
+getDummyList :: F M.List
+getDummyList = readJSON dummyListJson

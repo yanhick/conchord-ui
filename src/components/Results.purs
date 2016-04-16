@@ -40,10 +40,10 @@ results = parentComponent { render, eval, peek: Nothing }
                    ]
 
         renderResult :: M.Result -> ParentHTML M.Result Query R.Query g ResultSlot
-        renderResult (M.Result { id }) =
+        renderResult r@(M.Result { id }) =
             H.li_
                 [ H.slot (ResultSlot id) \_ ->
-                { component: R.result, initialState: (R.initState id)}
+                { component: R.result, initialState: r }
                 ]
 
         eval :: Natural Query (ParentDSL State M.Result Query R.Query g ResultSlot)

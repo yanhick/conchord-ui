@@ -12,9 +12,11 @@ import Control.Alt ((<|>))
 import Control.Monad.Free (liftF)
 import Control.Monad.Eff (Eff())
 import Control.Monad.Eff.Class
+import Control.Monad.Eff.Console (CONSOLE)
+import Control.Monad.Aff.Console (print)
 import Data.Functor.Coproduct (Coproduct, coproduct, left)
 import Data.Generic (class Generic, gEq, gCompare)
-import Data.Either (Either(Left))
+import Data.Either (Either(Left, Right), either)
 import Data.Maybe (Maybe (Just, Nothing), fromMaybe)
 import Control.Monad.Aff (Aff())
 import Network.HTTP.Affjax (AJAX(), post)
@@ -26,7 +28,7 @@ import Control.Monad.Eff.Exception
 import Halogen (HalogenEffects, ParentDSL, Natural,
                ParentHTML, Component, ParentState, ChildF(ChildF),
                parentState, runUI, parentComponent, modify, request, query', action,
-               Driver, HTML, SlotConstructor, fromEff
+               Driver, HTML, SlotConstructor, fromEff, fromAff
                )
 import Halogen.Util (runHalogenAff, awaitBody)
 import Halogen.Component.ChildPath (ChildPath(), cpL, cpR, (:>))
@@ -40,7 +42,7 @@ import Parser as P
 import DummyData as DD
 import Routing.Match (Match)
 
-type AppEffects eff = HalogenEffects (ajax :: AJAX | eff)
+type AppEffects eff = HalogenEffects (ajax :: AJAX, console :: CONSOLE | eff)
 type Affect eff = Aff (AppEffects eff)
 
 data ListSlot = ListSlot
@@ -122,7 +124,7 @@ ui = parentComponent { render, eval, peek: Just peek }
     peekSearch (Left p) (S.Submit _) = do
         modify _ { currentPage = SearchResult }
         search <- query' cpSearch p (request S.GetQuery)
-        query' cpResults ListSlot $ left (action (R.SetResults $ Just DD.dummyList))
+        query' cpResults ListSlot $ left (action (R.SetResults $ Just $ either (\e -> [M.Result {id: 1, desc: show e, title: "dasf"}]) id DD.getDummyList))
         pure unit
     peekSearch _ _ = pure unit
 

@@ -9,6 +9,7 @@ import Halogen (HalogenEffects, ComponentDSL, Natural, ComponentHTML, Component,
 import Halogen.HTML.Indexed as H
 import Results as R
 import Control.Monad.Aff (Aff())
+import Control.Monad.Eff.Console (print)
 import Data.Maybe (Maybe (Nothing))
 
 import Network.HTTP.Affjax (AJAX(), get)
