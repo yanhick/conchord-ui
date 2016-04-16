@@ -38,7 +38,6 @@ import Results as R
 import Result as Re
 import Detail as D
 import Model as M
-import Parser as P
 import DummyData as DD
 import Routing.Match (Match)
 
