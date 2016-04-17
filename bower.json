@@ -16,6 +16,7 @@
     "purescript-generics": "^0.7.2",
     "purescript-affjax": "^0.13.0",
     "purescript-routing": "^0.4.0",
-    "purescript-prelude": "^0.1.5"
+    "purescript-prelude": "^0.1.5",
+    "purescript-express": "^0.3.3"
   }
 }
