@@ -18,6 +18,7 @@ import Data.Functor.Coproduct (Coproduct, coproduct, left)
 import Data.Generic (class Generic, gEq, gCompare)
 import Data.Either (Either(Left, Right), either)
 import Data.Maybe (Maybe (Just, Nothing), fromMaybe)
+import Data.Foreign.Class (readJSON)
 import Control.Monad.Aff (Aff())
 import Network.HTTP.Affjax (AJAX(), post)
 import Data.Tuple (Tuple(Tuple))
@@ -39,6 +40,7 @@ import Result as Re
 import Detail as D
 import Model as M
 import DummyData as DD
+import Api as A
 import Routing.Match (Match)
 
 type AppEffects eff = HalogenEffects (ajax :: AJAX, console :: CONSOLE | eff)
@@ -123,7 +125,8 @@ ui = parentComponent { render, eval, peek: Just peek }
     peekSearch (Left p) (S.Submit _) = do
         modify _ { currentPage = SearchResult }
         search <- query' cpSearch p (request S.GetQuery)
-        query' cpResults ListSlot $ left (action (R.SetResults $ Just $ either (\e -> [M.Result {id: 1, desc: show e, title: "dasf"}]) id DD.getDummyList))
+        r <- fromAff A.fetchResults
+        query' cpResults ListSlot $ left (action (R.SetResults $ Just $ either (\e -> [M.Result {id: 1, desc: show e, title: "dasf"}]) id $ readJSON r))
         pure unit
     peekSearch _ _ = pure unit
 
