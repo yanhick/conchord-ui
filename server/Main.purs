@@ -10,7 +10,7 @@ import Node.Express.App (App(), listenHttp, get, useOnError)
 import Node.Express.Types (EXPRESS)
 import Node.Express.Handler (Handler())
 import Node.Express.Request (getRouteParam)
-import Node.Express.Response (send, sendJson, sendFile, setResponseHeader, setStatus)
+import Node.Express.Response (send, sendJson, sendFile, setStatus)
 import Node.HTTP (Server())
 
 main :: forall eff. Eff (console :: CONSOLE, express :: EXPRESS | eff) Server
@@ -48,12 +48,10 @@ fileHandler = do
 
 resultsHandler :: forall e. Handler e
 resultsHandler = do
-    setResponseHeader "Access-Control-Allow-Origin" "*"
     send results
 
 detailsHandler :: forall e. Handler e
 detailsHandler = do
-    setResponseHeader "Access-Control-Allow-Origin" "*"
     idParam <- getRouteParam "id"
     sendJson getDetails
 
