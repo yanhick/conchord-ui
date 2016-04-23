@@ -19,18 +19,13 @@ main = do
         log $ "listening on " <> show 8080
 
 type Detail = { id :: Int, title :: String, desc :: String }
+type Results = Array Detail
 
-results :: String
-results = "[{\"id\": 0, \"title\": \"first\", \"desc\": \"this is the first element\"}]"
+getResults :: Results
+getResults = [{id: 0, title: "first", desc: "this is the first element"}]
 
 getDetails :: Int -> Detail
 getDetails id = { id: 0, title: "", desc: "detail for:" <> show id }
-
-details :: String
-details = "{\"id\": 0, \"title\": \"first\", \"desc\": \"this is the first element\"}"
-
-dummyListJson :: String
-dummyListJson = "[{\"id\": 0, \"title\": \"first\", \"desc\": \"this is the first element\"}]"
 
 appSetup :: forall e. App (console :: CONSOLE | e)
 appSetup = do
@@ -48,12 +43,12 @@ fileHandler = do
 
 resultsHandler :: forall e. Handler e
 resultsHandler = do
-    send results
+    send getResults
 
 detailsHandler :: forall e. Handler e
 detailsHandler = do
     idParam <- getRouteParam "id"
-    sendJson getDetails
+    sendJson $ getDetails 0
 
 errorHandler :: forall e. Error -> Handler e
 errorHandler err = do
