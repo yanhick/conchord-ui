@@ -4,12 +4,13 @@ import Prelude
 import Data.Maybe (maybe)
 import Control.Monad.Eff.Console (log, CONSOLE)
 import Control.Monad.Eff (Eff())
+import Control.Monad.Eff.Exception (Error(), message)
 import Control.Monad.Eff.Class (liftEff)
-import Node.Express.App (App(), listenHttp, get)
+import Node.Express.App (App(), listenHttp, get, useOnError)
 import Node.Express.Types (EXPRESS)
 import Node.Express.Handler (Handler())
 import Node.Express.Request (getRouteParam)
-import Node.Express.Response (send, sendJson, sendFile, setResponseHeader)
+import Node.Express.Response (send, sendJson, sendFile, setResponseHeader, setStatus)
 import Node.HTTP (Server())
 
 main :: forall eff. Eff (console :: CONSOLE, express :: EXPRESS | eff) Server
@@ -37,7 +38,8 @@ appSetup = do
     get "/results" resultsHandler
     get "/details" detailsHandler
     get "/:file"   fileHandler
-    get "/"   fileHandler
+    get "/"        fileHandler
+    useOnError     errorHandler
 
 fileHandler :: forall e. Handler e
 fileHandler = do
@@ -54,4 +56,9 @@ detailsHandler = do
     setResponseHeader "Access-Control-Allow-Origin" "*"
     idParam <- getRouteParam "id"
     sendJson getDetails
+
+errorHandler :: forall e. Error -> Handler e
+errorHandler err = do
+    setStatus 400
+    sendJson {error: message err}
 
