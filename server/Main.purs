@@ -1,14 +1,15 @@
 module Main where
 
 import Prelude
-import Data.Maybe (maybe)
+import Data.Int (fromString)
+import Data.Maybe (maybe, fromMaybe, Maybe(..))
 import Control.Monad.Eff.Console (log, CONSOLE)
 import Control.Monad.Eff (Eff())
-import Control.Monad.Eff.Exception (Error(), message)
+import Control.Monad.Eff.Exception (Error(), message, error)
 import Control.Monad.Eff.Class (liftEff)
 import Node.Express.App (App(), listenHttp, get, useOnError)
 import Node.Express.Types (EXPRESS)
-import Node.Express.Handler (Handler())
+import Node.Express.Handler (Handler(), nextThrow)
 import Node.Express.Request (getRouteParam)
 import Node.Express.Response (send, sendJson, sendFile, setStatus)
 import Node.HTTP (Server())
@@ -30,11 +31,11 @@ getDetails id = { id: 0, title: "", desc: "detail for:" <> show id }
 appSetup :: forall e. App (console :: CONSOLE | e)
 appSetup = do
     liftEff $ log "Setting up"
-    get "/results" resultsHandler
-    get "/details" detailsHandler
-    get "/:file"   fileHandler
-    get "/"        fileHandler
-    useOnError     errorHandler
+    get "/results"     resultsHandler
+    get "/details/:id" detailsHandler
+    get "/:file"       fileHandler
+    get "/"            fileHandler
+    useOnError         errorHandler
 
 fileHandler :: forall e. Handler e
 fileHandler = do
@@ -48,7 +49,10 @@ resultsHandler = do
 detailsHandler :: forall e. Handler e
 detailsHandler = do
     idParam <- getRouteParam "id"
-    sendJson $ getDetails 0
+    case idParam of
+      Nothing -> nextThrow $ error "Id is required"
+      Just id -> do
+        sendJson $ getDetails $ fromMaybe 0 (fromString id)
 
 errorHandler :: forall e. Error -> Handler e
 errorHandler err = do
