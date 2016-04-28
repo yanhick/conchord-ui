@@ -6,7 +6,7 @@
   "scripts": {
     "test": "pulp test",
     "build": "pulp browserify > app.js && pulp build -m Main -o server-output --src-path server",
-    "dev-client": "pulp -w browserify > app.js",
+    "dev-client": "pulp -w browserify -t app.js",
     "dev-server": "pulp -w --then \"node server\" build -m ServerMain -o server-output --src-path server",
     "release": "pulp browserify > dist && git add dist && git commit -m'release' && git push heroku master -f && git reset --hard HEAD~",
     "postinstall": "bower install"
