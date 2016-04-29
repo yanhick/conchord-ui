@@ -13,9 +13,9 @@ fetchResults = do
              (StatusCode 200) -> result.response
              _ -> "fail"
 
-fetchDetails :: forall eff. Aff (ajax :: AJAX | eff) String
-fetchDetails = do
-    result <- get "http://localhost:8080/details/1"
+fetchDetails :: forall eff. Int -> Aff (ajax :: AJAX | eff) String
+fetchDetails id = do
+    result <- get $ "http://localhost:8080/details/" <> show id
     return case result.status of
              (StatusCode 200) -> result.response
              _ -> "fail"

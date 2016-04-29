@@ -47,12 +47,13 @@ detail = component { render, eval }
 
         eval :: Natural Query (ComponentDSL State Query (Aff (AppEffects eff)))
         eval (Query next) = pure next
-        eval (Load id next) = do
+        eval (Load id@(Just did) next) = do
             modify (\(State d) -> State $ d { id = id })
-            result <- fromAff A.fetchDetails
+            result <- fromAff $ A.fetchDetails did
             let r = parseResult result
             modify (\(State d) -> r)
             pure next
+        eval (Load _ next) = pure next
 
 parseResult :: String -> State
 parseResult s = either (\d -> State $ { desc: show d, title: "", id: Nothing }) id ((readJSON s) :: F State)

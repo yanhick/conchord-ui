@@ -26,7 +26,7 @@ getResults :: Results
 getResults = [{id: 0, title: "first", desc: "this is the first element"}]
 
 getDetails :: Int -> Detail
-getDetails id = { id: 0, title: "", desc: "detail for:" <> show id }
+getDetails id = { id: id, title: "", desc: "detail for:" <> show id }
 
 appSetup :: forall e. App (console :: CONSOLE | e)
 appSetup = do
