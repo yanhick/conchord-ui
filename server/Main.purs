@@ -23,7 +23,10 @@ type Detail = { id :: Int, title :: String, desc :: String }
 type Results = Array Detail
 
 getResults :: String -> Results
-getResults q = [{id: 0, title: q, desc: "this is the result for: " <> q }]
+getResults q = [
+        {id: 0, title: q, desc: "this is the first result for: " <> q },
+        {id: 1, title: q, desc: "this is the second result for: " <> q }
+    ]
 
 getDetails :: Int -> Detail
 getDetails id = { id: id, title: "", desc: "detail for:" <> show id }

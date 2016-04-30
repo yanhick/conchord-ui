@@ -4,8 +4,10 @@ import Prelude
 import Data.Maybe (Maybe (Just, Nothing), fromMaybe)
 import Data.Functor.Coproduct (Coproduct())
 import Data.Generic (class Generic, gEq, gCompare)
+import Control.Monad.Eff (foreachE)
+import Control.Monad.Eff.Class (liftEff)
 
-import Halogen (ParentDSL, Natural, ParentHTML, Component, ParentState, ChildF(ChildF), parentComponent, modify)
+import Halogen (ParentDSL, Natural, ParentHTML, Component, ParentState, ChildF(ChildF), parentComponent, modify, get, query, action, fromEff, liftH)
 import Halogen.HTML.Indexed as H
 import Result as R
 import Model as M
@@ -42,9 +44,7 @@ results = parentComponent { render, eval, peek: Nothing }
         renderResult :: M.Result -> ParentHTML M.Result Query R.Query g ResultSlot
         renderResult r@(M.Result { id }) =
             H.li_
-                [ H.slot (ResultSlot id) \_ ->
-                { component: R.result, initialState: r }
-                ]
+                [ H.slot (ResultSlot id) \_ -> { component: R.result, initialState: r } ]
 
         eval :: Natural Query (ParentDSL State M.Result Query R.Query g ResultSlot)
         eval (SetResults r next) = do

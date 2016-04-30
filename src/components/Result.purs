@@ -2,7 +2,7 @@ module Result where
 
 import Prelude
 
-import Halogen (ComponentDSL, Natural, ComponentHTML, Component, component)
+import Halogen (ComponentDSL, Natural, ComponentHTML, Component, component, modify)
 
 import Halogen.HTML.Indexed as H
 import Halogen.HTML.Events.Indexed as E
@@ -31,4 +31,5 @@ result = component { render, eval }
 
         eval :: Natural Query (ComponentDSL M.Result Query g)
         eval (Select next) = pure next
+
 

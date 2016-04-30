@@ -50,8 +50,7 @@ detail = component { render, eval }
         eval (Load id@(Just did) next) = do
             modify (\(State d) -> State $ d { id = id })
             result <- fromAff $ A.fetchDetails did
-            let r = parseResult result
-            modify (\(State d) -> r)
+            modify (\(State d) -> parseResult result)
             pure next
         eval (Load _ next) = pure next
 
