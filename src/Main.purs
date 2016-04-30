@@ -96,9 +96,9 @@ instance eqRoutes :: Eq Routes where
     eq _ _ = false
 
 instance showRoutes :: Show Routes where
-    show Home = "home"
-    show SearchResult = "search"
-    show DetailResult = "detail"
+    show Home = "/home"
+    show SearchResult = "/search"
+    show DetailResult = "/detail"
 
 routing :: Match Routes
 routing = SearchResult <$ lit "" <* lit "search"
