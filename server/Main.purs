@@ -10,7 +10,7 @@ import Control.Monad.Eff.Class (liftEff)
 import Node.Express.App (App(), listenHttp, get, useOnError)
 import Node.Express.Types (EXPRESS)
 import Node.Express.Handler (Handler(), nextThrow)
-import Node.Express.Request (getRouteParam)
+import Node.Express.Request (getRouteParam, getQueryParam)
 import Node.Express.Response (send, sendJson, sendFile, setStatus)
 import Node.HTTP (Server())
 
@@ -22,8 +22,8 @@ main = do
 type Detail = { id :: Int, title :: String, desc :: String }
 type Results = Array Detail
 
-getResults :: Results
-getResults = [{id: 0, title: "first", desc: "this is the first element"}]
+getResults :: String -> Results
+getResults q = [{id: 0, title: q, desc: "this is the result for: " <> q }]
 
 getDetails :: Int -> Detail
 getDetails id = { id: id, title: "", desc: "detail for:" <> show id }
@@ -44,7 +44,8 @@ fileHandler = do
 
 resultsHandler :: forall e. Handler e
 resultsHandler = do
-    send getResults
+    qParam <- getQueryParam "q"
+    send $ getResults (fromMaybe "" qParam)
 
 detailsHandler :: forall e. Handler e
 detailsHandler = do

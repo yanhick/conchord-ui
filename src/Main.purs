@@ -134,7 +134,7 @@ ui = parentComponent { render, eval, peek: Just peek }
     peekSearch (Left p) (S.Submit _) = do
         changePage SearchResult
         search <- query' cpSearch p (request S.GetQuery)
-        r <- fromAff A.fetchResults
+        r <- fromAff $ A.fetchResults $ fromMaybe "" search
         query' cpResults ListSlot $ left (action (R.SetResults $ Just $ either (\e -> [M.Result {id: 1, desc: show e, title: "dasf"}]) id $ readJSON r))
         pure unit
     peekSearch _ _ = pure unit
