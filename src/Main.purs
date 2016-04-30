@@ -106,8 +106,8 @@ routing = SearchResult <$ lit "" <* lit "search"
       <|> Home <$ lit ""
 
 routedComponent :: forall s i j . (Eq s) => s -> s -> HTML i j  -> HTML i j
-routedComponent r r' c | r == r' = H.div [ P.class_ $ H.className "adsf" ] [c]
-routedComponent _ _ c = H.div_ [c]
+routedComponent r r' c | r == r' = H.div_ [c]
+routedComponent _ _ c = H.div [ P.class_ $ H.className "hidden" ] [c]
 
 ui :: forall eff. Component (StateP (Affect eff)) QueryP (Affect eff)
 ui = parentComponent { render, eval, peek: Just peek }
@@ -117,10 +117,9 @@ ui = parentComponent { render, eval, peek: Just peek }
     render st =
         H.div_
             [
-              (routedComponent SearchResult SearchResult $ H.slot' cpResults ListSlot \_ -> { component: R.results, initialState: (parentState R.initState) })
-            , H.slot' cpSearch SearchSlot \_ -> { component: S.search, initialState: S.initState}
-            , H.slot' cpDetail DetailSlot \_ -> { component: D.detail , initialState: D.initState }
-            , H.div_ [ H.text $ show st.currentPage ]
+              (routedComponent st.currentPage SearchResult $ H.slot' cpResults ListSlot \_ -> { component: R.results, initialState: (parentState R.initState) })
+            , (routedComponent st.currentPage Home $ H.slot' cpSearch SearchSlot \_ -> { component: S.search, initialState: S.initState})
+            , (routedComponent st.currentPage DetailResult $ H.slot' cpDetail DetailSlot \_ -> { component: D.detail , initialState: D.initState })
             ]
 
     eval :: Natural Query (ParentDSL State (ChildState (Affect eff)) Query ChildQuery (Affect eff) ChildSlot)
