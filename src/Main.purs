@@ -7,13 +7,14 @@ import Routing
 import Routing.Match
 import Routing.Match.Class
 import Routing.Hash
-import Control.Apply ((<*))
+import Control.Apply ((<*), (*>))
 import Control.Alt ((<|>))
 import Control.Monad.Free (liftF)
 import Control.Monad.Eff (Eff())
 import Control.Monad.Eff.Class
 import Control.Monad.Eff.Console (CONSOLE)
 import Control.Monad.Aff.Console (print)
+import Data.Int (floor)
 import Data.Functor.Coproduct (Coproduct, coproduct, left)
 import Data.Generic (class Generic, gEq, gCompare)
 import Data.Either (Either(Left, Right), either)
@@ -87,23 +88,29 @@ type State = { currentPage :: Routes }
 data Routes
     = Home
     | SearchResult
-    | DetailResult
+    | DetailResult Int
 
 instance eqRoutes :: Eq Routes where
     eq Home Home = true
     eq SearchResult SearchResult = true
-    eq DetailResult DetailResult = true
+    eq (DetailResult _) (DetailResult _) = true
     eq _ _ = false
 
 instance showRoutes :: Show Routes where
     show Home = "/home"
     show SearchResult = "/search"
-    show DetailResult = "/detail"
+    show (DetailResult i)= "/detail/" <> show i
+
+int :: Match Int
+int = floor <$> num
 
 routing :: Match Routes
 routing = SearchResult <$ lit "" <* lit "search"
-      <|> DetailResult <$ lit "" <* lit "detail"
+      <|> detail
       <|> Home <$ lit ""
+
+detail :: Match Routes
+detail = DetailResult <$> (lit "" *> lit "detail" *> int)
 
 routedComponent :: forall s i j . (Eq s) => s -> s -> HTML i j  -> HTML i j
 routedComponent r r' c | r == r' = H.div_ [c]
@@ -119,7 +126,7 @@ ui = parentComponent { render, eval, peek: Just peek }
             [
               (routedComponent st.currentPage SearchResult $ H.slot' cpResults ListSlot \_ -> { component: R.results, initialState: (parentState R.initState) })
             , (routedComponent st.currentPage Home $ H.slot' cpSearch SearchSlot \_ -> { component: S.search, initialState: S.initState})
-            , (routedComponent st.currentPage DetailResult $ H.slot' cpDetail DetailSlot \_ -> { component: D.detail , initialState: D.initState })
+            , (routedComponent st.currentPage (DetailResult 0) $ H.slot' cpDetail DetailSlot \_ -> { component: D.detail , initialState: D.initState })
             ]
 
     eval :: Natural Query (ParentDSL State (ChildState (Affect eff)) Query ChildQuery (Affect eff) ChildSlot)
@@ -149,7 +156,7 @@ ui = parentComponent { render, eval, peek: Just peek }
     peekResult :: forall a. ChildF R.ResultSlot Re.Query a -> PeekP (Affect eff)
     peekResult (ChildF (R.ResultSlot p) _) = do
         query' cpDetail DetailSlot (action (D.Load (Just p)))
-        changePage DetailResult
+        changePage $ DetailResult p
         pure unit
 
 
@@ -170,8 +177,8 @@ redirects driver _ SearchResult = do
     driver $ left (action (Goto SearchResult))
 redirects driver _ Home = do
     driver $ left (action (Goto Home))
-redirects driver _ DetailResult = do
-    driver $ left (action (Goto DetailResult))
+redirects driver _ (DetailResult i) = do
+    driver $ left (action (Goto $ DetailResult i))
 
 main :: Eff (AppEffects ()) Unit
 main = runHalogenAff do
