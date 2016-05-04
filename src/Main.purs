@@ -87,30 +87,33 @@ type State = { currentPage :: Routes }
 
 data Routes
     = Home
-    | SearchResult
+    | SearchResult String
     | DetailResult Int
 
 instance eqRoutes :: Eq Routes where
     eq Home Home = true
-    eq SearchResult SearchResult = true
+    eq (SearchResult _) (SearchResult _) = true
     eq (DetailResult _) (DetailResult _) = true
     eq _ _ = false
 
 instance showRoutes :: Show Routes where
     show Home = "/home"
-    show SearchResult = "/search"
+    show (SearchResult q) = "/search/?q=" <> show q
     show (DetailResult i)= "/detail/" <> show i
 
 int :: Match Int
 int = floor <$> num
 
 routing :: Match Routes
-routing = SearchResult <$ lit "" <* lit "search"
+routing = search
       <|> detail
       <|> Home <$ lit ""
 
 detail :: Match Routes
 detail = DetailResult <$> (lit "" *> lit "detail" *> int)
+
+search :: Match Routes
+search = SearchResult <$> (lit "" *> lit "search" *> (param "q"))
 
 routedComponent :: forall s i j . (Eq s) => s -> s -> HTML i j  -> HTML i j
 routedComponent r r' c | r == r' = H.div_ [c]
@@ -124,7 +127,7 @@ ui = parentComponent { render, eval, peek: Just peek }
     render st =
         H.div_
             [
-              (routedComponent st.currentPage SearchResult $ H.slot' cpResults ListSlot \_ -> { component: R.results, initialState: (parentState R.initState) })
+              (routedComponent st.currentPage (SearchResult "") $ H.slot' cpResults ListSlot \_ -> { component: R.results, initialState: (parentState R.initState) })
             , (routedComponent st.currentPage Home $ H.slot' cpSearch SearchSlot \_ -> { component: S.search, initialState: S.initState})
             , (routedComponent st.currentPage (DetailResult 0) $ H.slot' cpDetail DetailSlot \_ -> { component: D.detail , initialState: D.initState })
             ]
@@ -139,8 +142,8 @@ ui = parentComponent { render, eval, peek: Just peek }
 
     peekSearch :: forall a. ChildSlot -> S.Query a -> PeekP (Affect eff)
     peekSearch (Left p) (S.Submit _) = do
-        changePage SearchResult
         search <- query' cpSearch p (request S.GetQuery)
+        changePage $ SearchResult $ fromMaybe "" search
         query' cpResults ListSlot $ left (action (R.SetResults Nothing))
         r <- fromAff $ A.fetchResults $ fromMaybe "" search
         query' cpResults ListSlot $ left (action (R.SetResults $ Just $ either (\e -> [M.Result {id: 1, desc: show e, title: "dasf"}]) id $ readJSON r))
@@ -173,8 +176,8 @@ routeSignal driver = do
     redirects driver old new
 
 redirects :: forall eff. Driver QueryP eff -> Maybe Routes -> Routes -> Aff (Effects eff) Unit
-redirects driver _ SearchResult = do
-    driver $ left (action (Goto SearchResult))
+redirects driver _ (SearchResult q) = do
+    driver $ left (action (Goto $ SearchResult q))
 redirects driver _ Home = do
     driver $ left (action (Goto Home))
 redirects driver _ (DetailResult i) = do
