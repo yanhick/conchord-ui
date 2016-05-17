@@ -2,6 +2,7 @@ module Main where
 
 import Prelude
 
+
 import Data.Functor ((<$))
 import Routing
 import Routing.Match
@@ -26,6 +27,9 @@ import Data.Tuple (Tuple(Tuple))
 import DOM
 import Control.Monad.Aff.AVar
 import Control.Monad.Eff.Exception
+import Signal.Channel (CHANNEL)
+import Pux (renderToDOM, fromSimple, start)
+import Pux.Html (Html, div, text)
 
 import Halogen (HalogenEffects, ParentDSL, Natural,
                ParentHTML, Component, ParentState, ChildF(ChildF),
@@ -183,8 +187,29 @@ redirects driver _ Home = do
 redirects driver _ (DetailResult i) = do
     driver $ left (action (Goto $ DetailResult i))
 
-main :: Eff (AppEffects ()) Unit
-main = runHalogenAff do
+mainhalo :: Eff (AppEffects ()) Unit
+mainhalo = runHalogenAff do
     body <- awaitBody
     driver <- runUI ui (parentState { currentPage: Home }) body
     routeSignal driver
+
+data Action = Action
+type StatePux = Int
+
+view :: StatePux -> Html Action
+view _ = div [] [ text "Result" ]
+
+update :: Action -> StatePux -> StatePux
+update _ = id
+
+main :: forall e. Eff (err :: EXCEPTION, channel :: CHANNEL | e) Unit
+main = do
+    app <- start
+        { initialState: 0
+        , update: fromSimple update
+        , view: view
+        , inputs: []
+        }
+    renderToDOM "#app" app.html
+
+

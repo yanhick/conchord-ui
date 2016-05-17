@@ -17,6 +17,8 @@
     "purescript-affjax": "^0.13.0",
     "purescript-routing": "^0.4.0",
     "purescript-prelude": "^0.1.5",
-    "purescript-express": "^0.3.3"
+    "purescript-express": "^0.3.3",
+    "purescript-pux": "^4.1.0",
+    "purescript-pux-devtool": "^2.0.3"
   }
 }
