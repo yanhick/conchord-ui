@@ -193,21 +193,13 @@ mainhalo = runHalogenAff do
     driver <- runUI ui (parentState { currentPage: Home }) body
     routeSignal driver
 
-data Action = Action
-type StatePux = Int
-
-view :: StatePux -> Html Action
-view _ = div [] [ text "Result" ]
-
-update :: Action -> StatePux -> StatePux
-update _ = id
 
 main :: forall e. Eff (err :: EXCEPTION, channel :: CHANNEL | e) Unit
 main = do
     app <- start
         { initialState: 0
-        , update: fromSimple update
-        , view: view
+        , update: fromSimple App.update
+        , view: App.view
         , inputs: []
         }
     renderToDOM "#app" app.html
