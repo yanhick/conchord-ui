@@ -194,14 +194,13 @@ mainhalo = runHalogenAff do
     routeSignal driver
 
 
-main :: forall e. Eff (err :: EXCEPTION, channel :: CHANNEL | e) Unit
 main = do
-    app <- start
-        { initialState: 0
-        , update: fromSimple App.update
-        , view: App.view
-        , inputs: []
-        }
+    app <- start {
+      initialState: App.init
+    , update: App.update
+    , view: App.view
+    , inputs: []
+    }
     renderToDOM "#app" app.html
 
 
