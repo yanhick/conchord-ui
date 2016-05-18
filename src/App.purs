@@ -77,7 +77,7 @@ update (SearchChange ev) state = noEffects $ state { q = ev.target.value }
 update RequestSearch state = {
     state: state
   , effects: [ do
-        liftEff $ navigateTo $ "/search?q=" <> state.q
+        liftEff $ navigateTo $ "/search/?q=" <> state.q
         res <- A.fetchResults state.q
         let results = (readJSON res) :: F M.List
         pure $ ReceiveSearch results
