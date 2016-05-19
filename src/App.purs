@@ -1,6 +1,6 @@
 module App where
 
-import Prelude (id, const, ($), pure, bind, (<<<), show, (<$>), (<>))
+import Prelude (const, ($), pure, bind, show, (<$>), (<>))
 import Pux (EffModel, noEffects)
 import Pux.Html (Html, form, input, button, text, div, ul, li)
 import Pux.Html.Attributes (type_, value)
@@ -14,7 +14,7 @@ import Data.Functor ((<$))
 import DOM (DOM())
 import Model as M
 import Api as A
-import Data.Either (Either(Left, Right), either)
+import Data.Either (Either(Right))
 import Data.Maybe (Maybe(Nothing, Just), maybe, fromMaybe)
 import Control.Alt ((<|>))
 import Control.Apply ((<*), (*>))
@@ -45,6 +45,7 @@ type State = {
   , currentPage :: Route
 }
 
+init :: State
 init = {
     q: ""
   , results: []
