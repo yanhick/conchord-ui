@@ -53,29 +53,26 @@ init = {
 }
 
 view :: State -> Html Action
-view state =
+view state = div [] [ page state.currentPage state ]
+
+page :: Route -> State -> Html Action
+page (Detail _) state = div [] [ text (maybe "" (\(M.Result d) -> d.desc) state.detail) ]
+page (SearchResult _) state = ul [] ((\(M.Result r) -> li [] [ text r.title, button [ onClick (const $ RequestDetail r.id) ] [text $ show r.id] ]) <$> state.results)
+page Home state =
     div []
         [form
             [ onSubmit (const RequestSearch) ]
             [ input [ type_ "text", value state.q, onChange SearchChange ] []
             , button [ type_ "submit" ] [ text "search" ]
             ]
-        ,  ul [] ((\(M.Result r) -> li [] [ text r.title, button [ onClick (const $ RequestDetail r.id) ] [text $ show r.id] ]) <$> state.results)
-        ,  div [] [ text (maybe "" (\(M.Result d) -> d.desc) state.detail) ]
-        , page state.currentPage
         ]
-
-page :: Route -> Html Action
-page Home = div [] [ text "home" ]
-page (SearchResult _) = div [] [ text "search result" ]
-page (Detail _) = div [] [ text "detail page" ]
-page _ = div [] [ text "not found" ]
+page _ _ = div [] [ text "not found" ]
 
 update :: Action -> State -> EffModel State Action (ajax :: AJAX, dom :: DOM)
 update (PageView p) state = noEffects $ state { currentPage = p }
 update (SearchChange ev) state = noEffects $ state { q = ev.target.value }
 update RequestSearch state = {
-    state: state
+    state: state { detail = Nothing, results = [] }
   , effects: [ do
         liftEff $ navigateTo $ "/search/?q=" <> state.q
         res <- A.fetchResults state.q
