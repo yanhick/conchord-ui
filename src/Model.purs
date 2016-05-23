@@ -3,9 +3,7 @@ module Model where
 import Prelude
 
 import Data.Foreign.Class (class IsForeign, readProp)
-import Data.Foreign (readInt, readArray, F(), ForeignError(TypeMismatch), Foreign())
-import Data.Maybe (Maybe(Nothing, Just), maybe)
-import Data.Either (Either(Left, Right), either)
+import Data.Maybe (Maybe(Nothing, Just))
 
 newtype Result = Result { id :: Int, title :: String, desc :: String }
 
@@ -48,10 +46,54 @@ type SongSection = {
 
 type SongLyric = {
     id :: Int,
-    text :: String,
+    text :: Maybe String,
     chord :: SongChord
 }
 
-data SongChord = A | B | C | D | E | F | G
+data SongChord = A | B | C | D | E | F | G | Am | Bm | Cm | Dm | Em | Fm | Gm
 
 data SongSectionName = Intro | Chorus | Verse | Outro | Bridge
+
+song :: Song
+song = {
+    id: 1,
+    meta: {
+        title: "Tokyo vampires and wolves",
+        artist: "The Wombats",
+        album: Just "This modern glitch",
+        year: 2011
+    },
+    content: [{
+        id: 1,
+        name: Verse,
+        lines: [{
+            id: 1,
+            text: Just "We're self imploding,",
+            chord: Am
+        }, {
+            id: 2,
+            text: Nothing,
+            chord: C
+        }, {
+            id: 3,
+            text: Nothing,
+            chord: Dm
+        }, {
+            id: 4,
+            text: Just "under",
+            chord: C
+        }, {
+            id: 5,
+            text: Just "the weight of",
+            chord: Dm
+        }, {
+            id: 6,
+            text: Just "your",
+            chord: Em
+        }, {
+            id: 7,
+            text: Just "advice.",
+            chord: F
+        }]
+    }]
+}
