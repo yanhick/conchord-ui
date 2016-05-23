@@ -11,6 +11,8 @@ import Network.HTTP.Affjax (AJAX())
 import Pux (renderToDOM, start)
 import Pux.Router (sampleUrl)
 import Signal ((~>))
+import Action (Action(PageView))
+import Route (match)
 
 
 main :: Eff (
@@ -21,7 +23,7 @@ main :: Eff (
 ) Unit
 main = do
     urlSignal <- sampleUrl
-    let routeSignal = urlSignal ~> (App.PageView <<< App.match)
+    let routeSignal = urlSignal ~> (PageView <<< match)
 
     app <- start {
       initialState: App.init
