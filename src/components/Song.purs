@@ -1,10 +1,13 @@
 module Song where
 
-import Data.Maybe (Maybe())
+import Data.Maybe (Maybe(Nothing, Just))
+import Pux.Html (Html, div, text)
 import Model (Song)
-import Pux.Html (Html)
 import Action (Action())
-import Pux.Html (div, text)
+import SongMeta as Sm
 
 view :: Maybe Song -> Html Action
-view _ = div [] [ text "Song" ]
+view Nothing = div [] [ text "No song" ]
+view (Just s) =
+    div []
+        [ Sm.view s.meta ]
