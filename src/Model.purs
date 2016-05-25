@@ -52,7 +52,24 @@ type SongLyric = {
 
 data SongChord = A | B | C | D | E | F | G | Am | Bm | Cm | Dm | Em | Fm | Gm
 
+
 data SongSectionName = Intro | Chorus | Verse | Outro | Bridge
+
+instance showSongChord :: Show SongChord where
+    show A = "A"
+    show B = "B"
+    show C = "C"
+    show D = "D"
+    show E = "E"
+    show F = "F"
+    show G = "G"
+    show Am = "Am"
+    show Bm = "Bm"
+    show Cm = "Cm"
+    show Dm = "Dm"
+    show Em = "Em"
+    show Fm = "Fm"
+    show Gm = "Gm"
 
 song :: Song
 song = {
