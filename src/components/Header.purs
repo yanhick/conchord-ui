@@ -4,8 +4,11 @@ import Pux.Html (Html, header, nav, text, (#), bind)
 import Pux.Router (link)
 
 import Action (Action())
+import SongTextSize as Sts
 
 view :: Html Action
 view =
     header # do
-        nav # link "/" [] [ text "Home" ]
+        nav # do
+            link "/" [] [ text "Home" ]
+            Sts.view

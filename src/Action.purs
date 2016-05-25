@@ -11,4 +11,9 @@ data Action =
     ReceiveDetail (F M.Detail) |
     RequestSearch |
     ReceiveSearch (F M.List) |
+    UIAction UIAction |
     PageView R.Route
+
+data UIAction =
+    Increment |
+    Decrement

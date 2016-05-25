@@ -1,6 +1,6 @@
 module App where
 
-import Prelude (const, ($), pure, bind, show, (<$>), (<>))
+import Prelude (const, ($), pure, bind, show, (<$>), (<>), (+), (-))
 import Pux (EffModel, noEffects)
 import Pux.Html (Html, form, input, button, text, div, ul, li)
 import Pux.Html.Attributes (type_, value)
@@ -14,9 +14,9 @@ import DOM (DOM())
 import Model as M
 import Api (fetchResults, fetchDetails)
 import Song as S
-import Data.Either (Either(Right))
+import Data.Either (Either(Right, Left))
 import Data.Maybe (Maybe(Nothing, Just), maybe)
-import Action (Action(..))
+import Action (Action(..), UIAction(..))
 import Route (Route (..))
 
 
@@ -26,6 +26,7 @@ type State = {
   , detail :: Maybe M.Detail
   , song :: Maybe M.Song
   , currentPage :: Route
+  , fontSize :: Number
 }
 
 init :: State
@@ -35,13 +36,14 @@ init = {
   , detail: Nothing
   , song: Just M.song
   , currentPage: Home
+  , fontSize: 12.0
 }
 
 view :: State -> Html Action
 view state = div [] [ page state.currentPage state ]
 
 page :: Route -> State -> Html Action
-page (Detail _) state = div [] [ text (maybe "" (\(M.Result d) -> d.desc) state.detail), S.view state.song ]
+page (Detail _) state = div [] [ text (maybe "" (\(M.Result d) -> d.desc) state.detail), S.view state.song state.fontSize ]
 page (SearchResult _) state = ul [] ((\(M.Result r) -> li [] [ text r.title, button [ onClick (const $ RequestDetail r.id) ] [text $ show r.id] ]) <$> state.results)
 page Home state =
     div []
@@ -75,5 +77,10 @@ update (RequestDetail d) state = {
     ]
 }
 update (ReceiveSearch (Right r)) state = noEffects $ state { results = r }
+update (ReceiveSearch (Left _)) state = noEffects state
+
 update (ReceiveDetail (Right d)) state = noEffects $ state { detail = Just d }
-update _ state = noEffects $ state
+update (ReceiveDetail (Left _)) state = noEffects state
+
+update (UIAction Increment) state = noEffects $ state { fontSize = state.fontSize + 1.0 }
+update (UIAction Decrement) state = noEffects $ state { fontSize = state.fontSize - 1.0 }

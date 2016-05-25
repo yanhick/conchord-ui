@@ -8,10 +8,10 @@ import SongMeta as Sm
 import SongContent as Sc
 import Header as H
 
-view :: Maybe Song -> Html Action
-view Nothing = div # text "No song"
-view (Just s) =
+view :: Maybe Song -> Number -> Html Action
+view Nothing _ = div # text "No song"
+view (Just s) fontSize =
     div # do
         H.view
         Sm.view s.meta
-        Sc.view s.content
+        Sc.view s.content fontSize
