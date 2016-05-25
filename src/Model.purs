@@ -41,7 +41,7 @@ type SongContent = Array SongSection
 type SongSection = {
     id :: Int,
     name :: SongSectionName,
-    lines :: Array SongLyric
+    lyrics :: Array SongLyric
 }
 
 type SongLyric = {
@@ -66,7 +66,7 @@ song = {
     content: [{
         id: 1,
         name: Verse,
-        lines: [{
+        lyrics: [{
             id: 1,
             text: Just "We're self imploding,",
             chord: Am
