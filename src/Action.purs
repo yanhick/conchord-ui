@@ -17,7 +17,7 @@ import Pux.Html.Events (FormEvent)
 import Pux.Router (navigateTo)
 
 import Route (Route())
-import Model (Detail, List, State, UIState)
+import Model (List, State, UIState, Song, song)
 
 
 data Action =
@@ -31,8 +31,8 @@ data UIAction =
     Decrement
 
 data IOAction =
-    RequestDetail Int |
-    ReceiveDetail (F Detail) |
+    RequestSong Int |
+    ReceiveSong Song |
     RequestSearch |
     ReceiveSearch (F List)
 
@@ -56,7 +56,7 @@ updateUI Decrement state = state { songFontSize = state.songFontSize - 1.0 }
 updateIO :: IOAction -> State -> Affction
 
 updateIO RequestSearch state = {
-    state: state { detail = Nothing, io = state.io { searchResults = [] } }
+    state: state { io = state.io { searchResults = [] } }
   , effects: [ do
         liftEff $ navigateTo $ "/search/?q=" <> state.ui.searchQuery
         res <- fetchResults state.ui.searchQuery
@@ -65,21 +65,18 @@ updateIO RequestSearch state = {
     ]
 }
 
-updateIO (RequestDetail d) state = {
-    state: state
-    , effects: [ do
-        liftEff $ navigateTo $ "/detail/" <> show d
-        res <- fetchDetails d
-        let results = (readJSON res) :: F Detail
-        pure $ IOAction $ ReceiveDetail results
-    ]
-}
-
 updateIO (ReceiveSearch (Right r)) state = noEffects $ state { io = state.io { searchResults = r } }
 updateIO (ReceiveSearch (Left _)) state = noEffects state
 
-updateIO (ReceiveDetail (Right d)) state = noEffects $ state { detail = Just d }
-updateIO (ReceiveDetail (Left _)) state = noEffects state
+updateIO (RequestSong id) state = {
+    state: state { io = state.io { song = Nothing } }
+  , effects: [ do
+        liftEff $ navigateTo $ "/detail/" <> show id
+        pure $ IOAction $ ReceiveSong song
+    ]
+}
+
+updateIO (ReceiveSong s) state = noEffects $ state { io = state.io { song = Just s } }
 
 --- AJAX Requests
 

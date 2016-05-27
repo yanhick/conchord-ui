@@ -11,8 +11,7 @@ import Route (Route(Home))
 --- App State
 
 type State = {
-    detail :: Maybe Detail
-  , currentPage :: Route
+    currentPage :: Route
   , ui :: UIState
   , io :: IOState
 }
@@ -29,15 +28,14 @@ type IOState = {
 
 init :: State
 init = {
-    detail: Nothing
-  , currentPage: Home
+    currentPage: Home
   , ui: {
       songFontSize: 12.0
     , searchQuery: ""
   }
   , io: {
       searchResults: []
-    , song: Just song
+    , song: Nothing
   }
 }
 
@@ -54,7 +52,6 @@ instance resultIsForeign :: IsForeign Result where
 
 type List = Array Result
 
-type Detail = Result
 
 --- Song Model
 

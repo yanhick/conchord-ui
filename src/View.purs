@@ -13,7 +13,7 @@ import Pux.Html.Events (onClick, onSubmit, onChange)
 import Pux.Html.Attributes (type_, value)
 
 import Model (State, Song, SongMeta, SongContent, SongSection, SongLyric, Result(Result))
-import Action (Action(UIAction, IOAction), IOAction(RequestDetail, RequestSearch), UIAction(Increment, Decrement, SearchChange))
+import Action (Action(UIAction, IOAction), IOAction(RequestSearch, RequestSong), UIAction(Increment, Decrement, SearchChange))
 import Route (Route (Detail, SearchResult, Home, NotFound))
 
 
@@ -48,7 +48,7 @@ searchResult :: Result -> Html Action
 searchResult (Result {title, id}) =
     li # do
         text title
-        button [ onClick (const $ IOAction $ RequestDetail id) ] []
+        button [ onClick (const $ IOAction $ RequestSong id) ] []
 
 --- Song Views
 
