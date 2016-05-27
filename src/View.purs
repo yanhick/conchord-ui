@@ -14,12 +14,20 @@ import Pux.Html.Attributes (type_, value)
 
 import Model (State, Song, SongMeta, SongContent, SongSection, SongLyric, Result(Result))
 import Action (Action(UIAction, RequestDetail, RequestSearch, SearchChange), UIAction(Increment, Decrement))
-import Route (Route (Detail, SearchResult, Home))
+import Route (Route (Detail, SearchResult, Home, NotFound))
+
+--- App Routing
 
 page :: Route -> State -> Html Action
 page (Detail _) state = song state.song state.fontSize
-page (SearchResult _) state = ul [] ((\(Result r) -> li [] [ text r.title, button [ onClick (const $ RequestDetail r.id) ] [text $ show r.id] ]) <$> state.results)
-page Home state =
+page (SearchResult _) state = search state
+page Home state = home state
+page NotFound _ = div [] [ text "not found" ]
+
+--- Search Views
+
+home :: State -> Html Action
+home state =
     div []
         [form
             [ onSubmit (const RequestSearch) ]
@@ -27,7 +35,11 @@ page Home state =
             , button [ type_ "submit" ] [ text "search" ]
             ]
         ]
-page _ _ = div [] [ text "not found" ]
+
+search :: State -> Html Action
+search state = ul [] ((\(Result r) -> li [] [ text r.title, button [ onClick (const $ RequestDetail r.id) ] [text $ show r.id] ]) <$> state.results)
+
+--- Song Views
 
 song :: Maybe Song -> Number -> Html Action
 song Nothing _ = div # text "No song"
