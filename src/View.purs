@@ -22,22 +22,29 @@ page :: Route -> State -> Html Action
 page (Detail _) state = song state.song state.fontSize
 page (SearchResult _) state = search state
 page Home state = home state
-page NotFound _ = div [] [ text "not found" ]
+page NotFound _ = notFound
+
+--- NotFound view
+
+notFound :: Html Action
+notFound = div [] [ text "not found" ]
 
 --- Search Views
 
 home :: State -> Html Action
 home state =
-    div []
-        [form
-            [ onSubmit (const RequestSearch) ]
-            [ input [ type_ "text", value state.q, onChange SearchChange ] []
-            , button [ type_ "submit" ] [ text "search" ]
-            ]
-        ]
+    form ! onSubmit (const RequestSearch) # do
+        input [ type_ "text", value state.q, onChange SearchChange ] []
+        button [ type_ "submit" ] [ text "search" ]
 
 search :: State -> Html Action
-search state = ul [] ((\(Result r) -> li [] [ text r.title, button [ onClick (const $ RequestDetail r.id) ] [text $ show r.id] ]) <$> state.results)
+search state = ul [] (searchResult <$> state.results)
+
+searchResult :: Result -> Html Action
+searchResult (Result {title, id}) =
+    li # do
+        text title
+        button [ onClick (const $ RequestDetail id) ] []
 
 --- Song Views
 
