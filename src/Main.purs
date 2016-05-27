@@ -14,6 +14,8 @@ import Signal ((~>))
 import Action (Action(PageView))
 import Route (match)
 import Model (init)
+import Action (update)
+import View (view)
 
 
 main :: Eff (
@@ -28,8 +30,8 @@ main = do
 
     app <- start {
       initialState: init
-    , update: App.update
-    , view: App.view
+    , update: update
+    , view: view
     , inputs: [routeSignal]
     }
     renderToDOM "#app" app.html

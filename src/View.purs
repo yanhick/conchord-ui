@@ -16,6 +16,10 @@ import Model (State, Song, SongMeta, SongContent, SongSection, SongLyric, Result
 import Action (Action(UIAction, RequestDetail, RequestSearch, SearchChange), UIAction(Increment, Decrement))
 import Route (Route (Detail, SearchResult, Home, NotFound))
 
+
+view :: State -> Html Action
+view state = div [] [ page state.currentPage state ]
+
 --- App Routing
 
 page :: Route -> State -> Html Action
