@@ -22,25 +22,34 @@ type Search = { q :: String }
 
 type Detail = Result
 
+--- App State
+
 type State = {
-    q :: String
-  , results :: List
+    results :: List
   , detail :: Maybe Detail
   , song :: Maybe Song
   , currentPage :: Route
-  , fontSize :: Number
+  , ui :: UIState
+}
+
+type UIState = {
+    songFontSize :: Number
+  , searchQuery :: String
 }
 
 init :: State
 init = {
-    q: ""
-  , results: []
+    results: []
   , detail: Nothing
   , song: Just song
   , currentPage: Home
-  , fontSize: 12.0
+  , ui : {
+      songFontSize: 12.0
+    , searchQuery: ""
+  }
 }
 
+--- Song Model
 
 type Song = {
     id :: Int,
@@ -97,6 +106,8 @@ instance showSongSectionName :: Show SongSectionName where
     show Verse = "Verse"
     show Outro = "Outro"
     show Bridge = "Bridge"
+
+--- Song Example
 
 song :: Song
 song = {

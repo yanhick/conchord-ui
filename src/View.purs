@@ -23,7 +23,7 @@ view state = div [] [ page state.currentPage state ]
 --- App Routing
 
 page :: Route -> State -> Html Action
-page (Detail _) state = song state.song state.fontSize
+page (Detail _) state = song state.song state.ui.songFontSize
 page (SearchResult _) state = search state
 page Home state = home state
 page NotFound _ = notFound
@@ -38,7 +38,7 @@ notFound = div [] [ text "not found" ]
 home :: State -> Html Action
 home state =
     form ! onSubmit (const $ IOAction RequestSearch) # do
-        input [ type_ "text", value state.q, onChange (\f -> UIAction (SearchChange f))] []
+        input [ type_ "text", value state.ui.searchQuery, onChange (\f -> UIAction (SearchChange f))] []
         button [ type_ "submit" ] [ text "search" ]
 
 search :: State -> Html Action

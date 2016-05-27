@@ -17,7 +17,7 @@ import Pux.Html.Events (FormEvent)
 import Pux.Router (navigateTo)
 
 import Route (Route())
-import Model (Detail, List, State)
+import Model (Detail, List, State, UIState)
 
 
 data Action =
@@ -42,14 +42,14 @@ type Affction = EffModel State Action (ajax :: AJAX, dom :: DOM)
 update :: Action -> State -> Affction
 update (PageView p) state = noEffects $ state { currentPage = p }
 update (IOAction a) state = updateIO a state
-update (UIAction a) state = updateUI a state
+update (UIAction a) state = noEffects $ state { ui = updateUI a state.ui }
 
 --- UI Actions
 
-updateUI :: UIAction -> State -> Affction
-updateUI (SearchChange ev) state = noEffects $ state { q = ev.target.value }
-updateUI Increment state = noEffects $ state { fontSize = state.fontSize + 1.0 }
-updateUI Decrement state = noEffects $ state { fontSize = state.fontSize - 1.0 }
+updateUI :: UIAction -> UIState -> UIState
+updateUI (SearchChange ev) state = state { searchQuery = ev.target.value }
+updateUI Increment state = state { songFontSize = state.songFontSize + 1.0 }
+updateUI Decrement state = state { songFontSize = state.songFontSize - 1.0 }
 
 --- IO Actions
 
@@ -58,8 +58,8 @@ updateIO :: IOAction -> State -> Affction
 updateIO RequestSearch state = {
     state: state { detail = Nothing, results = [] }
   , effects: [ do
-        liftEff $ navigateTo $ "/search/?q=" <> state.q
-        res <- fetchResults state.q
+        liftEff $ navigateTo $ "/search/?q=" <> state.ui.searchQuery
+        res <- fetchResults state.ui.searchQuery
         let results = (readJSON res) :: F List
         pure $ IOAction $ ReceiveSearch results
     ]
