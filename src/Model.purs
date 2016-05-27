@@ -5,6 +5,8 @@ import Prelude
 import Data.Foreign.Class (class IsForeign, readProp)
 import Data.Maybe (Maybe(Nothing, Just))
 
+import Route (Route(Home))
+
 newtype Result = Result { id :: Int, title :: String, desc :: String }
 
 instance resultIsForeign :: IsForeign Result where
@@ -19,6 +21,25 @@ type List = Array Result
 type Search = { q :: String }
 
 type Detail = Result
+
+type State = {
+    q :: String
+  , results :: List
+  , detail :: Maybe Detail
+  , song :: Maybe Song
+  , currentPage :: Route
+  , fontSize :: Number
+}
+
+init :: State
+init = {
+    q: ""
+  , results: []
+  , detail: Nothing
+  , song: Just song
+  , currentPage: Home
+  , fontSize: 12.0
+}
 
 
 type Song = {

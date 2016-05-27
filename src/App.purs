@@ -1,10 +1,8 @@
 module App where
 
-import Prelude (const, ($), pure, bind, show, (<$>), (<>), (+), (-))
+import Prelude (const, ($), pure, bind, show, (<>), (+), (-))
 import Pux (EffModel, noEffects)
-import Pux.Html (Html, form, input, button, text, div, ul, li)
-import Pux.Html.Attributes (type_, value)
-import Pux.Html.Events (onChange, onSubmit, onClick)
+import Pux.Html (Html, div)
 import Pux.Router (navigateTo)
 import Network.HTTP.Affjax (AJAX())
 import Data.Foreign.Class (readJSON)
@@ -13,47 +11,16 @@ import Data.Foreign (F)
 import DOM (DOM())
 import Model as M
 import Api (fetchResults, fetchDetails)
-import View (song)
+import View (page)
 import Data.Either (Either(Right, Left))
 import Data.Maybe (Maybe(Nothing, Just), maybe)
 import Action (Action(..), UIAction(..))
 import Route (Route (..))
+import Model (State)
 
-
-type State = {
-    q :: String
-  , results :: M.List
-  , detail :: Maybe M.Detail
-  , song :: Maybe M.Song
-  , currentPage :: Route
-  , fontSize :: Number
-}
-
-init :: State
-init = {
-    q: ""
-  , results: []
-  , detail: Nothing
-  , song: Just M.song
-  , currentPage: Home
-  , fontSize: 12.0
-}
 
 view :: State -> Html Action
 view state = div [] [ page state.currentPage state ]
-
-page :: Route -> State -> Html Action
-page (Detail _) state = div [] [ text (maybe "" (\(M.Result d) -> d.desc) state.detail), song state.song state.fontSize ]
-page (SearchResult _) state = ul [] ((\(M.Result r) -> li [] [ text r.title, button [ onClick (const $ RequestDetail r.id) ] [text $ show r.id] ]) <$> state.results)
-page Home state =
-    div []
-        [form
-            [ onSubmit (const RequestSearch) ]
-            [ input [ type_ "text", value state.q, onChange SearchChange ] []
-            , button [ type_ "submit" ] [ text "search" ]
-            ]
-        ]
-page _ _ = div [] [ text "not found" ]
 
 update :: Action -> State -> EffModel State Action (ajax :: AJAX, dom :: DOM)
 update (PageView p) state = noEffects $ state { currentPage = p }

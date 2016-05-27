@@ -5,14 +5,29 @@ import Prelude (($), (<$>), show, const)
 import Data.Maybe (Maybe(Nothing, Just), maybe, fromMaybe)
 
 import Pux.Html (Html, section, div, p, text, header, article
-                , h1, h2, h3, span, b, nav, li, button
-                , (#), (!), bind)
+                , h1, h2, h3, span, b, nav, li, button, ul, form
+                , input, (#), (!), bind)
 import Pux.CSS (style, px, fontSize)
 import Pux.Router (link)
-import Pux.Html.Events (onClick)
+import Pux.Html.Events (onClick, onSubmit, onChange)
+import Pux.Html.Attributes (type_, value)
 
-import Model (Song, SongMeta, SongContent, SongSection, SongLyric)
-import Action (Action(UIAction), UIAction(Increment, Decrement))
+import Model (State, Song, SongMeta, SongContent, SongSection, SongLyric, Result(Result))
+import Action (Action(UIAction, RequestDetail, RequestSearch, SearchChange), UIAction(Increment, Decrement))
+import Route (Route (Detail, SearchResult, Home))
+
+page :: Route -> State -> Html Action
+page (Detail _) state = song state.song state.fontSize
+page (SearchResult _) state = ul [] ((\(Result r) -> li [] [ text r.title, button [ onClick (const $ RequestDetail r.id) ] [text $ show r.id] ]) <$> state.results)
+page Home state =
+    div []
+        [form
+            [ onSubmit (const RequestSearch) ]
+            [ input [ type_ "text", value state.q, onChange SearchChange ] []
+            , button [ type_ "submit" ] [ text "search" ]
+            ]
+        ]
+page _ _ = div [] [ text "not found" ]
 
 song :: Maybe Song -> Number -> Html Action
 song Nothing _ = div # text "No song"

@@ -13,6 +13,7 @@ import Pux.Router (sampleUrl)
 import Signal ((~>))
 import Action (Action(PageView))
 import Route (match)
+import Model (init)
 
 
 main :: Eff (
@@ -26,7 +27,7 @@ main = do
     let routeSignal = urlSignal ~> (PageView <<< match)
 
     app <- start {
-      initialState: App.init
+      initialState: init
     , update: App.update
     , view: App.view
     , inputs: [routeSignal]
