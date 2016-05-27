@@ -21,11 +21,8 @@ import Model (Detail, List, State)
 
 
 data Action =
+    IOAction IOAction |
     SearchChange FormEvent |
-    RequestDetail Int |
-    ReceiveDetail (F Detail) |
-    RequestSearch |
-    ReceiveSearch (F List) |
     UIAction UIAction |
     PageView Route
 
@@ -43,32 +40,40 @@ data IOAction =
 update :: Action -> State -> EffModel State Action (ajax :: AJAX, dom :: DOM)
 update (PageView p) state = noEffects $ state { currentPage = p }
 update (SearchChange ev) state = noEffects $ state { q = ev.target.value }
-update RequestSearch state = {
+update (IOAction a) state = updateIOAction a state
+
+update (UIAction Increment) state = noEffects $ state { fontSize = state.fontSize + 1.0 }
+update (UIAction Decrement) state = noEffects $ state { fontSize = state.fontSize - 1.0 }
+
+--- IO Actions
+
+updateIOAction :: IOAction -> State -> EffModel State Action (ajax :: AJAX, dom :: DOM)
+
+updateIOAction RequestSearch state = {
     state: state { detail = Nothing, results = [] }
   , effects: [ do
         liftEff $ navigateTo $ "/search/?q=" <> state.q
         res <- fetchResults state.q
         let results = (readJSON res) :: F List
-        pure $ ReceiveSearch results
+        pure $ IOAction $ ReceiveSearch results
     ]
 }
-update (RequestDetail d) state = {
+
+updateIOAction (RequestDetail d) state = {
     state: state
     , effects: [ do
         liftEff $ navigateTo $ "/detail/" <> show d
         res <- fetchDetails d
         let results = (readJSON res) :: F Detail
-        pure $ ReceiveDetail results
+        pure $ IOAction $ ReceiveDetail results
     ]
 }
-update (ReceiveSearch (Right r)) state = noEffects $ state { results = r }
-update (ReceiveSearch (Left _)) state = noEffects state
 
-update (ReceiveDetail (Right d)) state = noEffects $ state { detail = Just d }
-update (ReceiveDetail (Left _)) state = noEffects state
+updateIOAction (ReceiveSearch (Right r)) state = noEffects $ state { results = r }
+updateIOAction (ReceiveSearch (Left _)) state = noEffects state
 
-update (UIAction Increment) state = noEffects $ state { fontSize = state.fontSize + 1.0 }
-update (UIAction Decrement) state = noEffects $ state { fontSize = state.fontSize - 1.0 }
+updateIOAction (ReceiveDetail (Right d)) state = noEffects $ state { detail = Just d }
+updateIOAction (ReceiveDetail (Left _)) state = noEffects state
 
 --- AJAX Requests
 
