@@ -56,7 +56,7 @@ updateUI Decrement state = state { songFontSize = state.songFontSize - 1.0 }
 updateIO :: IOAction -> State -> Affction
 
 updateIO RequestSearch state = {
-    state: state { detail = Nothing, results = [] }
+    state: state { detail = Nothing, io = state.io { searchResults = [] } }
   , effects: [ do
         liftEff $ navigateTo $ "/search/?q=" <> state.ui.searchQuery
         res <- fetchResults state.ui.searchQuery
@@ -75,7 +75,7 @@ updateIO (RequestDetail d) state = {
     ]
 }
 
-updateIO (ReceiveSearch (Right r)) state = noEffects $ state { results = r }
+updateIO (ReceiveSearch (Right r)) state = noEffects $ state { io = state.io { searchResults = r } }
 updateIO (ReceiveSearch (Left _)) state = noEffects state
 
 updateIO (ReceiveDetail (Right d)) state = noEffects $ state { detail = Just d }

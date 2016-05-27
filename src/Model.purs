@@ -7,6 +7,42 @@ import Data.Maybe (Maybe(Nothing, Just))
 
 import Route (Route(Home))
 
+
+--- App State
+
+type State = {
+    detail :: Maybe Detail
+  , currentPage :: Route
+  , ui :: UIState
+  , io :: IOState
+}
+
+type UIState = {
+    songFontSize :: Number
+  , searchQuery :: String
+}
+
+type IOState = {
+    searchResults :: List
+  , song :: Maybe Song
+}
+
+init :: State
+init = {
+    detail: Nothing
+  , currentPage: Home
+  , ui: {
+      songFontSize: 12.0
+    , searchQuery: ""
+  }
+  , io: {
+      searchResults: []
+    , song: Just song
+  }
+}
+
+--- Search Model
+
 newtype Result = Result { id :: Int, title :: String, desc :: String }
 
 instance resultIsForeign :: IsForeign Result where
@@ -18,36 +54,7 @@ instance resultIsForeign :: IsForeign Result where
 
 type List = Array Result
 
-type Search = { q :: String }
-
 type Detail = Result
-
---- App State
-
-type State = {
-    results :: List
-  , detail :: Maybe Detail
-  , song :: Maybe Song
-  , currentPage :: Route
-  , ui :: UIState
-}
-
-type UIState = {
-    songFontSize :: Number
-  , searchQuery :: String
-}
-
-init :: State
-init = {
-    results: []
-  , detail: Nothing
-  , song: Just song
-  , currentPage: Home
-  , ui : {
-      songFontSize: 12.0
-    , searchQuery: ""
-  }
-}
 
 --- Song Model
 

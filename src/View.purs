@@ -23,7 +23,7 @@ view state = div [] [ page state.currentPage state ]
 --- App Routing
 
 page :: Route -> State -> Html Action
-page (Detail _) state = song state.song state.ui.songFontSize
+page (Detail _) state = song state.io.song state.ui.songFontSize
 page (SearchResult _) state = search state
 page Home state = home state
 page NotFound _ = notFound
@@ -42,7 +42,7 @@ home state =
         button [ type_ "submit" ] [ text "search" ]
 
 search :: State -> Html Action
-search state = ul [] (searchResult <$> state.results)
+search state = ul [] (searchResult <$> state.io.searchResults)
 
 searchResult :: Result -> Html Action
 searchResult (Result {title, id}) =
