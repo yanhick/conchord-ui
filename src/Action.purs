@@ -22,11 +22,11 @@ import Model (Detail, List, State)
 
 data Action =
     IOAction IOAction |
-    SearchChange FormEvent |
     UIAction UIAction |
     PageView Route
 
 data UIAction =
+    SearchChange FormEvent |
     Increment |
     Decrement
 
@@ -39,17 +39,21 @@ data IOAction =
 
 update :: Action -> State -> EffModel State Action (ajax :: AJAX, dom :: DOM)
 update (PageView p) state = noEffects $ state { currentPage = p }
-update (SearchChange ev) state = noEffects $ state { q = ev.target.value }
-update (IOAction a) state = updateIOAction a state
+update (IOAction a) state = updateIO a state
+update (UIAction a) state = updateUI a state
 
-update (UIAction Increment) state = noEffects $ state { fontSize = state.fontSize + 1.0 }
-update (UIAction Decrement) state = noEffects $ state { fontSize = state.fontSize - 1.0 }
+--- UI Actions
+
+updateUI :: UIAction -> State -> EffModel State Action (ajax :: AJAX, dom :: DOM)
+updateUI (SearchChange ev) state = noEffects $ state { q = ev.target.value }
+updateUI Increment state = noEffects $ state { fontSize = state.fontSize + 1.0 }
+updateUI Decrement state = noEffects $ state { fontSize = state.fontSize - 1.0 }
 
 --- IO Actions
 
-updateIOAction :: IOAction -> State -> EffModel State Action (ajax :: AJAX, dom :: DOM)
+updateIO :: IOAction -> State -> EffModel State Action (ajax :: AJAX, dom :: DOM)
 
-updateIOAction RequestSearch state = {
+updateIO RequestSearch state = {
     state: state { detail = Nothing, results = [] }
   , effects: [ do
         liftEff $ navigateTo $ "/search/?q=" <> state.q
@@ -59,7 +63,7 @@ updateIOAction RequestSearch state = {
     ]
 }
 
-updateIOAction (RequestDetail d) state = {
+updateIO (RequestDetail d) state = {
     state: state
     , effects: [ do
         liftEff $ navigateTo $ "/detail/" <> show d
@@ -69,11 +73,11 @@ updateIOAction (RequestDetail d) state = {
     ]
 }
 
-updateIOAction (ReceiveSearch (Right r)) state = noEffects $ state { results = r }
-updateIOAction (ReceiveSearch (Left _)) state = noEffects state
+updateIO (ReceiveSearch (Right r)) state = noEffects $ state { results = r }
+updateIO (ReceiveSearch (Left _)) state = noEffects state
 
-updateIOAction (ReceiveDetail (Right d)) state = noEffects $ state { detail = Just d }
-updateIOAction (ReceiveDetail (Left _)) state = noEffects state
+updateIO (ReceiveDetail (Right d)) state = noEffects $ state { detail = Just d }
+updateIO (ReceiveDetail (Left _)) state = noEffects state
 
 --- AJAX Requests
 

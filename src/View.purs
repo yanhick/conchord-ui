@@ -13,7 +13,7 @@ import Pux.Html.Events (onClick, onSubmit, onChange)
 import Pux.Html.Attributes (type_, value)
 
 import Model (State, Song, SongMeta, SongContent, SongSection, SongLyric, Result(Result))
-import Action (Action(UIAction, IOAction, SearchChange), IOAction(RequestDetail, RequestSearch), UIAction(Increment, Decrement))
+import Action (Action(UIAction, IOAction), IOAction(RequestDetail, RequestSearch), UIAction(Increment, Decrement, SearchChange))
 import Route (Route (Detail, SearchResult, Home, NotFound))
 
 
@@ -38,7 +38,7 @@ notFound = div [] [ text "not found" ]
 home :: State -> Html Action
 home state =
     form ! onSubmit (const $ IOAction RequestSearch) # do
-        input [ type_ "text", value state.q, onChange SearchChange ] []
+        input [ type_ "text", value state.q, onChange (\f -> UIAction (SearchChange f))] []
         button [ type_ "submit" ] [ text "search" ]
 
 search :: State -> Html Action
