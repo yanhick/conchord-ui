@@ -1,4 +1,4 @@
-module Song where
+module View where
 
 import Prelude (($), (<$>), show, const)
 
@@ -13,13 +13,12 @@ import Pux.Html.Events (onClick)
 
 import Model (Song, SongMeta, SongContent, SongSection, SongLyric)
 import Action (Action(UIAction), UIAction(Increment, Decrement))
-import Header as H
 
-view :: Maybe Song -> Number -> Html Action
-view Nothing _ = div # text "No song"
-view (Just s) fontSize =
+song :: Maybe Song -> Number -> Html Action
+song Nothing _ = div # text "No song"
+song (Just s) fontSize =
     div # do
-        H.view
+        header_
         songMeta s.meta
         songContent s.content fontSize
 

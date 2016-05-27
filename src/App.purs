@@ -13,7 +13,7 @@ import Data.Foreign (F)
 import DOM (DOM())
 import Model as M
 import Api (fetchResults, fetchDetails)
-import Song as S
+import View (song)
 import Data.Either (Either(Right, Left))
 import Data.Maybe (Maybe(Nothing, Just), maybe)
 import Action (Action(..), UIAction(..))
@@ -43,7 +43,7 @@ view :: State -> Html Action
 view state = div [] [ page state.currentPage state ]
 
 page :: Route -> State -> Html Action
-page (Detail _) state = div [] [ text (maybe "" (\(M.Result d) -> d.desc) state.detail), S.view state.song state.fontSize ]
+page (Detail _) state = div [] [ text (maybe "" (\(M.Result d) -> d.desc) state.detail), song state.song state.fontSize ]
 page (SearchResult _) state = ul [] ((\(M.Result r) -> li [] [ text r.title, button [ onClick (const $ RequestDetail r.id) ] [text $ show r.id] ]) <$> state.results)
 page Home state =
     div []
