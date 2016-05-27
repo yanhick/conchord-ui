@@ -36,22 +36,24 @@ data IOAction =
     RequestSearch |
     ReceiveSearch (F List)
 
+type Affction = EffModel State Action (ajax :: AJAX, dom :: DOM)
 
-update :: Action -> State -> EffModel State Action (ajax :: AJAX, dom :: DOM)
+
+update :: Action -> State -> Affction
 update (PageView p) state = noEffects $ state { currentPage = p }
 update (IOAction a) state = updateIO a state
 update (UIAction a) state = updateUI a state
 
 --- UI Actions
 
-updateUI :: UIAction -> State -> EffModel State Action (ajax :: AJAX, dom :: DOM)
+updateUI :: UIAction -> State -> Affction
 updateUI (SearchChange ev) state = noEffects $ state { q = ev.target.value }
 updateUI Increment state = noEffects $ state { fontSize = state.fontSize + 1.0 }
 updateUI Decrement state = noEffects $ state { fontSize = state.fontSize - 1.0 }
 
 --- IO Actions
 
-updateIO :: IOAction -> State -> EffModel State Action (ajax :: AJAX, dom :: DOM)
+updateIO :: IOAction -> State -> Affction
 
 updateIO RequestSearch state = {
     state: state { detail = Nothing, results = [] }
