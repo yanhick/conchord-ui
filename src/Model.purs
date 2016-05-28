@@ -73,7 +73,7 @@ type SongMeta = {
 
 type Year = Int
 
-type SongContent = Array SongSection
+newtype SongContent = SongContent (Array SongSection)
 
 newtype SongSection = SongSection {
     name :: SongSectionName,
@@ -171,7 +171,7 @@ song = {
         album: Just "This modern glitch",
         year: 2011
     },
-    content: [ SongSection {
+    content: SongContent [ SongSection {
         name: Verse,
         lyrics: [ SongLyric {
             lyric: Just "We're self imploding,",
