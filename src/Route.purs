@@ -9,12 +9,12 @@ import Data.Maybe (fromMaybe)
 import Pux.Router (router, lit, int, end, param)
 
 
-data Route = Home | SearchResult String | Detail Int | NotFound
+data Route = HomePage | SearchResultPage String | SongPage Int | NotFoundPage
 
 match :: String -> Route
-match url = fromMaybe NotFound $ router url $
-            Home <$ end
+match url = fromMaybe NotFoundPage $ router url $
+            HomePage <$ end
             <|>
-            Detail <$> (lit "detail" *> int) <* end
+            SongPage <$> (lit "detail" *> int) <* end
             <|>
-            SearchResult <$> (lit "search" *> (param "q")) <* end
+            SearchResultPage <$> (lit "search" *> (param "q")) <* end

@@ -14,7 +14,7 @@ import Pux.Html.Attributes (type_, value)
 
 import Model (State, Song, SongMeta, SongContent, SongSection, SongLyric, SearchResult(SearchResult))
 import Action (Action(UIAction, IOAction), IOAction(RequestSearch, RequestSong), UIAction(Increment, Decrement, SearchChange))
-import Route (Route (Detail, SearchResult, Home, NotFound)) as R
+import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage))
 
 
 view :: State -> Html Action
@@ -22,11 +22,11 @@ view state = div [] [ page state.currentPage state ]
 
 --- App Routing
 
-page :: R.Route -> State -> Html Action
-page (R.Detail _) state = song state.io.song state.ui.songFontSize
-page (R.SearchResult _) state = search state
-page R.Home state = home state
-page R.NotFound _ = notFound
+page :: Route -> State -> Html Action
+page (SongPage _) state = song state.io.song state.ui.songFontSize
+page (SearchResultPage _) state = search state
+page HomePage state = home state
+page NotFoundPage _ = notFound
 
 --- NotFound view
 

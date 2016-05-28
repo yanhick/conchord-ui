@@ -5,7 +5,7 @@ import Prelude (pure, class Show, bind, ($))
 import Data.Foreign.Class (class IsForeign, readProp)
 import Data.Maybe (Maybe(Nothing, Just))
 
-import Route (Route(Home))
+import Route (Route(HomePage))
 
 
 --- App State
@@ -28,7 +28,7 @@ type IOState = {
 
 init :: State
 init = {
-    currentPage: Home
+    currentPage: HomePage
   , ui: {
       songFontSize: 12.0
     , searchQuery: ""
