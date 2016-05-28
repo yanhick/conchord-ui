@@ -28,6 +28,18 @@ page (SearchResultPage _) state = searchResultPage state
 page HomePage state = homePage state
 page NotFoundPage _ = notFoundPage
 
+--- Common
+
+type ToolBar = Html Action
+
+header_:: (Maybe ToolBar) -> Html Action
+header_ children =
+    header # do
+        nav # do
+            link "/" #
+                text "Home"
+            fromMaybe (text "") children
+
 --- NotFound view
 
 notFoundPage :: Html Action
@@ -38,11 +50,13 @@ notFoundPage = div [] [ text "not found" ]
 homePage :: State -> Html Action
 homePage state =
     div # do
+        header_ Nothing
         searchForm state
 
 searchResultPage :: State -> Html Action
 searchResultPage state =
     div # do
+        header_ Nothing
         searchForm state
         ul [] (searchResult <$> state.io.searchResults)
 
@@ -65,7 +79,7 @@ songPage :: Maybe Song -> Number -> Html Action
 songPage Nothing _ = div # text "No song"
 songPage (Just s) fontSize =
     div # do
-        header_
+        header_ $ Just songTextSize
         songMeta s.meta
         songContent s.content fontSize
 
@@ -90,13 +104,6 @@ songLyric l =
     span # do
         b # text (show l.chord)
         text $ fromMaybe "" l.text
-
-header_:: Html Action
-header_ =
-    header # do
-        nav # do
-            link "/" [] [ text "Home" ]
-            songTextSize
 
 songTextSize :: Html Action
 songTextSize =
