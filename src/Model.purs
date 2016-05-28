@@ -75,10 +75,16 @@ type Year = Int
 
 type SongContent = Array SongSection
 
-type SongSection = {
+newtype SongSection = SongSection {
     name :: SongSectionName,
     lyrics :: Array SongLyric
 }
+
+instance isForeignSongSection :: IsForeign SongSection where
+    read value = do
+        name <- readProp "name" value
+        lyrics <- readProp "lyrics" value
+        pure $ SongSection { name, lyrics }
 
 newtype SongLyric = SongLyric {
     lyric :: Maybe String,
@@ -89,7 +95,7 @@ instance isForeignSongLyric :: IsForeign SongLyric where
     read value = do
         lyric <- runNull <$> readProp "lyric" value
         chord <- readProp "chord" value
-        pure $ SongLyric {lyric, chord}
+        pure $ SongLyric { lyric, chord }
 
 data SongChord = A | B | C | D | E | F | G | Am | Bm | Cm | Dm | Em | Fm | Gm
 
@@ -165,9 +171,9 @@ song = {
         album: Just "This modern glitch",
         year: 2011
     },
-    content: [{
+    content: [ SongSection {
         name: Verse,
-        lyrics: [SongLyric {
+        lyrics: [ SongLyric {
             lyric: Just "We're self imploding,",
             chord: Am
         }, SongLyric {

@@ -12,7 +12,7 @@ import Pux.Router (link)
 import Pux.Html.Events (onClick, onSubmit, onChange)
 import Pux.Html.Attributes (type_, value)
 
-import Model (State, Song, SongMeta, SongContent, SongSection, SongLyric(SongLyric), SearchResult(SearchResult))
+import Model (State, Song, SongMeta, SongContent, SongSection(SongSection), SongLyric(SongLyric), SearchResult(SearchResult))
 import Action (Action(UIAction, IOAction), IOAction(RequestSearch, RequestSong), UIAction(Increment, Decrement, SearchChange))
 import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage))
 
@@ -97,10 +97,10 @@ songContent :: SongContent -> Number -> Html Action
 songContent s fs = article [ style $ fontSize (px fs) ] (songSection <$> s)
 
 songSection :: SongSection -> Html Action
-songSection s =
+songSection (SongSection {name, lyrics}) =
     section # do
-        h2 # text (show s.name)
-        p [] (songLyric <$> s.lyrics)
+        h2 # text (show name)
+        p [] (songLyric <$> lyrics)
 
 songLyric :: SongLyric -> Html Action
 songLyric (SongLyric {lyric, chord}) =
