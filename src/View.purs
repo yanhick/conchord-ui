@@ -12,9 +12,9 @@ import Pux.Router (link)
 import Pux.Html.Events (onClick, onSubmit, onChange)
 import Pux.Html.Attributes (type_, value)
 
-import Model (State, Song, SongMeta, SongContent, SongSection, SongLyric, Result(Result))
+import Model (State, Song, SongMeta, SongContent, SongSection, SongLyric, SearchResult(SearchResult))
 import Action (Action(UIAction, IOAction), IOAction(RequestSearch, RequestSong), UIAction(Increment, Decrement, SearchChange))
-import Route (Route (Detail, SearchResult, Home, NotFound))
+import Route (Route (Detail, SearchResult, Home, NotFound)) as R
 
 
 view :: State -> Html Action
@@ -22,11 +22,11 @@ view state = div [] [ page state.currentPage state ]
 
 --- App Routing
 
-page :: Route -> State -> Html Action
-page (Detail _) state = song state.io.song state.ui.songFontSize
-page (SearchResult _) state = search state
-page Home state = home state
-page NotFound _ = notFound
+page :: R.Route -> State -> Html Action
+page (R.Detail _) state = song state.io.song state.ui.songFontSize
+page (R.SearchResult _) state = search state
+page R.Home state = home state
+page R.NotFound _ = notFound
 
 --- NotFound view
 
@@ -44,8 +44,8 @@ home state =
 search :: State -> Html Action
 search state = ul [] (searchResult <$> state.io.searchResults)
 
-searchResult :: Result -> Html Action
-searchResult (Result {title, id}) =
+searchResult :: SearchResult -> Html Action
+searchResult (SearchResult {title, id}) =
     li # do
         text title
         button [ onClick (const $ IOAction $ RequestSong id) ] []

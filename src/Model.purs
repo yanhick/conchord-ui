@@ -1,6 +1,6 @@
 module Model where
 
-import Prelude
+import Prelude (pure, class Show, bind, ($))
 
 import Data.Foreign.Class (class IsForeign, readProp)
 import Data.Maybe (Maybe(Nothing, Just))
@@ -22,7 +22,7 @@ type UIState = {
 }
 
 type IOState = {
-    searchResults :: List
+    searchResults :: SearchResults
   , song :: Maybe Song
 }
 
@@ -41,16 +41,16 @@ init = {
 
 --- Search Model
 
-newtype Result = Result { id :: Int, title :: String, desc :: String }
+newtype SearchResult = SearchResult { id :: Int, title :: String, desc :: String }
 
-instance resultIsForeign :: IsForeign Result where
+instance searchResultIsForeign :: IsForeign SearchResult where
     read value = do
         id <- readProp "id" value
         title <- readProp "title" value
         desc <- readProp "desc" value
-        return $ Result { id, title, desc }
+        pure $ SearchResult { id, title, desc }
 
-type List = Array Result
+type SearchResults = Array SearchResult
 
 
 --- Song Model

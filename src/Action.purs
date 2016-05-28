@@ -17,7 +17,7 @@ import Pux.Html.Events (FormEvent)
 import Pux.Router (navigateTo)
 
 import Route (Route())
-import Model (List, State, UIState, Song, song)
+import Model (SearchResults, State, UIState, Song, song)
 
 
 data Action =
@@ -34,7 +34,7 @@ data IOAction =
     RequestSong Int |
     ReceiveSong Song |
     RequestSearch |
-    ReceiveSearch (F List)
+    ReceiveSearch (F SearchResults)
 
 type Affction = EffModel State Action (ajax :: AJAX, dom :: DOM)
 
@@ -60,7 +60,7 @@ updateIO RequestSearch state = {
   , effects: [ do
         liftEff $ navigateTo $ "/search/?q=" <> state.ui.searchQuery
         res <- fetchResults state.ui.searchQuery
-        let results = (readJSON res) :: F List
+        let results = (readJSON res) :: F SearchResults
         pure $ IOAction $ ReceiveSearch results
     ]
 }
