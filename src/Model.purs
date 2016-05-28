@@ -1,11 +1,11 @@
 module Model where
 
-import Prelude (pure, class Show, bind, ($), (<>), (<$>))
+import Prelude (pure, class Show, bind, ($), (<>), (<$>), show)
 
 import Data.Foreign.Class (class IsForeign, readProp, read)
 import Data.Foreign.Null (runNull)
-import Data.Foreign (readString, F, ForeignError(TypeMismatch))
-import Data.Either (Either(Left))
+import Data.Foreign (readString, F, ForeignError(TypeMismatch), parseJSON)
+import Data.Either (Either(Left, Right))
 import Data.Maybe (Maybe(Nothing, Just))
 
 import Route (Route(HomePage))
@@ -222,3 +222,11 @@ song = Song {
         }]
     }]
 }
+
+parseStringSong :: String
+parseStringSong = case parseJSON songString of
+                    (Left e) -> show e
+                    (Right _) -> "Yes"
+
+songString :: String
+songString = """{ "id": 1, "meta": { "title": "Tokyo vampires and wolves", "artist": "The Wombats", "album": "This modern glitch", "year": 2011 }, "content": [ { "name": "Verse", "lyrics": [ { "lyric": "We're self imploding,", "chord": "Am" } ] }] }"""
