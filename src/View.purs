@@ -43,7 +43,10 @@ header_ children =
 --- NotFound view
 
 notFoundPage :: Html Action
-notFoundPage = div [] [ text "not found" ]
+notFoundPage =
+    div # do
+        header_ Nothing
+        text "not found"
 
 --- Search Views
 
