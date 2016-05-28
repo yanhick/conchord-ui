@@ -23,38 +23,47 @@ view state = div [] [ page state.currentPage state ]
 --- App Routing
 
 page :: Route -> State -> Html Action
-page (SongPage _) state = song state.io.song state.ui.songFontSize
-page (SearchResultPage _) state = search state
-page HomePage state = home state
-page NotFoundPage _ = notFound
+page (SongPage _) state = songPage state.io.song state.ui.songFontSize
+page (SearchResultPage _) state = searchResultPage state
+page HomePage state = homePage state
+page NotFoundPage _ = notFoundPage
 
 --- NotFound view
 
-notFound :: Html Action
-notFound = div [] [ text "not found" ]
+notFoundPage :: Html Action
+notFoundPage = div [] [ text "not found" ]
 
 --- Search Views
 
-home :: State -> Html Action
-home state =
-    form ! onSubmit (const $ IOAction RequestSearch) # do
-        input [ type_ "text", value state.ui.searchQuery, onChange (\f -> UIAction (SearchChange f))] []
-        button [ type_ "submit" ] [ text "search" ]
+homePage :: State -> Html Action
+homePage state =
+    div # do
+        searchForm state
 
-search :: State -> Html Action
-search state = ul [] (searchResult <$> state.io.searchResults)
+searchResultPage :: State -> Html Action
+searchResultPage state =
+    div # do
+        searchForm state
+        ul [] (searchResult <$> state.io.searchResults)
 
 searchResult :: SearchResult -> Html Action
 searchResult (SearchResult {title, id}) =
     li # do
         text title
-        button [ onClick (const $ IOAction $ RequestSong id) ] []
+        button ! onClick (const $ IOAction $ RequestSong id) # do
+            text $ show id
+
+searchForm :: State -> Html Action
+searchForm state =
+    form ! onSubmit (const $ IOAction RequestSearch) # do
+        input [ type_ "text", value state.ui.searchQuery, onChange (\f -> UIAction (SearchChange f))] []
+        button [ type_ "submit" ] [ text "search" ]
 
 --- Song Views
 
-song :: Maybe Song -> Number -> Html Action
-song Nothing _ = div # text "No song"
-song (Just s) fontSize =
+songPage :: Maybe Song -> Number -> Html Action
+songPage Nothing _ = div # text "No song"
+songPage (Just s) fontSize =
     div # do
         header_
         songMeta s.meta
