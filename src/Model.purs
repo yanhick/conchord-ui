@@ -73,13 +73,11 @@ type Year = Int
 type SongContent = Array SongSection
 
 type SongSection = {
-    id :: Int,
     name :: SongSectionName,
     lyrics :: Array SongLyric
 }
 
 type SongLyric = {
-    id :: Int,
     text :: Maybe String,
     chord :: SongChord
 }
@@ -123,34 +121,26 @@ song = {
         year: 2011
     },
     content: [{
-        id: 1,
         name: Verse,
         lyrics: [{
-            id: 1,
             text: Just "We're self imploding,",
             chord: Am
         }, {
-            id: 2,
             text: Nothing,
             chord: C
         }, {
-            id: 3,
             text: Nothing,
             chord: Dm
         }, {
-            id: 4,
             text: Just "under",
             chord: C
         }, {
-            id: 5,
             text: Just "the weight of",
             chord: Dm
         }, {
-            id: 6,
             text: Just "your",
             chord: Em
         }, {
-            id: 7,
             text: Just "advice.",
             chord: F
         }]
