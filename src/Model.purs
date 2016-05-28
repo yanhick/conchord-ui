@@ -129,7 +129,7 @@ toChord "Dm" = pure Dm
 toChord "Em" = pure Em
 toChord "Fm" = pure Fm
 toChord "Gm" = pure Gm
-toChord s = Left $ TypeMismatch "Expected Valid Chord" ("Found " <> s)
+toChord s = Left $ TypeMismatch "Expected Valid Chord" ("Got" <> s)
 
 data SongSectionName = Intro | Chorus | Verse | Outro | Bridge
 
@@ -139,6 +139,20 @@ instance showSongSectionName :: Show SongSectionName where
     show Verse = "Verse"
     show Outro = "Outro"
     show Bridge = "Bridge"
+
+instance isForeignSongSectionName :: IsForeign SongSectionName where
+    read value = do
+        s <- readString value
+        toSongSectionName s
+
+toSongSectionName :: String -> F SongSectionName
+toSongSectionName "Intro" = pure Intro
+toSongSectionName "Chorus" = pure Chorus
+toSongSectionName "Verse" = pure Verse
+toSongSectionName "Outro" = pure Outro
+toSongSectionName "Bridge" = pure Bridge
+toSongSectionName s = Left $ TypeMismatch "Expected Valid Song Section Name" ("Got" <> s)
+
 
 --- Song Example
 
