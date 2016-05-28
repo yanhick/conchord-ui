@@ -79,8 +79,8 @@ type SongSection = {
     lyrics :: Array SongLyric
 }
 
-type SongLyric = {
-    text :: Maybe String,
+newtype SongLyric = SongLyric {
+    lyric :: Maybe String,
     chord :: SongChord
 }
 
@@ -104,15 +104,25 @@ instance showSongChord :: Show SongChord where
 
 instance isForeignSongChord :: IsForeign SongChord where
     read value = do
-        chord <- readString value
-        case chord of
-          "A" -> pure A
-          _ -> error chord
+        s <- readString value
+        toChord s
 
-        where
-
-        error :: String -> F SongChord
-        error chord = Left $ TypeMismatch "Expected Chord" ("Found " <> chord)
+toChord :: String -> F SongChord
+toChord "A" = pure A
+toChord "B" = pure B
+toChord "C" = pure C
+toChord "D" = pure D
+toChord "E" = pure E
+toChord "F" = pure F
+toChord "G" = pure G
+toChord "Am" = pure Am
+toChord "Bm" = pure Bm
+toChord "Cm" = pure Cm
+toChord "Dm" = pure Dm
+toChord "Em" = pure Em
+toChord "Fm" = pure Fm
+toChord "Gm" = pure Gm
+toChord s = Left $ TypeMismatch "Expected Valid Chord" ("Found " <> s)
 
 data SongSectionName = Intro | Chorus | Verse | Outro | Bridge
 
@@ -136,26 +146,26 @@ song = {
     },
     content: [{
         name: Verse,
-        lyrics: [{
-            text: Just "We're self imploding,",
+        lyrics: [SongLyric {
+            lyric: Just "We're self imploding,",
             chord: Am
-        }, {
-            text: Nothing,
+        }, SongLyric {
+            lyric: Nothing,
             chord: C
-        }, {
-            text: Nothing,
+        }, SongLyric {
+            lyric: Nothing,
             chord: Dm
-        }, {
-            text: Just "under",
+        }, SongLyric {
+            lyric: Just "under",
             chord: C
-        }, {
-            text: Just "the weight of",
+        }, SongLyric {
+            lyric: Just "the weight of",
             chord: Dm
-        }, {
-            text: Just "your",
+        }, SongLyric {
+            lyric: Just "your",
             chord: Em
-        }, {
-            text: Just "advice.",
+        }, SongLyric {
+            lyric: Just "advice.",
             chord: F
         }]
     }]
