@@ -64,12 +64,20 @@ type Song = {
     content :: SongContent
 }
 
-type SongMeta = {
+newtype SongMeta = SongMeta {
     title :: String,
     artist :: String,
     album :: Maybe String,
     year :: Year
 }
+
+instance isForeignSongMeta :: IsForeign SongMeta where
+    read value = do
+        title <- readProp "title" value
+        artist <- readProp "artist" value
+        album <- runNull <$> readProp "album" value
+        year <- readProp "year" value
+        pure $ SongMeta { title, artist, album, year }
 
 type Year = Int
 
@@ -165,7 +173,7 @@ toSongSectionName s = Left $ TypeMismatch "Expected Valid Song Section Name" ("G
 song :: Song
 song = {
     id: 1,
-    meta: {
+    meta: SongMeta {
         title: "Tokyo vampires and wolves",
         artist: "The Wombats",
         album: Just "This modern glitch",
