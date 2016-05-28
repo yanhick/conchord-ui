@@ -86,7 +86,12 @@ instance isForeignSongMeta :: IsForeign SongMeta where
         year <- readProp "year" value
         pure $ SongMeta { title, artist, album, year }
 
-type Year = Int
+newtype Year = Year Int
+
+instance isForeignYear :: IsForeign Year where
+    read value = do
+        y <- read value
+        pure $ Year y
 
 newtype SongContent = SongContent (Array SongSection)
 
@@ -189,7 +194,7 @@ song = Song {
         title: "Tokyo vampires and wolves",
         artist: "The Wombats",
         album: Just "This modern glitch",
-        year: 2011
+        year: Year 2011
     },
     content: SongContent [ SongSection {
         name: Verse,
