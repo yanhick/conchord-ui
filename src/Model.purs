@@ -2,7 +2,7 @@ module Model where
 
 import Prelude (pure, class Show, bind, ($), (<>), (<$>))
 
-import Data.Foreign.Class (class IsForeign, readProp)
+import Data.Foreign.Class (class IsForeign, readProp, read)
 import Data.Foreign.Null (runNull)
 import Data.Foreign (readString, F, ForeignError(TypeMismatch))
 import Data.Either (Either(Left))
@@ -58,11 +58,18 @@ type SearchResults = Array SearchResult
 
 --- Song Model
 
-type Song = {
+newtype Song = Song {
     id :: Int,
     meta :: SongMeta,
     content :: SongContent
 }
+
+instance isForeignSong :: IsForeign Song where
+    read value = do
+        id <- readProp "id" value
+        meta <- readProp "meta" value
+        content <- readProp "content" value
+        pure $ Song { id, meta, content }
 
 newtype SongMeta = SongMeta {
     title :: String,
@@ -82,6 +89,11 @@ instance isForeignSongMeta :: IsForeign SongMeta where
 type Year = Int
 
 newtype SongContent = SongContent (Array SongSection)
+
+instance isForeignSongContent :: IsForeign SongContent where
+    read value = do
+        c <- read value
+        pure $ SongContent c
 
 newtype SongSection = SongSection {
     name :: SongSectionName,
@@ -171,7 +183,7 @@ toSongSectionName s = Left $ TypeMismatch "Expected Valid Song Section Name" ("G
 --- Song Example
 
 song :: Song
-song = {
+song = Song {
     id: 1,
     meta: SongMeta {
         title: "Tokyo vampires and wolves",

@@ -12,7 +12,7 @@ import Pux.Router (link)
 import Pux.Html.Events (onClick, onSubmit, onChange)
 import Pux.Html.Attributes (type_, value)
 
-import Model (State, Song, SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(SongLyric), SearchResult(SearchResult))
+import Model (State, Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(SongLyric), SearchResult(SearchResult))
 import Action (Action(UIAction, IOAction), IOAction(RequestSearch, RequestSong), UIAction(Increment, Decrement, SearchChange))
 import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage))
 
@@ -80,7 +80,7 @@ searchForm state =
 
 songPage :: Maybe Song -> Number -> Html Action
 songPage Nothing _ = div # text "No song"
-songPage (Just s) fontSize =
+songPage (Just (Song s)) fontSize =
     div # do
         header_ $ Just songTextSize
         songMeta s.meta
