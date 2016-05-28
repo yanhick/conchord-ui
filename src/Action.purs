@@ -82,14 +82,14 @@ updateIO (ReceiveSong s) state = noEffects $ state { io = state.io { song = Just
 
 fetchResults :: forall eff. String -> Aff (ajax :: AJAX | eff) String
 fetchResults q = do
-    result <- get $ "http://localhost:8080/results?q=" <> q
+    result <- get $ "/results?q=" <> q
     pure case result.status of
              (StatusCode 200) -> result.response
              _ -> "fail"
 
 fetchDetails :: forall eff. Int -> Aff (ajax :: AJAX | eff) String
 fetchDetails id = do
-    result <- get $ "http://localhost:8080/details/" <> show id
+    result <- get $ "/details/" <> show id
     pure case result.status of
              (StatusCode 200) -> result.response
              _ -> "fail"
