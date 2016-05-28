@@ -1,8 +1,10 @@
 module Model where
 
-import Prelude (pure, class Show, bind, ($))
+import Prelude (pure, class Show, bind, ($), (<>))
 
 import Data.Foreign.Class (class IsForeign, readProp)
+import Data.Foreign (readString, F, ForeignError(TypeMismatch))
+import Data.Either (Either(Left))
 import Data.Maybe (Maybe(Nothing, Just))
 
 import Route (Route(HomePage))
@@ -43,7 +45,7 @@ init = {
 
 newtype SearchResult = SearchResult { id :: Int, title :: String, desc :: String }
 
-instance searchResultIsForeign :: IsForeign SearchResult where
+instance isForeignSearchResult :: IsForeign SearchResult where
     read value = do
         id <- readProp "id" value
         title <- readProp "title" value
@@ -99,6 +101,18 @@ instance showSongChord :: Show SongChord where
     show Em = "Em"
     show Fm = "Fm"
     show Gm = "Gm"
+
+instance isForeignSongChord :: IsForeign SongChord where
+    read value = do
+        chord <- readString value
+        case chord of
+          "A" -> pure A
+          _ -> error chord
+
+        where
+
+        error :: String -> F SongChord
+        error chord = Left $ TypeMismatch "Expected Chord" ("Found " <> chord)
 
 data SongSectionName = Intro | Chorus | Verse | Outro | Bridge
 
