@@ -1,8 +1,9 @@
 module Model where
 
-import Prelude (pure, class Show, bind, ($), (<>))
+import Prelude (pure, class Show, bind, ($), (<>), (<$>))
 
 import Data.Foreign.Class (class IsForeign, readProp)
+import Data.Foreign.Null (runNull)
 import Data.Foreign (readString, F, ForeignError(TypeMismatch))
 import Data.Either (Either(Left))
 import Data.Maybe (Maybe(Nothing, Just))
@@ -83,6 +84,12 @@ newtype SongLyric = SongLyric {
     lyric :: Maybe String,
     chord :: SongChord
 }
+
+instance isForeignSongLyric :: IsForeign SongLyric where
+    read value = do
+        lyric <- runNull <$> readProp "lyric" value
+        chord <- readProp "chord" value
+        pure $ SongLyric {lyric, chord}
 
 data SongChord = A | B | C | D | E | F | G | Am | Bm | Cm | Dm | Em | Fm | Gm
 
