@@ -33,12 +33,12 @@ page NotFoundPage _ = notFoundPage
 type ToolBar = Html Action
 
 header_:: (Maybe ToolBar) -> Html Action
-header_ children =
+header_ toolbar =
     header # do
         nav # do
             link "/" #
                 text "Home"
-            fromMaybe (text "") children
+            fromMaybe (text "") toolbar
 
 --- NotFound view
 
