@@ -13,7 +13,7 @@ import Pux.Router (sampleUrl)
 import Signal ((~>))
 import Action (Action(PageView))
 import Route (match)
-import Model (init)
+import App (init)
 import Action (update)
 import View (view)
 

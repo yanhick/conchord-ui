@@ -12,9 +12,10 @@ import Pux.Router (link)
 import Pux.Html.Events (onClick, onSubmit, onChange)
 import Pux.Html.Attributes (type_, value)
 
-import Model (State, Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(SongLyric), SearchResult(SearchResult))
+import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(SongLyric), SearchResult(SearchResult))
 import Action (Action(UIAction, IOAction), IOAction(RequestSearch, RequestSong), UIAction(Increment, Decrement, SearchChange))
 import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage))
+import App (State)
 
 
 view :: State -> Html Action

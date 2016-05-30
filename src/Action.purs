@@ -17,7 +17,8 @@ import Pux.Html.Events (FormEvent)
 import Pux.Router (navigateTo)
 
 import Route (Route())
-import Model (SearchResults, State, UIState, Song, songJSON)
+import Model (SearchResults, Song, songJSON)
+import App (State, UIState)
 
 
 data Action =

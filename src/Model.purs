@@ -8,40 +8,6 @@ import Data.Foreign (readString, F, ForeignError(TypeMismatch), parseJSON)
 import Data.Either (Either(Left, Right))
 import Data.Maybe (Maybe(Nothing, Just))
 
-import Route (Route(HomePage))
-
-
---- App State
-
-type State = {
-    currentPage :: Route
-  , ui :: UIState
-  , io :: IOState
-}
-
-type UIState = {
-    songFontSize :: Number
-  , searchQuery :: String
-}
-
-type IOState = {
-    searchResults :: SearchResults
-  , song :: Maybe Song
-}
-
-init :: State
-init = {
-    currentPage: HomePage
-  , ui: {
-      songFontSize: 12.0
-    , searchQuery: ""
-  }
-  , io: {
-      searchResults: []
-    , song: Nothing
-  }
-}
-
 --- Search Model
 
 newtype SearchResult = SearchResult { id :: Int, title :: String, desc :: String }
