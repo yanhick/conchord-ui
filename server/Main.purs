@@ -14,18 +14,19 @@ import Node.Express.Request (getRouteParam, getQueryParam)
 import Node.Express.Response (send, sendJson, sendFile, setStatus)
 import Node.HTTP (Server())
 
+import Model (SearchResults, SearchResult(SearchResult))
+
 main :: forall eff. Eff (console :: CONSOLE, express :: EXPRESS | eff) Server
 main = do
     listenHttp appSetup 8080 \_ ->
         log $ "listening on " <> show 8080
 
 type Detail = { id :: Int, title :: String, desc :: String }
-type Results = Array Detail
 
-getSearchResults :: String -> Results
+getSearchResults :: String -> SearchResults
 getSearchResults q = [
-        {id: 0, title: q, desc: "this is the first result for: " <> q },
-        {id: 1, title: q, desc: "this is the second result for: " <> q }
+        SearchResult {id: 0, title: q, desc: "this is the first result for: " <> q },
+        SearchResult {id: 1, title: q, desc: "this is the second result for: " <> q }
     ]
 
 getSong :: Int -> Detail
