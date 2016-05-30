@@ -223,10 +223,5 @@ song = Song {
     }]
 }
 
-parseStringSong :: String
-parseStringSong = case parseJSON songString of
-                    (Left e) -> show e
-                    (Right _) -> "Yes"
-
-songString :: String
-songString = """{ "id": 1, "meta": { "title": "Tokyo vampires and wolves", "artist": "The Wombats", "album": "This modern glitch", "year": 2011 }, "content": [ { "name": "Verse", "lyrics": [ { "lyric": "We're self imploding,", "chord": "Am" } ] }] }"""
+songJSON :: String
+songJSON = """{ "id": 1, "meta": { "title": "Tokyo vampires and wolves", "artist": "The Wombats", "album": "This modern glitch", "year": 2011 }, "content": [ { "name": "Verse", "lyrics": [ { "lyric": "We're self imploding,", "chord": "Am" } ] }] }"""
