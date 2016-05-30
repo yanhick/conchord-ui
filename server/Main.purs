@@ -22,20 +22,20 @@ main = do
 type Detail = { id :: Int, title :: String, desc :: String }
 type Results = Array Detail
 
-getResults :: String -> Results
-getResults q = [
+getSearchResults :: String -> Results
+getSearchResults q = [
         {id: 0, title: q, desc: "this is the first result for: " <> q },
         {id: 1, title: q, desc: "this is the second result for: " <> q }
     ]
 
-getDetails :: Int -> Detail
-getDetails id = { id: id, title: "", desc: "detail for:" <> show id }
+getSong :: Int -> Detail
+getSong id = { id: id, title: "", desc: "detail for:" <> show id }
 
 appSetup :: forall e. App (console :: CONSOLE | e)
 appSetup = do
     liftEff $ log "Setting up"
-    get "/results"     resultsHandler
-    get "/details/:id" detailsHandler
+    get "/search"     searchHandler
+    get "/song/:id" songHandler
     get "/:file"       fileHandler
     get "/"            fileHandler
     useOnError         errorHandler
@@ -45,18 +45,18 @@ fileHandler = do
     fileName <- getRouteParam "file"
     sendFile $ maybe "index.html" id fileName
 
-resultsHandler :: forall e. Handler e
-resultsHandler = do
+searchHandler :: forall e. Handler e
+searchHandler = do
     qParam <- getQueryParam "q"
-    send $ getResults (fromMaybe "" qParam)
+    send $ getSearchResults (fromMaybe "" qParam)
 
-detailsHandler :: forall e. Handler e
-detailsHandler = do
+songHandler :: forall e. Handler e
+songHandler = do
     idParam <- getRouteParam "id"
     case idParam of
       Nothing -> nextThrow $ error "Id is required"
       Just id -> do
-        sendJson $ getDetails $ fromMaybe 0 (fromString id)
+        sendJson $ getSong $ fromMaybe 0 (fromString id)
 
 errorHandler :: forall e. Error -> Handler e
 errorHandler err = do

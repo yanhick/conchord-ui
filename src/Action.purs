@@ -59,7 +59,7 @@ updateIO RequestSearch state = {
     state: state { io = state.io { searchResults = [] } }
   , effects: [ do
         liftEff $ navigateTo $ "/search/?q=" <> state.ui.searchQuery
-        res <- fetchResults state.ui.searchQuery
+        res <- fetchSearch state.ui.searchQuery
         let results = (readJSON res) :: F SearchResults
         pure $ IOAction $ ReceiveSearch results
     ]
@@ -82,16 +82,16 @@ updateIO (ReceiveSong (Right s)) state = noEffects $ state { io = state.io { son
 
 --- AJAX Requests
 
-fetchResults :: forall eff. String -> Aff (ajax :: AJAX | eff) String
-fetchResults q = do
-    result <- get $ "/results?q=" <> q
+fetchSearch :: forall eff. String -> Aff (ajax :: AJAX | eff) String
+fetchSearch q = do
+    result <- get $ "/search?q=" <> q
     pure case result.status of
              (StatusCode 200) -> result.response
              _ -> "fail"
 
-fetchDetails :: forall eff. Int -> Aff (ajax :: AJAX | eff) String
-fetchDetails id = do
-    result <- get $ "/details/" <> show id
+fetchSong :: forall eff. Int -> Aff (ajax :: AJAX | eff) String
+fetchSong id = do
+    result <- get $ "/song/" <> show id
     pure case result.status of
              (StatusCode 200) -> result.response
              _ -> "fail"
