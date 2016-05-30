@@ -1,11 +1,11 @@
 module Model where
 
-import Prelude (pure, class Show, bind, ($), (<>), (<$>), show)
+import Prelude (pure, class Show, bind, ($), (<>), (<$>))
 
 import Data.Foreign.Class (class IsForeign, readProp, read)
 import Data.Foreign.Null (runNull)
-import Data.Foreign (readString, F, ForeignError(TypeMismatch), parseJSON)
-import Data.Either (Either(Left, Right))
+import Data.Foreign (readString, F, ForeignError(TypeMismatch))
+import Data.Either (Either(Left))
 import Data.Maybe (Maybe(Nothing, Just))
 
 --- Search Model
