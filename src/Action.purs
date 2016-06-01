@@ -17,7 +17,7 @@ import Pux.Html.Events (FormEvent)
 import Pux.Router (navigateTo)
 
 import Route (Route())
-import Model (SearchResults, Song, songJSON)
+import Model (SearchResults, Song, song)
 import App (State, UIState)
 
 
@@ -70,16 +70,16 @@ updateIO (ReceiveSearch (Right r)) state = noEffects $ state { io = state.io { s
 updateIO (ReceiveSearch (Left _)) state = noEffects state
 
 updateIO (RequestSong id) state = {
-    state: state { io = state.io { song = Nothing } }
+    state: state { io = state.io { song = pure song } }
   , effects: [ do
         liftEff $ navigateTo $ "/detail/" <> show id
-        let song = (readJSON songJSON) :: F Song
+        res <- fetchSong id
+        let song = (readJSON res) :: F Song
         pure $ IOAction $ ReceiveSong song
     ]
 }
 
-updateIO (ReceiveSong (Left _)) state = noEffects $ state { io = state.io { song = Nothing } }
-updateIO (ReceiveSong (Right s)) state = noEffects $ state { io = state.io { song = Just s} }
+updateIO (ReceiveSong s) state = noEffects $ state { io = state.io { song = s } }
 
 --- AJAX Requests
 

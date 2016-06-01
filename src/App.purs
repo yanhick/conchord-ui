@@ -1,8 +1,11 @@
 module App where
 
-import Data.Maybe (Maybe(Nothing))
+import Prelude (pure)
 
-import Model (SearchResults, Song)
+import Data.Maybe (Maybe(Nothing))
+import Data.Foreign (F)
+
+import Model (SearchResults, Song, song)
 import Route (Route(HomePage))
 
 
@@ -21,7 +24,7 @@ type UIState = {
 
 type IOState = {
     searchResults :: SearchResults
-  , song :: Maybe Song
+  , song :: F Song
 }
 
 init :: State
@@ -33,7 +36,7 @@ init = {
   }
   , io: {
       searchResults: []
-    , song: Nothing
+    , song: pure song
   }
 }
 

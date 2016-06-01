@@ -1,6 +1,6 @@
 module Model where
 
-import Prelude (pure, class Show, bind, ($), (<>), (<$>))
+import Prelude (pure, class Show, bind, ($), (<$>))
 
 import Data.Foreign.Class (class IsForeign, readProp, read)
 import Data.Foreign.Null (runNull)
@@ -44,6 +44,8 @@ newtype SongMeta = SongMeta {
     year :: Year
 }
 
+newtype Album = Album (Maybe String)
+
 instance isForeignSongMeta :: IsForeign SongMeta where
     read value = do
         title <- readProp "title" value
@@ -79,16 +81,16 @@ instance isForeignSongSection :: IsForeign SongSection where
 
 newtype SongLyric = SongLyric {
     lyric :: Maybe String,
-    chord :: SongChord
+    chord :: Maybe SongChord
 }
 
 instance isForeignSongLyric :: IsForeign SongLyric where
     read value = do
         lyric <- runNull <$> readProp "lyric" value
-        chord <- readProp "chord" value
+        chord <- runNull <$> readProp "chord" value
         pure $ SongLyric { lyric, chord }
 
-data SongChord = A | B | C | D | E | F | G | Am | Bm | Cm | Dm | Em | Fm | Gm
+data SongChord = A | B | C | D | E | F | G | Am | Bm | Cm | Dm | Em | Fm | Gm | Am7 | G7
 
 instance showSongChord :: Show SongChord where
     show A = "A"
@@ -105,6 +107,8 @@ instance showSongChord :: Show SongChord where
     show Em = "Em"
     show Fm = "Fm"
     show Gm = "Gm"
+    show Am7 = "Am7"
+    show G7 = "G7"
 
 instance isForeignSongChord :: IsForeign SongChord where
     read value = do
@@ -126,7 +130,9 @@ toChord "Dm" = pure Dm
 toChord "Em" = pure Em
 toChord "Fm" = pure Fm
 toChord "Gm" = pure Gm
-toChord s = Left $ TypeMismatch "Expected Valid Chord" ("Got" <> s)
+toChord "Am7" = pure Am7
+toChord "G7" = pure G7
+toChord s = Left $ TypeMismatch "Valid Chord" s
 
 data SongSectionName = Intro | Chorus | Verse | Outro | Bridge
 
@@ -148,7 +154,7 @@ toSongSectionName "Chorus" = pure Chorus
 toSongSectionName "Verse" = pure Verse
 toSongSectionName "Outro" = pure Outro
 toSongSectionName "Bridge" = pure Bridge
-toSongSectionName s = Left $ TypeMismatch "Expected Valid Song Section Name" ("Got" <> s)
+toSongSectionName s = Left $ TypeMismatch "Valid Song Section Name" s
 
 
 --- Song Example
@@ -166,25 +172,25 @@ song = Song {
         name: Verse,
         lyrics: [ SongLyric {
             lyric: Just "We're self imploding,",
-            chord: Am
+            chord: Just Am
         }, SongLyric {
             lyric: Nothing,
-            chord: C
+            chord: Just C
         }, SongLyric {
             lyric: Nothing,
-            chord: Dm
+            chord: Just Dm
         }, SongLyric {
             lyric: Just "under",
-            chord: C
+            chord: Just C
         }, SongLyric {
             lyric: Just "the weight of",
-            chord: Dm
+            chord: Just Dm
         }, SongLyric {
             lyric: Just "your",
-            chord: Em
+            chord: Just Em
         }, SongLyric {
             lyric: Just "advice.",
-            chord: F
+            chord: Just F
         }]
     }]
 }

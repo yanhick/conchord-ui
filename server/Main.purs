@@ -1,7 +1,6 @@
 module Main where
 
 import Prelude
-import Data.Int (fromString)
 import Data.Maybe (maybe, fromMaybe, Maybe(..))
 import Control.Monad.Eff.Console (log, CONSOLE)
 import Control.Monad.Eff (Eff())
@@ -14,7 +13,7 @@ import Node.Express.Request (getRouteParam, getQueryParam)
 import Node.Express.Response (send, sendJson, sendFile, setStatus)
 import Node.HTTP (Server())
 
-import Model (SearchResults, SearchResult(SearchResult), Song, song)
+import Model (SearchResults, SearchResult(SearchResult))
 
 main :: forall eff. Eff (console :: CONSOLE, express :: EXPRESS | eff) Server
 main = do
@@ -26,9 +25,6 @@ getSearchResults q = [
         SearchResult {id: 0, title: q, desc: "this is the first result for: " <> q },
         SearchResult {id: 1, title: q, desc: "this is the second result for: " <> q }
     ]
-
-getSong :: Int -> Song
-getSong id = song
 
 appSetup :: forall e. App (console :: CONSOLE | e)
 appSetup = do
@@ -55,7 +51,7 @@ songHandler = do
     case idParam of
       Nothing -> nextThrow $ error "Id is required"
       Just id -> do
-        sendJson $ getSong $ fromMaybe 0 (fromString id)
+        sendFile "song.json"
 
 errorHandler :: forall e. Error -> Handler e
 errorHandler err = do

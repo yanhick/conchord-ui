@@ -1,0 +1,403 @@
+{
+    "id": 1,
+    "meta": {
+        "title": "Tokyo vampires and wolves",
+        "artist": "The Wombats",
+        "album": "This modern glitch",
+        "year": 2011
+    },
+    "content": [{
+        "name": "Intro",
+        "lyrics": [{
+            "chord": "Am",
+            "lyric": ""
+        }, {
+            "chord": "C",
+            "lyric": ""
+        }, {
+            "chord": "Dm",
+            "lyric": ""
+        }, {
+            "chord": "Dm",
+            "lyric": ""
+        }, {
+            "chord": "Em",
+            "lyric": ""
+        }, {
+            "chord": "F",
+            "lyric": ""
+        }, {
+            "chord": "G",
+            "lyric": ""
+        }]
+    }, {
+        "name": "Verse",
+        "lyrics": [{
+            "chord": "Am",
+            "lyric": "We're self imploding,"
+        }, {
+            "chord": "C",
+            "lyric": ""
+        }, {
+            "chord": "Dm",
+            "lyric": ""
+        }, {
+            "chord": "C",
+            "lyric": "under"
+        }, {
+            "chord": "Dm",
+            "lyric": "the weight of"
+        }, {
+            "chord": "Em",
+            "lyric": "your"
+        }, {
+            "chord": "F",
+            "lyric": "advice."
+        }, {
+            "chord": "G",
+            "lyric": ""
+        }, {
+            "chord": "Am",
+            "lyric": "I wear a suitcase,"
+        }, {
+            "chord": "C",
+            "lyric": ""
+        }, {
+            "chord": "Dm",
+            "lyric": ""
+        }, {
+            "chord": "C",
+            "lyric": "under"
+        }, {
+            "chord": "Dm",
+            "lyric": "each one of"
+        }, {
+            "chord": "Em",
+            "lyric": "my"
+        }, {
+            "chord": "F",
+            "lyric": "eyes."
+        }, {
+            "chord": "G",
+            "lyric": ""
+        }, {
+            "chord": "Am",
+            "lyric": "Fi\u00ad"
+        }, {
+            "chord": "C",
+            "lyric": "nally,"
+        }, {
+            "chord": "Dm",
+            "lyric": ""
+        }, {
+            "chord": "C",
+            "lyric": ""
+        }, {
+            "chord": "Dm",
+            "lyric": "I know now"
+        }, {
+            "chord": "Em",
+            "lyric": "what"
+        }, {
+            "chord": "F",
+            "lyric": "it takes. It"
+        }, {
+            "chord": "G",
+            "lyric": "takes"
+        }, {
+            "chord": "Am",
+            "lyric": "mo\u00ad"
+        }, {
+            "chord": "C",
+            "lyric": "ney"
+        }, {
+            "chord": "Dm",
+            "lyric": "and air\u00ad"
+        }, {
+            "chord": "G",
+            "lyric": "planes."
+        }]
+    }, {
+        "name": "Chorus",
+            "lyrics": [{
+            "chord": null,
+            "lyric": "If you"
+        }, {
+            "chord": "Dm",
+            "lyric": "love me let me"
+        }, {
+            "chord": "Am7",
+            "lyric": "go, back to that bar in Tokyo where the"
+        }, {
+            "chord": "G",
+            "lyric": "demons from my"
+        }, {
+            "chord": "Am",
+            "lyric": "past leave me in"
+        }, {
+            "chord": "F",
+            "lyric": "peace. I'll be ani\u00ad"
+        }, {
+            "chord": "Dm",
+            "lyric": "mating every"
+        }, {
+            "chord": "Am7",
+            "lyric": "night, the grass will be"
+        }, {
+            "chord": "F",
+            "lyric": "greener on the other side and the"
+        }, {
+            "chord": "G",
+            "lyric": "vampires and"
+        }, {
+            "chord": "Am",
+            "lyric": "wolves won't sink their"
+        }, {
+            "chord": "F",
+            "lyric": "teeth. I'm sick of"
+        }, {
+            "chord": "F",
+            "lyric": "dancing with the beast."
+        }]
+    }, {
+        "name": "Intro",
+        "lyrics": [{
+            "chord": "Am",
+            "lyric": ""
+        }, {
+            "chord": "C",
+            "lyric": ""
+        }, {
+            "chord": "Dm",
+            "lyric": ""
+        }, {
+            "chord": "Dm",
+            "lyric": ""
+        }, {
+            "chord": "Em",
+            "lyric": ""
+        }, {
+            "chord": "F",
+            "lyric": ""
+        }, {
+            "chord": "G",
+            "lyric": ""
+        }]
+    }, {
+        "name": "Verse",
+        "lyrics": [{
+            "chord": "Am",
+            "lyric": "Astrophysics,"
+        }, {
+            "chord": "C",
+            "lyric": ""
+        }, {
+            "chord": "Dm",
+            "lyric": ""
+        }, {
+            "chord": "C",
+            "lyric": "you'll"
+        }, {
+            "chord": "Dm",
+            "lyric": "never be my"
+        }, {
+            "chord": "Em",
+            "lyric": "closest"
+        }, {
+            "chord": "F",
+            "lyric": "friend."
+        }, {
+            "chord": "G",
+            "lyric": ""
+        }, {
+            "chord": "Am",
+            "lyric": "I find no comfort"
+        }, {
+            "chord": "C",
+            "lyric": ""
+        }, {
+            "chord": "Dm",
+            "lyric": ""
+        }, {
+            "chord": "C",
+            "lyric": "in"
+        }, {
+            "chord": "Dm",
+            "lyric": "what my mind"
+        }, {
+            "chord": "Em",
+            "lyric": "can't"
+        }, {
+            "chord": "F",
+            "lyric": "comprehend."
+        }, {
+            "chord": "G",
+            "lyric": ""
+        }, {
+            "chord": "Am",
+            "lyric": "Fin\u00ad"
+        }, {
+            "chord": "C",
+            "lyric": "ally,"
+        }, {
+            "chord": "Dm",
+            "lyric": ""
+        }, {
+            "chord": "C",
+            "lyric": ""
+        }, {
+            "chord": "Dm",
+            "lyric": "I know now"
+        }, {
+            "chord": "Em",
+            "lyric": "what"
+        }, {
+            "chord": "F",
+            "lyric": "it takes. It"
+        }, {
+            "chord": "G",
+            "lyric": "takes"
+        }, {
+            "chord": "Am",
+            "lyric": "mo\u00ad"
+        }, {
+            "chord": "C",
+            "lyric": "ney"
+        }, {
+            "chord": "Dm",
+            "lyric": "and air\u00ad"
+        }, {
+            "chord": "G",
+            "lyric": "planes."
+        }]
+    }, {
+        "name": "Chorus",
+            "lyrics": [{
+            "chord": null,
+            "lyric": "If you"
+        }, {
+            "chord": "Dm",
+            "lyric": "love me let me"
+        }, {
+            "chord": "Am7",
+            "lyric": "go, back to that bar in Tokyo where the"
+        }, {
+            "chord": "G",
+            "lyric": "demons from my"
+        }, {
+            "chord": "Am",
+            "lyric": "past leave me in"
+        }, {
+            "chord": "F",
+            "lyric": "peace. I'll be ani\u00ad"
+        }, {
+            "chord": "Dm",
+            "lyric": "mating every"
+        }, {
+            "chord": "Am7",
+            "lyric": "night, the grass will be"
+        }, {
+            "chord": "F",
+            "lyric": "greener on the other side and the"
+        }, {
+            "chord": "G",
+            "lyric": "vampires and"
+        }, {
+            "chord": "Am",
+            "lyric": "wolves won't sink their"
+        }, {
+            "chord": "F",
+            "lyric": "teeth. I'm sick of"
+        }, {
+            "chord": "F",
+            "lyric": "dancing with the beast."
+        }]
+    }, {
+        "name": "Bridge",
+        "lyrics": [{
+            "chord": null,
+            "lyric": "No matter"
+        }, {
+            "chord": "Am",
+            "lyric": "how much it"
+        }, {
+            "chord": "C",
+            "lyric": "needs"
+        }, {
+            "chord": "F",
+            "lyric": "me. Go And follow"
+        }, {
+            "chord": "Dm",
+            "lyric": "someone else's"
+        }, {
+            "chord": "G7",
+            "lyric": "lead"
+        }]
+    }, {
+        "name": "Chorus",
+            "lyrics": [{
+            "chord": null,
+            "lyric": "If you"
+        }, {
+            "chord": "Dm",
+            "lyric": "love me let me"
+        }, {
+            "chord": "Am7",
+            "lyric": "go, back to that bar in Tokyo where the"
+        }, {
+            "chord": "G",
+            "lyric": "demons from my"
+        }, {
+            "chord": "Am",
+            "lyric": "past leave me in"
+        }, {
+            "chord": "F",
+            "lyric": "peace. I'll be ani\u00ad"
+        }, {
+            "chord": "Dm",
+            "lyric": "mating every"
+        }, {
+            "chord": "Am7",
+            "lyric": "night, the grass will be"
+        }, {
+            "chord": "F",
+            "lyric": "greener on the other side and the"
+        }, {
+            "chord": "G",
+            "lyric": "vampires and"
+        }, {
+            "chord": "Am",
+            "lyric": "wolves won't sink their"
+        }, {
+            "chord": "F",
+            "lyric": "teeth. I'm sick of"
+        }, {
+            "chord": "F",
+            "lyric": "dancing with the beast"
+        }]
+    }, {
+        "name": "Outro",
+        "lyrics": [{
+            "chord": "Am",
+            "lyric": ""
+        }, {
+            "chord": "C",
+            "lyric": ""
+        }, {
+            "chord": "Dm",
+            "lyric": ""
+        }, {
+            "chord": "Dm",
+            "lyric": ""
+        }, {
+            "chord": "Em",
+            "lyric": ""
+        }, {
+            "chord": "F",
+            "lyric": ""
+        }, {
+            "chord": "G",
+            "lyric": ""
+        }]
+    }]
+}

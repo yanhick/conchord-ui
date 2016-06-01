@@ -3,6 +3,8 @@ module View where
 import Prelude (($), (<$>), show, const)
 
 import Data.Maybe (Maybe(Nothing, Just), maybe, fromMaybe)
+import Data.Foreign (F)
+import Data.Either (Either(Left, Right))
 
 import Pux.Html (Html, section, div, p, text, header, article
                 , h1, h2, h3, span, b, nav, li, button, ul, form
@@ -79,9 +81,9 @@ searchForm state =
 
 --- Song Views
 
-songPage :: Maybe Song -> Number -> Html Action
-songPage Nothing _ = div # text "No song"
-songPage (Just (Song s)) fontSize =
+songPage :: F Song -> Number -> Html Action
+songPage (Left e) _ = div # text (show e)
+songPage (Right (Song s)) fontSize =
     div # do
         header_ $ Just songTextSize
         songMeta s.meta
