@@ -1,6 +1,5 @@
 module App where
 
-import Data.Maybe (Maybe(Nothing))
 import Data.Foreign (F)
 
 import Model (SearchResults, Song)
