@@ -109,7 +109,7 @@ songSection (SongSection {name, lyrics}) =
 songLyric :: SongLyric -> Html Action
 songLyric (SongLyric {lyric, chord}) =
     span # do
-        b # text (show chord)
+        b # text (maybe "" show chord)
         text $ fromMaybe "" lyric
 
 songTextSize :: Html Action
