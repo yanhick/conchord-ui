@@ -1,11 +1,9 @@
 module App where
 
-import Prelude (pure)
-
 import Data.Maybe (Maybe(Nothing))
 import Data.Foreign (F)
 
-import Model (SearchResults, Song, song)
+import Model (SearchResults, Song)
 import Route (Route(HomePage))
 
 

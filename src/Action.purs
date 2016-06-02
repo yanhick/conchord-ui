@@ -2,7 +2,6 @@ module Action where
 
 import Prelude (($), bind, (<>), pure, show, (+), (-))
 
-import Data.Maybe (Maybe(Nothing, Just))
 import Data.Either (Either(Right, Left))
 import Data.Foreign (F)
 import Data.Foreign.Class (readJSON)
@@ -17,7 +16,7 @@ import Pux.Html.Events (FormEvent)
 import Pux.Router (navigateTo)
 
 import Route (Route())
-import Model (SearchResults, Song, song)
+import Model (SearchResults, Song)
 import App (State, UIState, SongState(Loading, Loaded))
 
 
