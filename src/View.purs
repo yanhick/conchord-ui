@@ -3,7 +3,6 @@ module View where
 import Prelude (($), (<$>), show, const)
 
 import Data.Maybe (Maybe(Nothing, Just), maybe, fromMaybe)
-import Data.Foreign (F)
 import Data.Either (Either(Left, Right))
 
 import Pux.Html (Html, section, div, p, text, header, article
@@ -17,7 +16,7 @@ import Pux.Html.Attributes (type_, value)
 import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(SongLyric), SearchResult(SearchResult))
 import Action (Action(UIAction, IOAction), IOAction(RequestSearch, RequestSong), UIAction(Increment, Decrement, SearchChange))
 import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage))
-import App (State)
+import App (State, SongState(Loading, Loaded, Empty))
 
 
 view :: State -> Html Action
@@ -81,10 +80,11 @@ searchForm state =
 
 --- Song Views
 
-songPage :: Maybe (F Song) -> Number -> Html Action
-songPage Nothing _ = div # text "No Song"
-songPage (Just (Left e)) _ = div # text (show e)
-songPage (Just (Right (Song s))) fontSize =
+songPage :: SongState -> Number -> Html Action
+songPage Empty _ = div # text ""
+songPage Loading _ = div # text "Loading Song"
+songPage (Loaded (Left e)) _ = div # text (show e)
+songPage (Loaded (Right (Song s))) fontSize =
     div # do
         header_ $ Just songTextSize
         songMeta s.meta

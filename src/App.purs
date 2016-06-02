@@ -22,9 +22,11 @@ type UIState = {
   , searchQuery :: String
 }
 
+data SongState = Loaded (F Song) | Loading | Empty
+
 type IOState = {
     searchResults :: SearchResults
-  , song :: Maybe (F Song)
+  , song :: SongState
 }
 
 init :: State
@@ -36,7 +38,7 @@ init = {
   }
   , io: {
       searchResults: []
-    , song: Nothing
+    , song: Empty
   }
 }
 

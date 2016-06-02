@@ -18,7 +18,7 @@ import Pux.Router (navigateTo)
 
 import Route (Route())
 import Model (SearchResults, Song, song)
-import App (State, UIState)
+import App (State, UIState, SongState(Loading, Loaded))
 
 
 data Action =
@@ -70,7 +70,7 @@ updateIO (ReceiveSearch (Right r)) state = noEffects $ state { io = state.io { s
 updateIO (ReceiveSearch (Left _)) state = noEffects state
 
 updateIO (RequestSong id) state = {
-    state: state { io = state.io { song = Nothing } }
+    state: state { io = state.io { song = Loading } }
   , effects: [ do
         liftEff $ navigateTo $ "/song/" <> show id
         res <- fetchSong id
@@ -79,7 +79,7 @@ updateIO (RequestSong id) state = {
     ]
 }
 
-updateIO (ReceiveSong s) state = noEffects $ state { io = state.io { song = pure s } }
+updateIO (ReceiveSong s) state = noEffects $ state { io = state.io { song = Loaded s } }
 
 --- AJAX Requests
 
