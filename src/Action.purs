@@ -70,7 +70,7 @@ updateIO (ReceiveSearch (Right r)) state = noEffects $ state { io = state.io { s
 updateIO (ReceiveSearch (Left _)) state = noEffects state
 
 updateIO (RequestSong id) state = {
-    state: state { io = state.io { song = pure song } }
+    state: state { io = state.io { song = Nothing } }
   , effects: [ do
         liftEff $ navigateTo $ "/detail/" <> show id
         res <- fetchSong id
@@ -79,7 +79,7 @@ updateIO (RequestSong id) state = {
     ]
 }
 
-updateIO (ReceiveSong s) state = noEffects $ state { io = state.io { song = s } }
+updateIO (ReceiveSong s) state = noEffects $ state { io = state.io { song = pure s } }
 
 --- AJAX Requests
 

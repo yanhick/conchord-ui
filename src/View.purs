@@ -81,9 +81,10 @@ searchForm state =
 
 --- Song Views
 
-songPage :: F Song -> Number -> Html Action
-songPage (Left e) _ = div # text (show e)
-songPage (Right (Song s)) fontSize =
+songPage :: Maybe (F Song) -> Number -> Html Action
+songPage Nothing _ = div # text "No Song"
+songPage (Just (Left e)) _ = div # text (show e)
+songPage (Just (Right (Song s))) fontSize =
     div # do
         header_ $ Just songTextSize
         songMeta s.meta

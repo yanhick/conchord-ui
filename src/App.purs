@@ -24,7 +24,7 @@ type UIState = {
 
 type IOState = {
     searchResults :: SearchResults
-  , song :: F Song
+  , song :: Maybe (F Song)
 }
 
 init :: State
@@ -36,7 +36,7 @@ init = {
   }
   , io: {
       searchResults: []
-    , song: pure song
+    , song: Nothing
   }
 }
 
