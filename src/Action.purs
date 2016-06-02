@@ -72,7 +72,7 @@ updateIO (ReceiveSearch (Left _)) state = noEffects state
 updateIO (RequestSong id) state = {
     state: state { io = state.io { song = Nothing } }
   , effects: [ do
-        liftEff $ navigateTo $ "/detail/" <> show id
+        liftEff $ navigateTo $ "/song/" <> show id
         res <- fetchSong id
         let song = (readJSON res) :: F Song
         pure $ IOAction $ ReceiveSong song

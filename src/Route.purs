@@ -15,6 +15,6 @@ match :: String -> Route
 match url = fromMaybe NotFoundPage $ router url $
             HomePage <$ end
             <|>
-            SongPage <$> (lit "detail" *> int) <* end
+            SongPage <$> (lit "song" *> int) <* end
             <|>
             SearchResultPage <$> (lit "search" *> (param "q")) <* end
