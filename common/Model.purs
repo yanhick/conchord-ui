@@ -92,17 +92,6 @@ instance isForeignSongLyric :: IsForeign SongLyric where
 
 data SongChord = A | B | C | D | E | F | G | Am | Bm | Cm | Dm | Em | Fm | Gm | Am7 | G7
 
-type SongChord2 = {
-    root :: SongChordRoot,
-    quality :: SongChordQuality,
-    interval :: Maybe SongChordInterval
-}
-
-data SongChordRoot = A | Bb | B | C | Db | D | Eb | E | F | Gb | G | Ab
-
-data SongChordQuality = Major | Minor
-
-data SongChordInterval = Seventh
 
 instance showSongChord :: Show SongChord where
     show A = "A"
