@@ -12,11 +12,13 @@ import Control.Monad.Except.Trans (ExceptT, runExceptT)
 import Control.Monad.Error.Class (throwError)
 import Data.Identity (Identity, runIdentity)
 
-newtype SongChord = SongChord {
+type SongChordFields = {
     root :: SongChordRoot,
     rootModifier :: Maybe SongChordRootModifier,
     quality :: SongChordQuality
 }
+
+newtype SongChord = SongChord SongChordFields
 
 instance showSongChord :: Show SongChord where
     show (SongChord { root, rootModifier, quality }) = show root <> show rootModifier <> show quality
@@ -42,7 +44,16 @@ type ChordParserState = Tuple String SongChord
 runChordParser :: ChordParser -> ChordParserState -> Either Errors (Tuple Unit ChordParserState)
 runChordParser p s = runIdentity $ runExceptT $ runStateT p s
 
+runSongChord :: forall a. SongChord -> SongChordFields
 runSongChord (SongChord c) = c
+
+parseSongChord :: String -> Either Errors (Tuple Unit ChordParserState)
+parseSongChord s = runChordParser parse (Tuple s emptyChord)
+    where
+    parse = do
+        chordRoot
+        chordRootModifier
+        chordQuality
 
 chordRoot :: ChordParser
 chordRoot = do
