@@ -14,11 +14,16 @@ import Data.Identity (Identity, runIdentity)
 
 newtype SongChord = SongChord {
     root :: SongChordRoot,
-    rootModifier :: Maybe SongChordRootModifier
+    rootModifier :: Maybe SongChordRootModifier,
+    quality :: SongChordQuality
 }
 
 instance showSongChord :: Show SongChord where
-    show (SongChord { root, rootModifier }) = show root <> show rootModifier
+    show (SongChord { root, rootModifier, quality }) = show root <> show rootModifier <> show quality
+
+instance showChordQuality :: Show SongChordQuality where
+    show Minor = "Minor"
+    show Major = "Major"
 
 data SongChordRoot = A | B | C | D | E | F | G
 
@@ -49,7 +54,7 @@ chordRoot = do
         Nothing -> throwError ["Not A Valid Chord root"]
 
 emptyChord :: SongChord
-emptyChord = SongChord { root: A, rootModifier: Nothing }
+emptyChord = SongChord { root: A, rootModifier: Nothing, quality: Major }
 
 chordRootModifier :: ChordParser
 chordRootModifier = do
@@ -59,6 +64,16 @@ chordRootModifier = do
           put $ Tuple (drop 1 (fst sc)) (SongChord ((runSongChord $ snd sc) { rootModifier = Just r }))
           pure unit
       Nothing -> pure unit
+
+chordQuality :: ChordParser
+chordQuality = do
+    (sc :: ChordParserState) <- get
+    case (take 1 (fst sc)) of
+      "m" -> do
+          put $ Tuple (drop 1 (fst sc)) (SongChord ((runSongChord $ snd sc)) { quality = Minor })
+          pure unit
+      _ -> pure unit
+
 
 toChordRootModifier :: String -> Maybe SongChordRootModifier
 toChordRootModifier "#" = Just Sharp
