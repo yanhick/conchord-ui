@@ -15,17 +15,21 @@ import Data.Identity (Identity, runIdentity)
 type SongChordFields = {
     root :: SongChordRoot,
     rootModifier :: Maybe SongChordRootModifier,
-    quality :: SongChordQuality
+    quality :: SongChordQuality,
+    interval :: Maybe SongChordInterval
 }
 
 newtype SongChord = SongChord SongChordFields
 
 instance showSongChord :: Show SongChord where
-    show (SongChord { root, rootModifier, quality }) = show root <> show rootModifier <> show quality
+    show (SongChord { root, rootModifier, quality, interval }) = show root <> show rootModifier <> show quality <> show interval
 
 instance showChordQuality :: Show SongChordQuality where
     show Minor = "Minor"
     show Major = "Major"
+
+instance showSongChordInterval :: Show SongChordInterval where
+    show Seventh = "7"
 
 data SongChordRoot = A | B | C | D | E | F | G
 
@@ -54,6 +58,7 @@ parseSongChord s = runChordParser parse (Tuple s emptyChord)
         chordRoot
         chordRootModifier
         chordQuality
+        chordInterval
 
 chordRoot :: ChordParser
 chordRoot = do
@@ -65,7 +70,7 @@ chordRoot = do
         Nothing -> throwError ["Not A Valid Chord root"]
 
 emptyChord :: SongChord
-emptyChord = SongChord { root: A, rootModifier: Nothing, quality: Major }
+emptyChord = SongChord { root: A, rootModifier: Nothing, quality: Major, interval: Nothing }
 
 chordRootModifier :: ChordParser
 chordRootModifier = do
@@ -85,6 +90,14 @@ chordQuality = do
           pure unit
       _ -> pure unit
 
+chordInterval :: ChordParser
+chordInterval = do
+    (sc :: ChordParserState) <- get
+    case (take 1 (fst sc)) of
+      "7" -> do
+          put $ Tuple (drop 1 (fst sc)) (SongChord ((runSongChord $ snd sc)) { interval = Just Seventh })
+          pure unit
+      _ -> pure unit
 
 toChordRootModifier :: String -> Maybe SongChordRootModifier
 toChordRootModifier "#" = Just Sharp
