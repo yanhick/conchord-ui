@@ -8,6 +8,8 @@ import Data.Foreign (readString, F, ForeignError(TypeMismatch))
 import Data.Either (Either(Left))
 import Data.Maybe (Maybe())
 
+import Parser (SongChord, parseSongChord)
+
 --- Search Model
 
 newtype SearchResult = SearchResult { id :: Int, title :: String, desc :: String }
@@ -90,50 +92,6 @@ instance isForeignSongLyric :: IsForeign SongLyric where
         chord <- runNull <$> readProp "chord" value
         pure $ SongLyric { lyric, chord }
 
-data SongChord = A | B | C | D | E | F | G | Am | Bm | Cm | Dm | Em | Fm | Gm | Am7 | G7
-
-
-instance showSongChord :: Show SongChord where
-    show A = "A"
-    show B = "B"
-    show C = "C"
-    show D = "D"
-    show E = "E"
-    show F = "F"
-    show G = "G"
-    show Am = "Am"
-    show Bm = "Bm"
-    show Cm = "Cm"
-    show Dm = "Dm"
-    show Em = "Em"
-    show Fm = "Fm"
-    show Gm = "Gm"
-    show Am7 = "Am7"
-    show G7 = "G7"
-
-instance isForeignSongChord :: IsForeign SongChord where
-    read value = do
-        s <- readString value
-        toChord s
-
-toChord :: String -> F SongChord
-toChord "A" = pure A
-toChord "B" = pure B
-toChord "C" = pure C
-toChord "D" = pure D
-toChord "E" = pure E
-toChord "F" = pure F
-toChord "G" = pure G
-toChord "Am" = pure Am
-toChord "Bm" = pure Bm
-toChord "Cm" = pure Cm
-toChord "Dm" = pure Dm
-toChord "Em" = pure Em
-toChord "Fm" = pure Fm
-toChord "Gm" = pure Gm
-toChord "Am7" = pure Am7
-toChord "G7" = pure G7
-toChord s = Left $ TypeMismatch "Valid Chord" s
 
 data SongSectionName = Intro | Chorus | Verse | Outro | Bridge
 

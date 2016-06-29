@@ -2,15 +2,24 @@ module Parser where
 
 import Prelude (pure, class Show, bind, ($), (>>=), Unit(), unit, (<>), show)
 import Data.Maybe (Maybe(Just, Nothing))
-import Data.Either (Either())
+import Data.Either (Either(Left, Right))
 import Data.Tuple (Tuple(Tuple), fst, snd)
 import Data.String (take, drop)
+import Data.Foreign.Class (class IsForeign, read)
+import Data.Foreign (readString, F, ForeignError(TypeMismatch))
 import Control.Monad.State.Trans (StateT, runStateT)
 import Control.Monad.State.Class (get, put)
 import Control.Monad.Writer.Trans (WriterT, runWriterT)
 import Control.Monad.Except.Trans (ExceptT, runExceptT)
 import Control.Monad.Error.Class (throwError)
 import Data.Identity (Identity, runIdentity)
+
+instance isForeignSongChord :: IsForeign SongChord where
+    read value = do
+        s <- readString value
+        case parseSongChord s of
+          Left _ -> Left $ TypeMismatch "bim" "bam"
+          Right (Tuple _ (Tuple _ c)) -> Right c
 
 type SongChordFields = {
     root :: SongChordRoot,
