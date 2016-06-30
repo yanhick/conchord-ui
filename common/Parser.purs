@@ -1,7 +1,7 @@
 module Parser where
 
 import Prelude (pure, class Show, bind, ($), (>>=), Unit(), unit, (<>), show)
-import Data.Maybe (Maybe(Just, Nothing))
+import Data.Maybe (Maybe(Just, Nothing), maybe)
 import Data.Either (Either(Left, Right))
 import Data.Tuple (Tuple(Tuple), fst, snd)
 import Data.String (take, drop)
@@ -18,7 +18,7 @@ instance isForeignSongChord :: IsForeign SongChord where
     read value = do
         s <- readString value
         case parseSongChord s of
-          Left _ -> Left $ TypeMismatch "bim" "bam"
+          Left _ -> Left $ TypeMismatch s "Valid chord"
           Right (Tuple _ (Tuple _ c)) -> Right c
 
 type SongChordFields = {
@@ -31,11 +31,12 @@ type SongChordFields = {
 newtype SongChord = SongChord SongChordFields
 
 instance showSongChord :: Show SongChord where
-    show (SongChord { root, rootModifier, quality, interval }) = show root <> show rootModifier <> show quality <> show interval
+    show (SongChord { root, rootModifier, quality, interval }) =
+        show root <> (maybe "" show rootModifier) <> show quality <> (maybe "" show interval)
 
 instance showChordQuality :: Show SongChordQuality where
-    show Minor = "Minor"
-    show Major = "Major"
+    show Minor = "m"
+    show Major = ""
 
 instance showSongChordInterval :: Show SongChordInterval where
     show Seventh = "7"
