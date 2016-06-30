@@ -5,10 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "pulp test",
-    "build": "pulp browserify > app.js && pulp build -m Main -o server-output --src-path server",
+    "build": "pulp browserify -t app.js -I common && pulp build -m Main -o server-output --src-path server -I common",
     "dev-client": "pulp -w browserify -t app.js -I common",
-    "dev-server": "pulp -w --then \"node server\" build -m ServerMain -o server-output --src-path server -I common",
-    "release": "pulp browserify > dist && git add dist && git commit -m'release' && git push heroku master -f && git reset --hard HEAD~",
+    "dev-server": "pulp -w --then \"node index\" build -m ServerMain -o server-output --src-path server -I common",
+    "release": "npm run build && git add app.js -f && git add server-output -f && git commit -m'release' && git push heroku master -f && git reset --hard HEAD^",
     "postinstall": "bower install"
   },
   "author": "Yannick Dominguez",

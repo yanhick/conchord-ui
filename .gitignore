@@ -5,3 +5,4 @@
 /server-output/
 /.psci*
 /src/.webpack.js
+app.js
