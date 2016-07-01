@@ -5,13 +5,13 @@ import Prelude (($), (<$>), show, const)
 import Data.Maybe (Maybe(Nothing, Just), maybe, fromMaybe)
 import Data.Either (Either(Left, Right))
 
-import Pux.Html (Html, section, div, p, text, header, article
+import Pux.Html (Html, section, div, main, p, text, header, article
                 , h1, h2, h3, span, b, nav, li, button, ul, form
                 , input, (#), (!), bind)
 import Pux.CSS (style, px, fontSize)
 import Pux.Router (link)
 import Pux.Html.Events (onClick, onSubmit, onChange)
-import Pux.Html.Attributes (type_, value)
+import Pux.Html.Attributes (type_, value, data_)
 
 import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(SongLyric), SearchResult(SearchResult))
 import Action (Action(UIAction, IOAction), IOAction(RequestSearch, RequestSong), UIAction(Increment, Decrement, SearchChange))
@@ -87,8 +87,9 @@ songPage (Loaded (Left e)) _ = div # text (show e)
 songPage (Loaded (Right (Song s))) fontSize =
     div # do
         header_ $ Just songTextSize
-        songMeta s.meta
-        songContent s.content fontSize
+        main # do
+            songMeta s.meta
+            songContent s.content fontSize
 
 songMeta :: SongMeta -> Html Action
 songMeta (SongMeta { title, artist, album }) =
@@ -108,9 +109,12 @@ songSection (SongSection {name, lyrics}) =
 
 songLyric :: SongLyric -> Html Action
 songLyric (SongLyric {lyric, chord}) =
-    span # do
-        b # text (maybe "" show chord)
-        text $ fromMaybe "" lyric
+    span ! data_ "lyrics" l ! data_ "chord" c # do
+        b # text c
+        text l
+    where
+        c = maybe "" show chord
+        l = fromMaybe "" lyric
 
 songTextSize :: Html Action
 songTextSize =

@@ -1,0 +1,56 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+}
+
+main header {
+    background: none;
+    margin: 50px 50px 0 50px;
+    text-align: center;
+}
+
+main article {
+    margin: 50px;
+    column-width: 400px;
+    -moz-column-width: 400px;
+    column-count: 3;
+    -moz-column-count: 3;
+    column-gap: 60px;
+    -moz-column-gap: 60px;
+}
+
+main article section {
+    break-inside: avoid;
+}
+
+main article section h2 {
+    text-transform: uppercase;
+    font-size: 1.5rem;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+main article section p {
+    white-space: pre-line;
+    margin-left: 15px;
+    margin-bottom: 15px;
+    text-align: justify;
+}
+
+main article section b {
+    margin: 0 4px;
+}
+
+main article section span:after {
+    content: ' ';
+}
+
+main article section span[data-lyrics$="."]:after {
+    content: '\A';
+}
