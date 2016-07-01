@@ -2,6 +2,7 @@ module Main where
 
 import Prelude
 import Data.Maybe (maybe, fromMaybe, Maybe(..))
+import Data.Foreign.EasyFFI (unsafeForeignFunction)
 import Control.Monad.Eff.Console (log, CONSOLE)
 import Control.Monad.Eff (Eff())
 import Control.Monad.Eff.Exception (Error(), message, error)
@@ -17,8 +18,9 @@ import Model (SearchResults, SearchResult(SearchResult))
 
 main :: forall eff. Eff (console :: CONSOLE, express :: EXPRESS | eff) Server
 main = do
-    listenHttp appSetup 8080 \_ ->
-        log $ "listening on " <> show 8080
+    port <- unsafeForeignFunction [""] "process.env.PORT || 8080"
+    listenHttp appSetup port \_ ->
+        log $ "listening on " <> show port
 
 getSearchResults :: String -> SearchResults
 getSearchResults q = [
