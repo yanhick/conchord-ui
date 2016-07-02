@@ -109,8 +109,8 @@ songSection (SongSection {name, lyrics}) =
 
 songLyric :: SongLyric -> Html Action
 songLyric (SongLyric {lyric, chord}) =
-    span ! data_ "lyrics" l ! data_ "chord" c # do
-        b # text c
+    span ! data_ "lyrics" l # do
+        b ! data_ "chord" c # text ""
         text l
     where
         c = maybe "" show chord

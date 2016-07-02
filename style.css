@@ -23,6 +23,7 @@ main article {
     -moz-column-count: 3;
     column-gap: 60px;
     -moz-column-gap: 60px;
+    line-height: 3;
 }
 
 main article section {
@@ -43,8 +44,16 @@ main article section p {
     text-align: justify;
 }
 
-main article section b {
-    margin: 0 4px;
+main article section b:after {
+    content: attr(data-chord);
+    position: absolute;
+    transform: translateY(-15px);
+}
+
+main article section span[data-lyrics=""] b:after {
+    position: relative;
+    transform: translateY(-15px);
+    top: -15px;
 }
 
 main article section span:after {
