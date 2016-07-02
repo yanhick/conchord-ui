@@ -6,7 +6,7 @@ import Data.Maybe (Maybe(Nothing, Just), maybe, fromMaybe)
 import Data.Either (Either(Left, Right))
 
 import Pux.Html (Html, section, div, main, p, text, header, article
-                , h1, h2, h3, span, b, nav, li, button, ul, form
+                , h1, h2, h3, h4, span, b, nav, li, button, ul, form
                 , input, (#), (!), bind)
 import Pux.CSS (style, rem, fontSize)
 import Pux.Router (link)
@@ -104,7 +104,7 @@ songContent (SongContent s) fs = article [ style $ fontSize (rem fs) ] (songSect
 songSection :: SongSection -> Html Action
 songSection (SongSection {name, lyrics}) =
     section # do
-        h2 # text (show name)
+        h4 # text (show name)
         p [] (songLyric <$> lyrics)
 
 songLyric :: SongLyric -> Html Action
