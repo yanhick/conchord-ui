@@ -8,7 +8,7 @@ import Data.Either (Either(Left, Right))
 import Pux.Html (Html, section, div, main, p, text, header, article
                 , h1, h2, h3, span, b, nav, li, button, ul, form
                 , input, (#), (!), bind)
-import Pux.CSS (style, px, fontSize)
+import Pux.CSS (style, em, fontSize)
 import Pux.Router (link)
 import Pux.Html.Events (onClick, onSubmit, onChange)
 import Pux.Html.Attributes (type_, value, data_)
@@ -99,7 +99,7 @@ songMeta (SongMeta { title, artist, album }) =
        maybe (text "") (\a -> h3 # text a) album
 
 songContent :: SongContent -> Number -> Html Action
-songContent (SongContent s) fs = article [ style $ fontSize (px fs) ] (songSection <$> s)
+songContent (SongContent s) fs = article [ style $ fontSize (em fs) ] (songSection <$> s)
 
 songSection :: SongSection -> Html Action
 songSection (SongSection {name, lyrics}) =

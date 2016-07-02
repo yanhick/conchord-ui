@@ -48,8 +48,8 @@ update (UIAction a) state = noEffects $ state { ui = updateUI a state.ui }
 
 updateUI :: UIAction -> UIState -> UIState
 updateUI (SearchChange ev) state = state { searchQuery = ev.target.value }
-updateUI Increment state = state { songFontSize = state.songFontSize + 1.0 }
-updateUI Decrement state = state { songFontSize = state.songFontSize - 1.0 }
+updateUI Increment state = state { songFontSize = state.songFontSize + 0.1 }
+updateUI Decrement state = state { songFontSize = state.songFontSize - 0.1 }
 
 --- IO Actions
 

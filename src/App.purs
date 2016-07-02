@@ -30,7 +30,7 @@ init :: State
 init = {
     currentPage: HomePage
   , ui: {
-      songFontSize: 12.0
+      songFontSize: 1.0
     , searchQuery: ""
   }
   , io: {
