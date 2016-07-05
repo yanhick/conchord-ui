@@ -33,36 +33,31 @@ page NotFoundPage _ = notFoundPage
 
 type ToolBar = Html Action
 
-header_:: (Maybe ToolBar) -> Html Action
-header_ toolbar =
+header_:: IOState -> UIState -> Html Action
+header_ { searchResults } { searchQuery } =
     header # do
         nav # do
-            link "/" #
-                text "Home"
-            fromMaybe (text "") toolbar
+            searchForm searchQuery
+            ul [] (searchResult <$> searchResults)
 
 --- NotFound view
 
 notFoundPage :: Html Action
 notFoundPage =
     div # do
-        header_ Nothing
         text "not found"
 
 --- Search Views
 
 homePage :: State -> Html Action
-homePage { ui }=
+homePage { io, ui }=
     div # do
-        header_ Nothing
-        searchForm ui.searchQuery
+        header_ io ui
 
 searchResultPage :: State -> Html Action
 searchResultPage { io, ui }=
     div # do
-        header_ Nothing
-        searchForm ui.searchQuery
-        ul [] (searchResult <$> io.searchResults)
+        header_ io ui
 
 searchResult :: SearchResult -> Html Action
 searchResult (SearchResult {title, id}) =
@@ -80,16 +75,19 @@ searchForm q =
 --- Song Views
 
 songPage :: IOState -> UIState -> Html Action
-songPage { song = Empty } _ = div # text ""
-songPage { song = Loading } _ = div # text "Loading Song"
-songPage {song = Loaded (Left e) } _ = div # text (show e)
-songPage { song = Loaded (Right (Song s)), searchResults } { searchQuery }=
+songPage io ui =
     div # do
-        searchForm searchQuery
-        ul [] (searchResult <$> searchResults)
-        main # do
-            songMeta s.meta
-            songContent s.content
+        header_ io ui
+        songPageContent io ui
+
+songPageContent :: IOState -> UIState -> Html Action
+songPageContent { song = Empty } _ = div # text ""
+songPageContent { song = Loading } _ = div # text "Loading Song"
+songPageContent { song = Loaded (Left e) } _ = div # text (show e)
+songPageContent { song = Loaded (Right (Song { meta, content })), searchResults } { searchQuery }=
+    main # do
+        songMeta meta
+        songContent content
 
 songMeta :: SongMeta -> Html Action
 songMeta (SongMeta { title, artist, album }) =
