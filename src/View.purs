@@ -1,16 +1,16 @@
 module View where
 
-import Prelude (($), (<$>), show, const)
+import Prelude (($), (<$>), show, const, (<>))
 
 import Data.Maybe (Maybe(Nothing), maybe, fromMaybe)
 import Data.Either (Either(Left, Right))
 
 import Pux.Html (Html, section, div, main, p, text, header, article
-                , h1, h2, h3, h4, span, i, nav, li, button, ul, form
+                , h1, h2, h3, h4, span, i, nav, li, a, button, ul, form
                 , input, (#), (!), bind)
 import Pux.Router (link)
 import Pux.Html.Events (onClick, onSubmit, onChange)
-import Pux.Html.Attributes (type_, value, data_)
+import Pux.Html.Attributes (type_, value, data_, href)
 
 import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(SongLyric), SearchResult(SearchResult))
 import Action (Action(UIAction, IOAction), IOAction(RequestSearch, RequestSong), UIAction(Increment, Decrement, SearchChange))
@@ -62,9 +62,8 @@ searchResultPage { io, ui }=
 searchResult :: SearchResult -> Html Action
 searchResult (SearchResult {title, id}) =
     li # do
-        text title
-        button ! onClick (const $ IOAction $ RequestSong id) # do
-            text $ show id
+        a ! href ("/song/" <> show id) ! onClick (const $ IOAction $ RequestSong id) # do
+            text title
 
 searchForm :: String -> Html Action
 searchForm q =
