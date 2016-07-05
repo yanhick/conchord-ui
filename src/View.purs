@@ -16,7 +16,7 @@ import Pux.Html.Attributes (type_, value, data_)
 import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(SongLyric), SearchResult(SearchResult))
 import Action (Action(UIAction, IOAction), IOAction(RequestSearch, RequestSong), UIAction(Increment, Decrement, SearchChange))
 import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage))
-import App (State, SongState(Loading, Loaded, Empty))
+import App (State, SongState(Loading, Loaded, Empty), UIState)
 
 
 view :: State -> Html Action
@@ -25,7 +25,7 @@ view state = div [] [ page state.currentPage state ]
 --- App Routing
 
 page :: Route -> State -> Html Action
-page (SongPage _) state = songPage state.io.song state.ui.songFontSize
+page (SongPage _) { ui, io }= songPage io.song ui
 page (SearchResultPage _) state = searchResultPage state
 page HomePage state = homePage state
 page NotFoundPage _ = notFoundPage
@@ -53,17 +53,17 @@ notFoundPage =
 --- Search Views
 
 homePage :: State -> Html Action
-homePage state =
+homePage { ui }=
     div # do
         header_ Nothing
-        searchForm state
+        searchForm ui.searchQuery
 
 searchResultPage :: State -> Html Action
-searchResultPage state =
+searchResultPage { io, ui }=
     div # do
         header_ Nothing
-        searchForm state
-        ul [] (searchResult <$> state.io.searchResults)
+        searchForm ui.searchQuery
+        ul [] (searchResult <$> io.searchResults)
 
 searchResult :: SearchResult -> Html Action
 searchResult (SearchResult {title, id}) =
@@ -72,24 +72,24 @@ searchResult (SearchResult {title, id}) =
         button ! onClick (const $ IOAction $ RequestSong id) # do
             text $ show id
 
-searchForm :: State -> Html Action
-searchForm state =
+searchForm :: String -> Html Action
+searchForm q =
     form ! onSubmit (const $ IOAction RequestSearch) # do
-        input [ type_ "text", value state.ui.searchQuery, onChange (\f -> UIAction (SearchChange f))] []
+        input [ type_ "text", value q, onChange (\f -> UIAction (SearchChange f))] []
         button [ type_ "submit" ] [ text "search" ]
 
 --- Song Views
 
-songPage :: SongState -> Number -> Html Action
+songPage :: SongState -> UIState -> Html Action
 songPage Empty _ = div # text ""
 songPage Loading _ = div # text "Loading Song"
 songPage (Loaded (Left e)) _ = div # text (show e)
-songPage (Loaded (Right (Song s))) fontSize =
+songPage (Loaded (Right (Song s))) { songFontSize, searchQuery }=
     div # do
-        header_ $ Just songTextSize
+        searchForm searchQuery
         main # do
             songMeta s.meta
-            songContent s.content fontSize
+            songContent s.content songFontSize
 
 songMeta :: SongMeta -> Html Action
 songMeta (SongMeta { title, artist, album }) =
