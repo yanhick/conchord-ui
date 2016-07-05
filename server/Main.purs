@@ -25,7 +25,25 @@ main = do
 getSearchResults :: String -> SearchResults
 getSearchResults q = [
         SearchResult {id: 0, title: q, desc: "this is the first result for: " <> q },
-        SearchResult {id: 1, title: q, desc: "this is the second result for: " <> q }
+        SearchResult {id: 1, title: q, desc: "this is the second result for: " <> q },
+        SearchResult {id: 2, title: q, desc: "this is the first result for: " <> q },
+        SearchResult {id: 3, title: q, desc: "this is the second result for: " <> q },
+        SearchResult {id: 4, title: q, desc: "this is the first result for: " <> q },
+        SearchResult {id: 5, title: q, desc: "this is the second result for: " <> q },
+        SearchResult {id: 6, title: q, desc: "this is the first result for: " <> q },
+        SearchResult {id: 7, title: q, desc: "this is the second result for: " <> q },
+        SearchResult {id: 8, title: q, desc: "this is the first result for: " <> q },
+        SearchResult {id: 9, title: q, desc: "this is the second result for: " <> q },
+        SearchResult {id: 10, title: q, desc: "this is the first result for: " <> q },
+        SearchResult {id: 11, title: q, desc: "this is the second result for: " <> q },
+        SearchResult {id: 12, title: q, desc: "this is the first result for: " <> q },
+        SearchResult {id: 13, title: q, desc: "this is the second result for: " <> q },
+        SearchResult {id: 14, title: q, desc: "this is the first result for: " <> q },
+        SearchResult {id: 15, title: q, desc: "this is the second result for: " <> q },
+        SearchResult {id: 16, title: q, desc: "this is the first result for: " <> q },
+        SearchResult {id: 17, title: q, desc: "this is the second result for: " <> q },
+        SearchResult {id: 18, title: q, desc: "this is the first result for: " <> q },
+        SearchResult {id: 19, title: q, desc: "this is the second result for: " <> q }
     ]
 
 appSetup :: forall e. App (console :: CONSOLE | e)

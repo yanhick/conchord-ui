@@ -4,6 +4,17 @@
     box-sizing: border-box;
 }
 
+nav {
+    background: black;
+
+}
+
+nav ul {
+    background: grey;
+    column-count: 4;
+    -moz-column-count: 4;
+}
+
 main header {
     text-align: center;
 }
