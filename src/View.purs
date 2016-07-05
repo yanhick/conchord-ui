@@ -15,7 +15,7 @@ import Pux.Html.Attributes (type_, value, data_)
 import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(SongLyric), SearchResult(SearchResult))
 import Action (Action(UIAction, IOAction), IOAction(RequestSearch, RequestSong), UIAction(Increment, Decrement, SearchChange))
 import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage))
-import App (State, SongState(Loading, Loaded, Empty), UIState)
+import App (State, SongState(Loading, Loaded, Empty), UIState, IOState)
 
 
 view :: State -> Html Action
@@ -24,7 +24,7 @@ view state = div [] [ page state.currentPage state ]
 --- App Routing
 
 page :: Route -> State -> Html Action
-page (SongPage _) { ui, io }= songPage io.song ui
+page (SongPage _) { ui, io }= songPage io ui
 page (SearchResultPage _) state = searchResultPage state
 page HomePage state = homePage state
 page NotFoundPage _ = notFoundPage
@@ -79,13 +79,14 @@ searchForm q =
 
 --- Song Views
 
-songPage :: SongState -> UIState -> Html Action
-songPage Empty _ = div # text ""
-songPage Loading _ = div # text "Loading Song"
-songPage (Loaded (Left e)) _ = div # text (show e)
-songPage (Loaded (Right (Song s))) { searchQuery }=
+songPage :: IOState -> UIState -> Html Action
+songPage { song = Empty } _ = div # text ""
+songPage { song = Loading } _ = div # text "Loading Song"
+songPage {song = Loaded (Left e) } _ = div # text (show e)
+songPage { song = Loaded (Right (Song s)), searchResults } { searchQuery }=
     div # do
         searchForm searchQuery
+        ul [] (searchResult <$> searchResults)
         main # do
             songMeta s.meta
             songContent s.content
