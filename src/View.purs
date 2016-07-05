@@ -2,13 +2,12 @@ module View where
 
 import Prelude (($), (<$>), show, const)
 
-import Data.Maybe (Maybe(Nothing, Just), maybe, fromMaybe)
+import Data.Maybe (Maybe(Nothing), maybe, fromMaybe)
 import Data.Either (Either(Left, Right))
 
 import Pux.Html (Html, section, div, main, p, text, header, article
                 , h1, h2, h3, h4, span, i, nav, li, button, ul, form
                 , input, (#), (!), bind)
-import Pux.CSS (style, rem, fontSize)
 import Pux.Router (link)
 import Pux.Html.Events (onClick, onSubmit, onChange)
 import Pux.Html.Attributes (type_, value, data_)
@@ -84,12 +83,12 @@ songPage :: SongState -> UIState -> Html Action
 songPage Empty _ = div # text ""
 songPage Loading _ = div # text "Loading Song"
 songPage (Loaded (Left e)) _ = div # text (show e)
-songPage (Loaded (Right (Song s))) { songFontSize, searchQuery }=
+songPage (Loaded (Right (Song s))) { searchQuery }=
     div # do
         searchForm searchQuery
         main # do
             songMeta s.meta
-            songContent s.content songFontSize
+            songContent s.content
 
 songMeta :: SongMeta -> Html Action
 songMeta (SongMeta { title, artist, album }) =
@@ -98,8 +97,8 @@ songMeta (SongMeta { title, artist, album }) =
        h2 # text artist
        maybe (text "") (\a -> h3 # text a) album
 
-songContent :: SongContent -> Number -> Html Action
-songContent (SongContent s) fs = article [ style $ fontSize (rem fs) ] (songSection <$> s)
+songContent :: SongContent -> Html Action
+songContent (SongContent s) = article [] (songSection <$> s)
 
 songSection :: SongSection -> Html Action
 songSection (SongSection {name, lyrics}) =

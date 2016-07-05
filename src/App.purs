@@ -15,8 +15,7 @@ type State = {
 }
 
 type UIState = {
-    songFontSize :: Number
-  , searchQuery :: String
+    searchQuery :: String
 }
 
 data SongState = Loaded (F Song) | Loading | Empty
@@ -30,8 +29,7 @@ init :: State
 init = {
     currentPage: HomePage
   , ui: {
-      songFontSize: 1.0
-    , searchQuery: ""
+      searchQuery: ""
   }
   , io: {
       searchResults: []
