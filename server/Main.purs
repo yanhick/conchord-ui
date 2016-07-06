@@ -14,7 +14,7 @@ import Node.Express.Request (getRouteParam, getQueryParam)
 import Node.Express.Response (send, sendJson, sendFile, setStatus)
 import Node.HTTP (Server())
 
-import Model (SearchResults, SearchResult(SearchResult))
+import Model (SearchResults, SearchResult(SearchResult), SongMeta(SongMeta), Year(Year))
 
 main :: forall eff. Eff (console :: CONSOLE, express :: EXPRESS | eff) Server
 main = do
@@ -22,29 +22,10 @@ main = do
     listenHttp appSetup port \_ ->
         log $ "listening on " <> show port
 
-getSearchResults :: String -> SearchResults
-getSearchResults q = [
-        SearchResult {id: 0, title: q, desc: "this is the first result for: " <> q },
-        SearchResult {id: 1, title: q, desc: "this is the second result for: " <> q },
-        SearchResult {id: 2, title: q, desc: "this is the first result for: " <> q },
-        SearchResult {id: 3, title: q, desc: "this is the second result for: " <> q },
-        SearchResult {id: 4, title: q, desc: "this is the first result for: " <> q },
-        SearchResult {id: 5, title: q, desc: "this is the second result for: " <> q },
-        SearchResult {id: 6, title: q, desc: "this is the first result for: " <> q },
-        SearchResult {id: 7, title: q, desc: "this is the second result for: " <> q },
-        SearchResult {id: 8, title: q, desc: "this is the first result for: " <> q },
-        SearchResult {id: 9, title: q, desc: "this is the second result for: " <> q },
-        SearchResult {id: 10, title: q, desc: "this is the first result for: " <> q },
-        SearchResult {id: 11, title: q, desc: "this is the second result for: " <> q },
-        SearchResult {id: 12, title: q, desc: "this is the first result for: " <> q },
-        SearchResult {id: 13, title: q, desc: "this is the second result for: " <> q },
-        SearchResult {id: 14, title: q, desc: "this is the first result for: " <> q },
-        SearchResult {id: 15, title: q, desc: "this is the second result for: " <> q },
-        SearchResult {id: 16, title: q, desc: "this is the first result for: " <> q },
-        SearchResult {id: 17, title: q, desc: "this is the second result for: " <> q },
-        SearchResult {id: 18, title: q, desc: "this is the first result for: " <> q },
-        SearchResult {id: 19, title: q, desc: "this is the second result for: " <> q }
-    ]
+getSongMeta :: String
+getSongMeta = "{ \"title\": \"T\", \"artist\":\"a\", \"album\":\"a\", \"year\": 2011 }"
+
+getSearchResultsS = "[{\"id\":0, \"meta\":" <> getSongMeta <> ", \"desc\":\"d\"}]"
 
 appSetup :: forall e. App (console :: CONSOLE | e)
 appSetup = do
@@ -63,7 +44,7 @@ fileHandler = do
 searchHandler :: forall e. Handler e
 searchHandler = do
     qParam <- getQueryParam "q"
-    send $ getSearchResults (fromMaybe "" qParam)
+    send $ getSearchResultsS
 
 songHandler :: forall e. Handler e
 songHandler = do

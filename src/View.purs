@@ -10,7 +10,7 @@ import Pux.Html (Html, section, div, main, p, text, header, article
                 , input, (#), (!), bind)
 import Pux.Router (link)
 import Pux.Html.Events (onClick, onSubmit, onChange)
-import Pux.Html.Attributes (type_, value, data_, href)
+import Pux.Html.Attributes (placeholder, type_, value, data_, href)
 
 import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(SongLyric), SearchResult(SearchResult))
 import Action (Action(UIAction, IOAction), IOAction(RequestSearch, RequestSong), UIAction(Increment, Decrement, SearchChange))
@@ -66,15 +66,16 @@ searchResultPage { io, ui }=
         header_ io ui
 
 searchResult :: SearchResult -> Html Action
-searchResult (SearchResult {title, id}) =
+searchResult (SearchResult { meta: SongMeta { title }, id}) =
     li # do
-        a ! href ("/song/" <> show id) ! onClick (const $ IOAction $ RequestSong id) # do
-            text title
+        h3 # do
+            a ! href ("/song/" <> show id) ! onClick (const $ IOAction $ RequestSong id) # do
+                text title
 
 searchForm :: String -> Html Action
 searchForm q =
     form ! onSubmit (const $ IOAction RequestSearch) # do
-        input [ type_ "search", value q, onChange (\f -> UIAction (SearchChange f))] []
+        input [ type_ "search", placeholder "Search", value q, onChange (\f -> UIAction (SearchChange f))] []
 
 --- Song Views
 

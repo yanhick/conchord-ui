@@ -12,14 +12,14 @@ import Parser (SongChord, parseSongChord)
 
 --- Search Model
 
-newtype SearchResult = SearchResult { id :: Int, title :: String, desc :: String }
+newtype SearchResult = SearchResult { id :: Int, meta :: SongMeta, desc :: String }
 
 instance isForeignSearchResult :: IsForeign SearchResult where
     read value = do
         id <- readProp "id" value
-        title <- readProp "title" value
+        meta <- readProp "meta" value
         desc <- readProp "desc" value
-        pure $ SearchResult { id, title, desc }
+        pure $ SearchResult { id, meta, desc }
 
 type SearchResults = Array SearchResult
 
