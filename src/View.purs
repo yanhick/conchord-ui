@@ -40,6 +40,12 @@ header_ { searchResults } { searchQuery } =
             searchForm searchQuery
             ul [] (searchResult <$> searchResults)
 
+songPageHeader :: UIState -> Html Action
+songPageHeader { searchQuery } =
+    header # do
+        nav # do
+            searchForm searchQuery
+
 --- NotFound view
 
 notFoundPage :: Html Action
@@ -68,15 +74,14 @@ searchResult (SearchResult {title, id}) =
 searchForm :: String -> Html Action
 searchForm q =
     form ! onSubmit (const $ IOAction RequestSearch) # do
-        input [ type_ "text", value q, onChange (\f -> UIAction (SearchChange f))] []
-        button [ type_ "submit" ] [ text "search" ]
+        input [ type_ "search", value q, onChange (\f -> UIAction (SearchChange f))] []
 
 --- Song Views
 
 songPage :: IOState -> UIState -> Html Action
 songPage io ui =
     div # do
-        header_ io ui
+        songPageHeader ui
         songPageContent io ui
 
 songPageContent :: IOState -> UIState -> Html Action
