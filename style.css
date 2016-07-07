@@ -10,9 +10,30 @@ nav {
 }
 
 nav ul {
-    background: grey;
+    background: white;
+    border-bottom: solid thick black;
+    border-left: solid thin black;
     column-count: 4;
     -moz-column-count: 4;
+    -webkit-column-count: 4;
+    list-style: none;
+    padding: 1rem;
+}
+
+nav ul li i {
+    text-align: justify;
+}
+
+nav ul li a {
+    display: inline-block;
+    text-decoration: none;
+    margin: 1rem;
+    opacity: 0.8;
+    color: black;
+}
+
+nav ul li a:hover {
+    opacity: 1;
 }
 
 input[type="search"] {
@@ -38,8 +59,10 @@ main article {
     margin: 1rem;
     column-count: 3;
     -moz-column-count: 3;
+    -webkit-column-count: 3;
     column-gap: 1rem;
     -moz-column-gap: 5rem;
+    -webkit-column-gap: 5rem;
     line-height: 2.5;
 }
 
