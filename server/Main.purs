@@ -23,9 +23,9 @@ main = do
         log $ "listening on " <> show port
 
 getSongMeta :: String
-getSongMeta = "{ \"title\": \"T\", \"artist\":\"a\", \"album\":\"a\", \"year\": 2011 }"
+getSongMeta = "{ \"title\": \"Tokyo vampires and wolves\", \"artist\":\"The Wombats\", \"album\":\"This modern glitch\", \"year\": 2011 }"
 
-getSearchResultsS = "[{\"id\":0, \"meta\":" <> getSongMeta <> ", \"desc\":\"d\"}]"
+getSearchResultsS = "[{\"id\":0, \"meta\":" <> getSongMeta <> ", \"desc\":\"We're self-imploding, under the weight of your advice. I wear a suitcase, under each one of my eyes.\"}]"
 
 appSetup :: forall e. App (console :: CONSOLE | e)
 appSetup = do
