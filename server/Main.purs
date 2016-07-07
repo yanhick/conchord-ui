@@ -3,6 +3,8 @@ module Main where
 import Prelude
 import Data.Maybe (maybe, fromMaybe, Maybe(..))
 import Data.Foreign.EasyFFI (unsafeForeignFunction)
+import Data.Array (replicate)
+import Data.String (joinWith)
 import Control.Monad.Eff.Console (log, CONSOLE)
 import Control.Monad.Eff (Eff())
 import Control.Monad.Eff.Exception (Error(), message, error)
@@ -25,7 +27,11 @@ main = do
 getSongMeta :: String
 getSongMeta = "{ \"title\": \"Tokyo vampires and wolves\", \"artist\":\"The Wombats\", \"album\":\"This modern glitch\", \"year\": 2011 }"
 
-getSearchResultsS = "[{\"id\":0, \"meta\":" <> getSongMeta <> ", \"desc\":\"We're self-imploding, under the weight of your advice. I wear a suitcase, under each one of my eyes.\"}]"
+getSearchResult :: String
+getSearchResult = "{\"id\":0, \"meta\":" <> getSongMeta <> ", \"desc\":\"We're self-imploding, under the weight of your advice. I wear a suitcase, under each one of my eyes.\"}"
+
+getSearchResults :: String
+getSearchResults = "[" <> joinWith "," (replicate 15 (getSearchResult)) <> "]"
 
 appSetup :: forall e. App (console :: CONSOLE | e)
 appSetup = do
@@ -44,7 +50,7 @@ fileHandler = do
 searchHandler :: forall e. Handler e
 searchHandler = do
     qParam <- getQueryParam "q"
-    send $ getSearchResultsS
+    send $ getSearchResults
 
 songHandler :: forall e. Handler e
 songHandler = do
