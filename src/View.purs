@@ -66,13 +66,14 @@ searchResultPage { io, ui }=
         header_ io ui
 
 searchResult :: SearchResult -> Html Action
-searchResult (SearchResult { meta: SongMeta { title, artist, album, year: Year(y) }, id}) =
+searchResult (SearchResult { meta: SongMeta { title, artist, album, year: Year(y) }, desc, id}) =
     li # do
         a ! href ("/song/" <> show id) ! onClick (const $ IOAction $ RequestSong id) # do
             h3 # text title
             h4 # text artist
             h5 # text (fromMaybe "" album)
             h6 # text (show y)
+            i # text desc
 
 searchForm :: String -> Html Action
 searchForm q =
