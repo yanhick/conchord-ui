@@ -79,13 +79,14 @@ main article section p {
 main article section i:after {
     content: attr(data-chord);
     font-size: 0.75rem;
-    position: absolute;
-    transform: translateY(-0.75rem);
+    position: relative;
+    display: inline-block;
+    width: 0;
+    top: -1.25rem;
 }
 
 main article section span[data-lyrics=""] i:after {
-    position: relative;
-    top: -1.25rem;
+    display: inline;
 }
 
 main article section span:after {
