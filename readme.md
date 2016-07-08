@@ -6,20 +6,27 @@ Conchord UI
 [![Stories in Ready](https://badge.waffle.io/yanhick/conchord-ui.png?label=ready&title=Ready)](https://waffle.io/yanhick/conchord-ui)
 
 
-A UI to display songs in the conchord format
+A web UI to display songs in the conchord format written in [Purescript](http://www.purescript.org)
 
 Demo
 ----
 
-[https://rocky-lake-6297.herokuapp.com/](https://rocky-lake-6297.herokuapp.com/)
+[https://tranquil-harbor-60171.herokuapp.com/](https://tranquil-harbor-60171.herokuapp.com/)
 
 Install
 -------
 
-You’ll need node.js v0.10, npm and Haskell and Cabal installed.
+You’ll need node.js ^4.2.0 and npm
 
 ```
 npm install
+```
+
+Build
+-----
+
+```
+npm run build
 ```
 
 Run
@@ -29,7 +36,7 @@ Run
 npm start
 ```
 
-Then open [http://localhost:1234](http://localhost:1234)
+Then open [http://localhost:8080](http://localhost:8080)
 
 Test
 ----
@@ -42,5 +49,7 @@ Develop
 -------
 
 ```
-gulp
+npm run dev-client
+npm run dev-server
 ```
+Then open [http://localhost:8080](http://localhost:8080)
