@@ -18,7 +18,6 @@
     "purescript-prelude": "^1.0.1",
     "purescript-express": "6264dd4f279e1c468ae0401f66d0a30c05b135f7",
     "purescript-pux": "^5.0.2",
-    "purescript-pux-devtool": "^3.0.0",
     "purescript-parsing": "^1.0.0",
     "purescript-options": "^1.0.0",
     "purescript-easy-ffi": "^2.0.0"

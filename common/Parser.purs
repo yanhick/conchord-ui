@@ -5,11 +5,10 @@ import Data.Maybe (Maybe(Just, Nothing), maybe)
 import Data.Either (Either(Left, Right))
 import Data.Tuple (Tuple(Tuple), fst, snd)
 import Data.String (take, drop)
-import Data.Foreign.Class (class IsForeign, read)
-import Data.Foreign (readString, F, ForeignError(TypeMismatch))
+import Data.Foreign.Class (class IsForeign)
+import Data.Foreign (readString, ForeignError(TypeMismatch))
 import Control.Monad.State.Trans (StateT, runStateT)
 import Control.Monad.State.Class (get, put)
-import Control.Monad.Writer.Trans (WriterT, runWriterT)
 import Control.Monad.Except.Trans (ExceptT, runExceptT)
 import Control.Monad.Error.Class (throwError)
 import Data.Identity (Identity, runIdentity)
@@ -58,7 +57,7 @@ type ChordParserState = Tuple String SongChord
 runChordParser :: ChordParser -> ChordParserState -> Either Errors (Tuple Unit ChordParserState)
 runChordParser p s = runIdentity $ runExceptT $ runStateT p s
 
-runSongChord :: forall a. SongChord -> SongChordFields
+runSongChord :: SongChord -> SongChordFields
 runSongChord (SongChord c) = c
 
 parseSongChord :: String -> Either Errors (Tuple Unit ChordParserState)
