@@ -11,10 +11,9 @@ import Network.HTTP.Affjax (AJAX())
 import Pux (renderToDOM, start)
 import Pux.Router (sampleUrl)
 import Signal ((~>))
-import Action (Action(PageView))
 import Route (match)
 import App (init)
-import Action (update)
+import Action (update, Action(PageView))
 import View (view)
 
 
