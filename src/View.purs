@@ -2,18 +2,17 @@ module View where
 
 import Prelude (($), (<$>), show, const, (<>))
 
-import Data.Maybe (Maybe(Nothing), maybe, fromMaybe)
+import Data.Maybe (maybe, fromMaybe)
 import Data.Either (Either(Left, Right))
 
 import Pux.Html (Html, section, div, main, p, text, header, article
-                , h1, h2, h3, h4, h5, h6, span, i, nav, li, a, button, ul, form
+                , h1, h2, h3, h4, h5, h6, span, i, nav, li, a, ul, form
                 , input, (#), (!), bind)
-import Pux.Router (link)
 import Pux.Html.Events (onClick, onSubmit, onChange)
 import Pux.Html.Attributes (placeholder, type_, value, data_, href)
 
 import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(SongLyric), SearchResult(SearchResult), Year(Year))
-import Action (Action(UIAction, IOAction), IOAction(RequestSearch, RequestSong), UIAction(Increment, Decrement, SearchChange))
+import Action (Action(UIAction, IOAction), IOAction(RequestSearch, RequestSong), UIAction(SearchChange))
 import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage))
 import App (State, SongState(Loading, Loaded, Empty), UIState, IOState)
 
@@ -89,10 +88,10 @@ songPage io ui =
         songPageContent io ui
 
 songPageContent :: IOState -> UIState -> Html Action
-songPageContent { song = Empty } _ = div # text ""
-songPageContent { song = Loading } _ = div # text "Loading Song"
-songPageContent { song = Loaded (Left e) } _ = div # text (show e)
-songPageContent { song = Loaded (Right (Song { meta, content })), searchResults } { searchQuery }=
+songPageContent { song: Empty } _ = div # text ""
+songPageContent { song: Loading } _ = div # text "Loading Song"
+songPageContent { song: Loaded (Left e) } _ = div # text (show e)
+songPageContent { song: Loaded (Right (Song { meta, content })), searchResults } { searchQuery }=
     main # do
         songMeta meta
         songContent content
@@ -121,9 +120,3 @@ songLyric (SongLyric {lyric, chord}) =
     where
         c = maybe "" show chord
         l = fromMaybe "" lyric
-
-songTextSize :: Html Action
-songTextSize =
-    li # do
-        button ! onClick (const  (UIAction Increment)) # text "+"
-        button ! onClick (const  (UIAction Decrement)) # text "-"

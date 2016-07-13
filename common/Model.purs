@@ -3,12 +3,12 @@ module Model where
 import Prelude (pure, class Show, bind, ($), (<$>))
 
 import Data.Foreign.Class (class IsForeign, readProp, read)
-import Data.Foreign.Null (runNull)
+import Data.Foreign.Null (unNull)
 import Data.Foreign (readString, F, ForeignError(TypeMismatch))
 import Data.Either (Either(Left))
 import Data.Maybe (Maybe())
 
-import Parser (SongChord, parseSongChord)
+import Parser (SongChord)
 
 --- Search Model
 
@@ -52,7 +52,7 @@ instance isForeignSongMeta :: IsForeign SongMeta where
     read value = do
         title <- readProp "title" value
         artist <- readProp "artist" value
-        album <- runNull <$> readProp "album" value
+        album <- unNull <$> readProp "album" value
         year <- readProp "year" value
         pure $ SongMeta { title, artist, album, year }
 
@@ -88,8 +88,8 @@ newtype SongLyric = SongLyric {
 
 instance isForeignSongLyric :: IsForeign SongLyric where
     read value = do
-        lyric <- runNull <$> readProp "lyric" value
-        chord <- runNull <$> readProp "chord" value
+        lyric <- unNull <$> readProp "lyric" value
+        chord <- unNull <$> readProp "chord" value
         pure $ SongLyric { lyric, chord }
 
 

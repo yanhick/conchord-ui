@@ -25,10 +25,7 @@ data Action =
     UIAction UIAction |
     PageView Route
 
-data UIAction =
-    SearchChange FormEvent |
-    Increment |
-    Decrement
+data UIAction = SearchChange FormEvent
 
 data IOAction =
     RequestSong Int |

@@ -1,9 +1,9 @@
 module Main where
 
 import Prelude
-import Data.Maybe (maybe, fromMaybe, Maybe(..))
+import Data.Maybe (maybe, Maybe(..))
 import Data.Foreign.EasyFFI (unsafeForeignFunction)
-import Data.Array (replicate)
+import Data.Unfoldable (replicate)
 import Data.String (joinWith)
 import Control.Monad.Eff.Console (log, CONSOLE)
 import Control.Monad.Eff (Eff())
@@ -15,8 +15,6 @@ import Node.Express.Handler (Handler(), nextThrow)
 import Node.Express.Request (getRouteParam, getQueryParam)
 import Node.Express.Response (send, sendJson, sendFile, setStatus)
 import Node.HTTP (Server())
-
-import Model (SearchResults, SearchResult(SearchResult), SongMeta(SongMeta), Year(Year))
 
 main :: forall eff. Eff (console :: CONSOLE, express :: EXPRESS | eff) Server
 main = do
