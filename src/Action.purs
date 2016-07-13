@@ -53,7 +53,7 @@ updateIO :: IOAction -> State -> Affction
 updateIO RequestSearch state = {
     state: state { io = state.io { searchResults = [] } }
   , effects: [ do
-        liftEff $ navigateTo $ "/search/?q=" <> state.ui.searchQuery
+        liftEff $ navigateTo $ "/search?q=" <> state.ui.searchQuery
         res <- fetchSearch state.ui.searchQuery
         let results = (readJSON res) :: F SearchResults
         pure $ IOAction $ ReceiveSearch results
