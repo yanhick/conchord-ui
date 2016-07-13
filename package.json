@@ -4,6 +4,7 @@
   "description": "A UI for the conchord file format",
   "main": "index.js",
   "scripts": {
+    "clean": "rm -rf node_modules bower_components app.js server-output",
     "start": "node index.js",
     "test": "pulp test",
     "build": "pulp browserify -t app.js -I common && pulp build -m Main -o server-output --src-path server -I common",
