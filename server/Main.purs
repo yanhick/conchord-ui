@@ -4,7 +4,6 @@ import Prelude
 import Data.Maybe (maybe, Maybe(..))
 import Data.Foreign.EasyFFI (unsafeForeignFunction)
 import Data.Unfoldable (replicate)
-import Data.String (joinWith)
 import Control.Monad.Eff.Console (log, CONSOLE)
 import Control.Monad.Eff (Eff())
 import Control.Monad.Eff.Exception (Error(), message, error)
@@ -13,8 +12,11 @@ import Node.Express.App (App(), listenHttp, get, useOnError)
 import Node.Express.Types (EXPRESS)
 import Node.Express.Handler (Handler(), nextThrow)
 import Node.Express.Request (getRouteParam, getQueryParam)
-import Node.Express.Response (send, sendJson, sendFile, setStatus)
+import Node.Express.Response (sendJson, sendFile, setStatus)
 import Node.HTTP (Server())
+
+import Model (SongMeta(SongMeta), Year(Year), SearchResult(SearchResult))
+import Data.Argonaut (encodeJson, Json)
 
 main :: forall eff. Eff (console :: CONSOLE, express :: EXPRESS | eff) Server
 main = do
@@ -22,14 +24,23 @@ main = do
     listenHttp appSetup port \_ ->
         log $ "listening on " <> show port
 
-getSongMeta :: String
-getSongMeta = "{ \"title\": \"Tokyo vampires and wolves\", \"artist\":\"The Wombats\", \"album\":\"This modern glitch\", \"year\": 2011 }"
+getSongMeta :: SongMeta
+getSongMeta = SongMeta {
+    title: "Tokyo vampires and wolves",
+    artist: "The Wombats",
+    album: Just "This modern glitch",
+    year: Year 2011
+}
 
-getSearchResult :: String
-getSearchResult = "{\"id\":0, \"meta\":" <> getSongMeta <> ", \"desc\":\"We're self-imploding, under the weight of your advice. I wear a suitcase, under each one of my eyes.\"}"
+getSearchResult :: Json
+getSearchResult = encodeJson $ SearchResult {
+    id: 0,
+    meta: getSongMeta,
+    desc: "We're self-imploding, under the weight of your advice. I wear a suitcase, under each one of my eyes."
+}
 
-getSearchResults :: String
-getSearchResults = "[" <> joinWith "," (replicate 15 (getSearchResult)) <> "]"
+getSearchResults :: Json
+getSearchResults = encodeJson (replicate 15 (getSearchResult) :: Array Json)
 
 appSetup :: forall e. App (console :: CONSOLE | e)
 appSetup = do
@@ -48,7 +59,7 @@ fileHandler = do
 searchHandler :: forall e. Handler e
 searchHandler = do
     qParam <- getQueryParam "q"
-    send $ getSearchResults
+    sendJson getSearchResults
 
 songHandler :: forall e. Handler e
 songHandler = do

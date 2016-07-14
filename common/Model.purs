@@ -7,6 +7,7 @@ import Data.Foreign.Null (unNull)
 import Data.Foreign (readString, F, ForeignError(TypeMismatch))
 import Data.Either (Either(Left))
 import Data.Maybe (Maybe())
+import Data.Argonaut (class EncodeJson, encodeJson, (:=), (~>), jsonEmptyObject)
 
 import Parser (SongChord)
 
@@ -22,6 +23,13 @@ instance isForeignSearchResult :: IsForeign SearchResult where
         pure $ SearchResult { id, meta, desc }
 
 type SearchResults = Array SearchResult
+
+instance encodeJsonSearchResult :: EncodeJson SearchResult where
+    encodeJson (SearchResult { id, meta, desc })
+        = "id" := id
+        ~> "meta" := encodeJson meta
+        ~> "desc" := desc
+        ~> jsonEmptyObject
 
 
 --- Song Model
@@ -45,6 +53,14 @@ newtype SongMeta = SongMeta {
     album :: Maybe String,
     year :: Year
 }
+
+instance encodeJsonSongMeta :: EncodeJson SongMeta where
+    encodeJson (SongMeta { title, artist, album, year: Year(y) })
+        = "title" := title
+        ~> "artist" := artist
+        ~> "album" := album
+        ~> "year" := y
+        ~> jsonEmptyObject
 
 newtype Album = Album (Maybe String)
 
