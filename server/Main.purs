@@ -45,10 +45,12 @@ getSearchResults = encodeJson (replicate 15 (getSearchResult) :: Array Json)
 appSetup :: forall e. App (console :: CONSOLE | e)
 appSetup = do
     liftEff $ log "Setting up"
-    get "/search"     searchHandler
-    get "/song/:id" songHandler
+    get "/search"      fileHandler
+    get "/song/:id"    fileHandler
     get "/:file"       fileHandler
     get "/"            fileHandler
+    get "/api/search"   searchHandler
+    get "/api/song/:id" songHandler
     useOnError         errorHandler
 
 fileHandler :: forall e. Handler e
