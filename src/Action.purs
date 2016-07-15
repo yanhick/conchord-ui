@@ -15,7 +15,7 @@ import Pux (EffModel, noEffects)
 import Pux.Html.Events (FormEvent)
 import Pux.Router (navigateTo)
 
-import Route (Route(SongPage))
+import Route (Route(SongPage, SearchResultPage))
 import Model (SearchResults, Song)
 import App (State, UIState, SongState(Loading, Loaded))
 
@@ -37,7 +37,12 @@ type Affction = EffModel State Action (ajax :: AJAX, dom :: DOM)
 
 
 update :: Action -> State -> Affction
-update (PageView p@(SongPage s)) state = updateIO (RequestSong s) (state { currentPage = p })
+update (PageView p@(SongPage s)) state =
+    updateIO (RequestSong s) (state { currentPage = p })
+update (PageView p@(SearchResultPage s)) state@{ currentPage: (SearchResultPage q) } =
+    noEffects state { ui = { searchQuery: q } }
+update (PageView p@(SearchResultPage q)) state =
+    updateIO RequestSearch (state { currentPage = p, ui = { searchQuery: q } })
 update (PageView p) state = noEffects $ state { currentPage = p }
 update (IOAction a) state = updateIO a state
 update (UIAction a) state = noEffects $ state { ui = updateUI a state.ui }

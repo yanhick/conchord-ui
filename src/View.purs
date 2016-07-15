@@ -13,7 +13,7 @@ import Pux.Html.Attributes (placeholder, type_, value, data_)
 import Pux.Router (link)
 
 import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(SongLyric), SearchResult(SearchResult), Year(Year))
-import Action (Action(UIAction, IOAction), IOAction(RequestSearch), UIAction(SearchChange))
+import Action (Action(UIAction, PageView), UIAction(SearchChange))
 import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage))
 import App (State, SongState(Loading, Loaded, Empty), UIState, IOState)
 
@@ -77,7 +77,7 @@ searchResult (SearchResult { meta: SongMeta { title, artist, album, year: Year(y
 
 searchForm :: String -> Html Action
 searchForm q =
-    form ! onSubmit (const $ IOAction RequestSearch) # do
+    form ! onSubmit (const $ PageView (SearchResultPage q)) # do
         input [ type_ "search", placeholder "Search", value q, onChange (\f -> UIAction (SearchChange f))] []
 
 --- Song Views
