@@ -6,13 +6,14 @@ import Data.Maybe (maybe, fromMaybe)
 import Data.Either (Either(Left, Right))
 
 import Pux.Html (Html, section, div, main, p, text, header, article
-                , h1, h2, h3, h4, h5, h6, span, i, nav, li, a, ul, form
+                , h1, h2, h3, h4, h5, h6, span, i, nav, li, ul, form
                 , input, (#), (!), bind)
-import Pux.Html.Events (onClick, onSubmit, onChange)
-import Pux.Html.Attributes (placeholder, type_, value, data_, href)
+import Pux.Html.Events (onSubmit, onChange)
+import Pux.Html.Attributes (placeholder, type_, value, data_)
+import Pux.Router (link)
 
 import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(SongLyric), SearchResult(SearchResult), Year(Year))
-import Action (Action(UIAction, IOAction), IOAction(RequestSearch, RequestSong), UIAction(SearchChange))
+import Action (Action(UIAction, IOAction), IOAction(RequestSearch), UIAction(SearchChange))
 import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage))
 import App (State, SongState(Loading, Loaded, Empty), UIState, IOState)
 
@@ -67,7 +68,7 @@ searchResultPage { io, ui }=
 searchResult :: SearchResult -> Html Action
 searchResult (SearchResult { meta: SongMeta { title, artist, album, year: Year(y) }, desc, id}) =
     li # do
-        a ! href ("/song/" <> show id) ! onClick (const $ IOAction $ RequestSong id) # do
+        link ("/song/" <> show id) # do
             h3 # text title
             h4 # text artist
             h5 # text (fromMaybe "" album)

@@ -15,7 +15,7 @@ import Pux (EffModel, noEffects)
 import Pux.Html.Events (FormEvent)
 import Pux.Router (navigateTo)
 
-import Route (Route())
+import Route (Route(SongPage))
 import Model (SearchResults, Song)
 import App (State, UIState, SongState(Loading, Loaded))
 
@@ -37,6 +37,7 @@ type Affction = EffModel State Action (ajax :: AJAX, dom :: DOM)
 
 
 update :: Action -> State -> Affction
+update (PageView p@(SongPage s)) state = updateIO (RequestSong s) (state { currentPage = p })
 update (PageView p) state = noEffects $ state { currentPage = p }
 update (IOAction a) state = updateIO a state
 update (UIAction a) state = noEffects $ state { ui = updateUI a state.ui }
@@ -66,7 +67,6 @@ updateIO (ReceiveSearch (Left _)) state = noEffects state
 updateIO (RequestSong id) state = {
     state: state { io = state.io { song = Loading } }
   , effects: [ do
-        liftEff $ navigateTo $ "/song/" <> show id
         res <- fetchSong id
         let song = (readJSON res) :: F Song
         pure $ IOAction $ ReceiveSong song
