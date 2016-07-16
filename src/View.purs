@@ -9,7 +9,7 @@ import Pux.Html (Html, section, div, main, p, text, header, article
                 , h1, h2, h3, h4, h5, h6, span, i, nav, li, ul, form
                 , input, (#), (!), bind)
 import Pux.Html.Events (onSubmit, onChange)
-import Pux.Html.Attributes (placeholder, type_, value, data_, action, method)
+import Pux.Html.Attributes (name, placeholder, type_, value, data_, action, method)
 import Pux.Router (link)
 
 import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(SongLyric), SearchResult(SearchResult), Year(Year))
@@ -85,7 +85,7 @@ searchResult (SearchResult { meta: SongMeta { title, artist, album, year: Year(y
 searchForm :: String -> Html Action
 searchForm q =
     form ! action "/search" ! method "GET" ! onSubmit (const $ PageView (SearchResultPage q)) # do
-        input [ type_ "search", placeholder "Search", value q, onChange (\f -> UIAction (SearchChange f))] []
+        input [ name "q", type_ "search", placeholder "Search", value q, onChange (\f -> UIAction (SearchChange f))] []
 
 --- Song Views
 
