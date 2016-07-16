@@ -18,11 +18,11 @@ type UIState = {
     searchQuery :: String
 }
 
-data SongState = Loaded (F Song) | Loading | Empty
+data AsyncData a = Loaded (F a) | Loading | Empty
 
 type IOState = {
-    searchResults :: SearchResults
-  , song :: SongState
+    searchResults :: AsyncData SearchResults
+  , song :: AsyncData Song
 }
 
 init :: State
@@ -32,7 +32,7 @@ init = {
       searchQuery: ""
   }
   , io: {
-      searchResults: []
+      searchResults: Empty
     , song: Empty
   }
 }

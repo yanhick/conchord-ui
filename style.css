@@ -9,7 +9,7 @@ nav {
 
 }
 
-nav ul {
+ul {
     background: white;
     border-bottom: solid thick black;
     border-left: solid thin black;
@@ -20,11 +20,11 @@ nav ul {
     padding: 1rem;
 }
 
-nav ul li i {
+ul li i {
     text-align: justify;
 }
 
-nav ul li a {
+ul li a {
     display: inline-block;
     text-decoration: none;
     margin: 1rem;
@@ -32,7 +32,7 @@ nav ul li a {
     color: black;
 }
 
-nav ul li a:hover {
+ul li a:hover {
     opacity: 1;
 }
 

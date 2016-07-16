@@ -1,8 +1,7 @@
 module Action where
 
-import Prelude (($), bind, (<>), pure, show, (+), (-))
+import Prelude (($), bind, (<>), pure, show, (+), (-), (==))
 
-import Data.Either (Either(Right, Left))
 import Data.Foreign (F)
 import Data.Foreign.Class (readJSON)
 import Control.Monad.Aff (Aff())
@@ -17,7 +16,7 @@ import Pux.Router (navigateTo)
 
 import Route (Route(SongPage, SearchResultPage))
 import Model (SearchResults, Song)
-import App (State, UIState, SongState(Loading, Loaded))
+import App (State, UIState, AsyncData(Loading, Loaded))
 
 
 data Action =
@@ -39,8 +38,8 @@ type Affction = EffModel State Action (ajax :: AJAX, dom :: DOM)
 update :: Action -> State -> Affction
 update (PageView p@(SongPage s)) state =
     updateIO (RequestSong s) (state { currentPage = p })
-update (PageView p@(SearchResultPage s)) state@{ currentPage: (SearchResultPage q) } =
-    noEffects state { ui = { searchQuery: q } }
+update (PageView p@(SearchResultPage s)) state@{ currentPage: (SearchResultPage q) }
+    | s == q = noEffects state { ui = { searchQuery: q } }
 update (PageView p@(SearchResultPage q)) state =
     updateIO (RequestSearch q) (state { currentPage = p, ui = { searchQuery: q } })
 update (PageView p) state = noEffects $ state { currentPage = p }
@@ -57,7 +56,7 @@ updateUI (SearchChange ev) state = state { searchQuery = ev.target.value }
 updateIO :: IOAction -> State -> Affction
 
 updateIO (RequestSearch q) state = {
-    state: state { io = state.io { searchResults = [] } }
+    state: state { io = state.io { searchResults = Loading } }
   , effects: [ do
         liftEff $ navigateTo $ "/search?q=" <> q
         res <- fetchSearch state.ui.searchQuery
@@ -66,8 +65,7 @@ updateIO (RequestSearch q) state = {
     ]
 }
 
-updateIO (ReceiveSearch (Right r)) state = noEffects $ state { io = state.io { searchResults = r } }
-updateIO (ReceiveSearch (Left _)) state = noEffects state
+updateIO (ReceiveSearch r) state = noEffects $ state { io = state.io { searchResults = Loaded r } }
 
 updateIO (RequestSong id) state = {
     state: state { io = state.io { song = Loading } }

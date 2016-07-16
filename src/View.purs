@@ -15,7 +15,7 @@ import Pux.Router (link)
 import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(SongLyric), SearchResult(SearchResult), Year(Year))
 import Action (Action(UIAction, PageView), UIAction(SearchChange))
 import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage))
-import App (State, SongState(Loading, Loaded, Empty), UIState, IOState)
+import App (State, AsyncData(Loading, Loaded, Empty), UIState, IOState)
 
 
 view :: State -> Html Action
@@ -38,7 +38,6 @@ header_ { searchResults } { searchQuery } =
     header # do
         nav # do
             searchForm searchQuery
-            ul [] (searchResult <$> searchResults)
 
 songPageHeader :: UIState -> Html Action
 songPageHeader { searchQuery } =
@@ -64,6 +63,14 @@ searchResultPage :: State -> Html Action
 searchResultPage { io, ui }=
     div # do
         header_ io ui
+        searchResultPageContent io ui
+
+searchResultPageContent :: IOState -> UIState -> Html Action
+searchResultPageContent { searchResults: Empty } _ = div # text ""
+searchResultPageContent { searchResults: Loading } _ = div # text "Loading..."
+searchResultPageContent { searchResults: Loaded (Right s) } _ = ul [] (searchResult <$> s)
+searchResultPageContent { searchResults: Loaded (Left _) } _ = div # text "Could not find results"
+
 
 searchResult :: SearchResult -> Html Action
 searchResult (SearchResult { meta: SongMeta { title, artist, album, year: Year(y) }, desc, id}) =
