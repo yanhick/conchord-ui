@@ -2,17 +2,17 @@ module Route where
 
 import Prelude (($), (<$>), (<>), show, bind)
 import Data.Functor ((<$))
+import Data.Maybe (Maybe(Just, Nothing), fromMaybe)
+import Data.String (stripPrefix)
 import Data.Either (Either(Left, Right))
 import Control.Alt ((<|>))
 import Control.Apply ((<*), (*>))
 
-import Data.Foreign (F)
-import Data.Foreign.Class (class IsForeign, readProp, read)
-import Data.Foreign (readString, ForeignError(TypeMismatch))
+import Data.Foreign.Class (class IsForeign)
+import Data.Foreign (readString, ForeignError(TypeMismatch), F)
 
 import Data.Argonaut (class EncodeJson, (:=), (~>), fromString)
 
-import Data.Maybe (fromMaybe)
 import Pux.Router (router, lit, int, end, param)
 
 
@@ -32,7 +32,13 @@ instance isForeignRoute :: IsForeign Route where
 toRoute :: String -> F Route
 toRoute "HomePage" = Right HomePage
 toRoute "NotFoundPage" = Right NotFoundPage
-toRoute _ = Left $ TypeMismatch "Route" "Not Route"
+toRoute r =
+    case stripPrefix "SongPage " r of
+        Just id -> Right $ SongPage 0
+        Nothing ->
+            case stripPrefix "SearchResultPage " r of
+                Just q -> Right $ SearchResultPage q
+                Nothing -> Left $ TypeMismatch "Route" r
 
 
 match :: String -> Route
