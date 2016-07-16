@@ -154,7 +154,7 @@ index s =
         </head>
         <body>
             <div id="app">""" <> renderAppHandler s <> """</div>
-            <script>window.puxLastState =  """ <> show (encodeJson s) <> """;</script>
+            <script>window.puxLastState =  JSON.stringify(""" <> show (encodeJson s) <> """);</script>
             <script src="/app.js"></script>
         </body>
     </html>
