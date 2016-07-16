@@ -66,10 +66,10 @@ searchResultPage (State { io, ui }) =
         searchResultPageContent io ui
 
 searchResultPageContent :: IOState -> UIState -> Html Action
-searchResultPageContent (IOState { searchResults: Empty }) _ = div # text ""
-searchResultPageContent (IOState { searchResults: Loading }) _ = div # text "Loading..."
+searchResultPageContent (IOState { searchResults: Empty }) _ = ul # text ""
+searchResultPageContent (IOState { searchResults: Loading }) _ = ul # text "Loading..."
 searchResultPageContent (IOState { searchResults: Loaded (Right s) }) _ = ul [] (searchResult <$> s)
-searchResultPageContent (IOState { searchResults: Loaded (Left _) }) _ = div # text "Could not find results"
+searchResultPageContent (IOState { searchResults: Loaded (Left _) }) _ = ul # text "Could not find results"
 
 
 searchResult :: SearchResult -> Html Action
@@ -96,9 +96,9 @@ songPage io ui =
         songPageContent io ui
 
 songPageContent :: IOState -> UIState -> Html Action
-songPageContent (IOState { song: Empty }) _ = div # text ""
-songPageContent (IOState { song: Loading }) _ = div # text "Loading Song"
-songPageContent (IOState { song: Loaded (Left e) }) _ = div # text (show e)
+songPageContent (IOState { song: Empty }) _ = main # text ""
+songPageContent (IOState { song: Loading }) _ = main # text "Loading Song"
+songPageContent (IOState { song: Loaded (Left e) }) _ = main # text (show e)
 songPageContent (IOState { song: Loaded (Right (Song { meta, content })), searchResults }) (UIState { searchQuery }) =
     main # do
         songMeta meta
