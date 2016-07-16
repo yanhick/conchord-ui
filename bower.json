@@ -26,7 +26,8 @@
   },
   "devDependencies": {
     "purescript-quickcheck": "^1.0.0",
-    "purescript-pux-devtool": "^3.0.0"
+    "purescript-pux-devtool": "^3.0.0",
+    "purescript-psci-support": "^1.0.0"
   },
   "resolutions": {
     "purescript-console": "^1.0.0",
