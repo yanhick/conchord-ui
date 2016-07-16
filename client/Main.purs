@@ -7,6 +7,9 @@ import Control.Monad.Eff.Exception (EXCEPTION())
 import DOM (DOM())
 import Signal.Channel (CHANNEL())
 import Network.HTTP.Affjax (AJAX())
+import Data.Foreign.EasyFFI (unsafeForeignFunction)
+import Data.Foreign.Class (readJSON)
+import Data.Either (Either (Left, Right))
 
 import Pux (renderToDOM, start)
 import Pux.Router (sampleUrl)
@@ -27,12 +30,15 @@ main = do
     urlSignal <- sampleUrl
     let routeSignal = urlSignal ~> (PageView <<< match)
 
+    state <- unsafeForeignFunction [""] "window.puxLastState"
+
     app <- start {
-      initialState: init
+      initialState: case readJSON state of
+                      Left (_) -> init
+                      Right s -> s
     , update: update
     , view: view
     , inputs: [routeSignal]
     }
+
     renderToDOM "#app" app.html
-
-
