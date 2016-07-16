@@ -82,7 +82,7 @@ fileHandler = do
 searchPageHandler :: forall e. Handler e
 searchPageHandler = do
     qParam <- getQueryParam "q"
-    send $ index (renderAppHandler init {
+    send $ index (init {
         currentPage = (SearchResultPage $ maybe "" id qParam),
         io = { searchResults: Loaded(pure getSearchResults), song: Empty }
     })
@@ -94,13 +94,13 @@ songPageHandler = do
       Nothing -> nextThrow $ error "Id is required"
       Just id -> do
         let s = unsafePerformEff $ catchException (\_ -> pure "") (readTextFile UTF8 "song.json")
-        send $ index (renderAppHandler init {
+        send $ index (init {
             currentPage = (SongPage 0),
             io = { searchResults: Empty, song: Loaded(readJSON s)}
         })
 
 homePageHandler :: forall e. Handler e
-homePageHandler = send $ index (renderAppHandler init)
+homePageHandler = send $ index init
 
 searchApiHandler :: forall e. Handler e
 searchApiHandler = do
@@ -142,7 +142,7 @@ renderApp s = do
     renderToString app.html
 
 
-index :: String -> String
+index :: State -> String
 index s =
     """
     <!doctype html>
@@ -153,10 +153,10 @@ index s =
         <body>
             <div id="app">
      """
-     <> s <>
+     <> renderAppHandler s <>
      """
-            <script src="/app.js"></script>
             </div>
+            <script src="/app.js"></script>
         </body>
     </html>
     """
