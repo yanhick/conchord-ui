@@ -1,13 +1,13 @@
 module Model where
 
-import Prelude (pure, class Show, bind, ($), (<$>))
+import Prelude (pure, class Show, bind, ($), (<$>), show)
 
 import Data.Foreign.Class (class IsForeign, readProp, read)
 import Data.Foreign.Null (unNull)
 import Data.Foreign (readString, F, ForeignError(TypeMismatch))
 import Data.Either (Either(Left))
 import Data.Maybe (Maybe())
-import Data.Argonaut (class EncodeJson, encodeJson, (:=), (~>), jsonEmptyObject)
+import Data.Argonaut (class EncodeJson, encodeJson, (:=), (~>), jsonEmptyObject, fromArray)
 
 import Parser (SongChord)
 
@@ -39,6 +39,13 @@ newtype Song = Song {
     meta :: SongMeta,
     content :: SongContent
 }
+
+instance encodeJsonSong :: EncodeJson Song where
+    encodeJson (Song { id, meta, content })
+        = "id" := id
+        ~> "meta" := encodeJson meta
+        ~> "content" := encodeJson content
+        ~> jsonEmptyObject
 
 instance isForeignSong :: IsForeign Song where
     read value = do
@@ -81,6 +88,9 @@ instance isForeignYear :: IsForeign Year where
 
 newtype SongContent = SongContent (Array SongSection)
 
+instance encodeJsonSongContent :: EncodeJson SongContent where
+    encodeJson (SongContent s) = fromArray $ encodeJson <$> s
+
 instance isForeignSongContent :: IsForeign SongContent where
     read value = do
         c <- read value
@@ -90,6 +100,12 @@ newtype SongSection = SongSection {
     name :: SongSectionName,
     lyrics :: Array SongLyric
 }
+
+instance encodeJsonSongSection :: EncodeJson SongSection where
+    encodeJson (SongSection { name, lyrics })
+        = "name" := show name
+        ~> "lyrics" := encodeJson lyrics
+        ~> jsonEmptyObject
 
 instance isForeignSongSection :: IsForeign SongSection where
     read value = do
@@ -107,6 +123,12 @@ instance isForeignSongLyric :: IsForeign SongLyric where
         lyric <- unNull <$> readProp "lyric" value
         chord <- unNull <$> readProp "chord" value
         pure $ SongLyric { lyric, chord }
+
+instance encodeJsonSongLyric :: EncodeJson SongLyric where
+    encodeJson (SongLyric { lyric, chord })
+        = "lyric" := lyric
+        ~> "chord" := (show <$> chord)
+        ~> jsonEmptyObject
 
 
 data SongSectionName = Intro | Chorus | Verse | Outro | Bridge
