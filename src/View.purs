@@ -15,16 +15,16 @@ import Pux.Router (link)
 import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(SongLyric), SearchResult(SearchResult), Year(Year))
 import Action (Action(UIAction, PageView), UIAction(SearchChange))
 import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage))
-import App (State, AsyncData(Loading, Loaded, Empty), UIState, IOState)
+import App (State(State), AsyncData(Loading, Loaded, Empty), UIState(UIState), IOState(IOState))
 
 
 view :: State -> Html Action
-view state = div [] [ page state.currentPage state ]
+view state@(State { currentPage } ) = div [] [ page currentPage state ]
 
 --- App Routing
 
 page :: Route -> State -> Html Action
-page (SongPage _) { ui, io }= songPage io ui
+page (SongPage _) (State { ui, io }) = songPage io ui
 page (SearchResultPage _) state = searchResultPage state
 page HomePage state = homePage state
 page NotFoundPage _ = notFoundPage
@@ -34,13 +34,13 @@ page NotFoundPage _ = notFoundPage
 type ToolBar = Html Action
 
 header_:: IOState -> UIState -> Html Action
-header_ { searchResults } { searchQuery } =
+header_ (IOState { searchResults }) (UIState { searchQuery }) =
     header # do
         nav # do
             searchForm searchQuery
 
 songPageHeader :: UIState -> Html Action
-songPageHeader { searchQuery } =
+songPageHeader (UIState { searchQuery }) =
     header # do
         nav # do
             searchForm searchQuery
@@ -55,21 +55,21 @@ notFoundPage =
 --- Search Views
 
 homePage :: State -> Html Action
-homePage { io, ui }=
+homePage (State { io, ui }) =
     div # do
         header_ io ui
 
 searchResultPage :: State -> Html Action
-searchResultPage { io, ui }=
+searchResultPage (State { io, ui }) =
     div # do
         header_ io ui
         searchResultPageContent io ui
 
 searchResultPageContent :: IOState -> UIState -> Html Action
-searchResultPageContent { searchResults: Empty } _ = div # text ""
-searchResultPageContent { searchResults: Loading } _ = div # text "Loading..."
-searchResultPageContent { searchResults: Loaded (Right s) } _ = ul [] (searchResult <$> s)
-searchResultPageContent { searchResults: Loaded (Left _) } _ = div # text "Could not find results"
+searchResultPageContent (IOState { searchResults: Empty }) _ = div # text ""
+searchResultPageContent (IOState { searchResults: Loading }) _ = div # text "Loading..."
+searchResultPageContent (IOState { searchResults: Loaded (Right s) }) _ = ul [] (searchResult <$> s)
+searchResultPageContent (IOState { searchResults: Loaded (Left _) }) _ = div # text "Could not find results"
 
 
 searchResult :: SearchResult -> Html Action
@@ -96,10 +96,10 @@ songPage io ui =
         songPageContent io ui
 
 songPageContent :: IOState -> UIState -> Html Action
-songPageContent { song: Empty } _ = div # text ""
-songPageContent { song: Loading } _ = div # text "Loading Song"
-songPageContent { song: Loaded (Left e) } _ = div # text (show e)
-songPageContent { song: Loaded (Right (Song { meta, content })), searchResults } { searchQuery }=
+songPageContent (IOState { song: Empty }) _ = div # text ""
+songPageContent (IOState { song: Loading }) _ = div # text "Loading Song"
+songPageContent (IOState { song: Loaded (Left e) }) _ = div # text (show e)
+songPageContent (IOState { song: Loaded (Right (Song { meta, content })), searchResults }) (UIState { searchQuery }) =
     main # do
         songMeta meta
         songContent content

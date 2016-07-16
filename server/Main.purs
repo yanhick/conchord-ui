@@ -25,7 +25,7 @@ import Signal.Channel (CHANNEL())
 import Pux (renderToString, start)
 import Signal ((~>))
 import Route (Route(SearchResultPage, SongPage))
-import App (init, AsyncData(Loaded, Empty), State)
+import App (init, AsyncData(Loaded, Empty), State(State), UIState(UIState), IOState(IOState))
 import Action (update)
 import View (view)
 
@@ -82,9 +82,10 @@ fileHandler = do
 searchPageHandler :: forall e. Handler e
 searchPageHandler = do
     qParam <- getQueryParam "q"
-    send $ index (init {
-        currentPage = (SearchResultPage $ maybe "" id qParam),
-        io = { searchResults: Loaded(pure getSearchResults), song: Empty }
+    send $ index (State {
+        currentPage: (SearchResultPage $ maybe "" id qParam),
+        io: IOState { searchResults: Loaded(pure getSearchResults), song: Empty },
+        ui: UIState { searchQuery: maybe "" id qParam }
     })
 
 songPageHandler :: forall e. Handler e
@@ -94,9 +95,10 @@ songPageHandler = do
       Nothing -> nextThrow $ error "Id is required"
       Just id -> do
         let s = unsafePerformEff $ catchException (\_ -> pure "") (readTextFile UTF8 "song.json")
-        send $ index (init {
-            currentPage = (SongPage 0),
-            io = { searchResults: Empty, song: Loaded(readJSON s)}
+        send $ index (State {
+            currentPage: (SongPage 0),
+            io: IOState { searchResults: Empty, song: Loaded(readJSON s)},
+            ui: UIState { searchQuery: "" }
         })
 
 homePageHandler :: forall e. Handler e

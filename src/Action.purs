@@ -16,7 +16,7 @@ import Pux.Router (navigateTo)
 
 import Route (Route(SongPage, SearchResultPage))
 import Model (SearchResults, Song)
-import App (State, UIState, AsyncData(Loading, Loaded))
+import App (State(State), UIState(UIState), IOState(IOState), AsyncData(Loading, Loaded))
 
 
 data Action =
@@ -36,39 +36,40 @@ type Affction = EffModel State Action (ajax :: AJAX, dom :: DOM)
 
 
 update :: Action -> State -> Affction
-update (PageView p@(SongPage s)) state =
-    updateIO (RequestSong s) (state { currentPage = p })
-update (PageView p@(SearchResultPage s)) state@{ currentPage: (SearchResultPage q) }
-    | s == q = noEffects state { ui = { searchQuery: q } }
-update (PageView p@(SearchResultPage q)) state =
-    updateIO (RequestSearch q) (state { currentPage = p, ui = { searchQuery: q } })
-update (PageView p) state = noEffects $ state { currentPage = p }
+update (PageView p@(SongPage s)) (State state) =
+    updateIO (RequestSong s) (State (state { currentPage = p }))
+update (PageView p@(SearchResultPage s)) (State state@{ currentPage: (SearchResultPage q) })
+    | s == q = noEffects $ State state { ui = UIState { searchQuery: q } }
+update (PageView p@(SearchResultPage q)) (State state) =
+    updateIO (RequestSearch q) (State state { currentPage = p, ui = UIState { searchQuery: q } })
+update (PageView p) (State state) = noEffects $ State state { currentPage = p }
 update (IOAction a) state = updateIO a state
-update (UIAction a) state = noEffects $ state { ui = updateUI a state.ui }
+update (UIAction a) (State state@{ ui }) = noEffects $ State state { ui = updateUI a ui }
 
 --- UI Actions
 
 updateUI :: UIAction -> UIState -> UIState
-updateUI (SearchChange ev) state = state { searchQuery = ev.target.value }
+updateUI (SearchChange ev) (UIState state) = UIState state { searchQuery = ev.target.value }
 
 --- IO Actions
 
 updateIO :: IOAction -> State -> Affction
 
-updateIO (RequestSearch q) state = {
-    state: state { io = state.io { searchResults = Loading } }
+updateIO (RequestSearch q) (State state@{ ui: UIState { searchQuery }, io: IOState { song }}) = {
+    state: State $ state { io = IOState { searchResults: Loading, song: song } }
   , effects: [ do
         liftEff $ navigateTo $ "/search?q=" <> q
-        res <- fetchSearch state.ui.searchQuery
+        res <- fetchSearch searchQuery
         let results = (readJSON res) :: F SearchResults
         pure $ IOAction $ ReceiveSearch results
     ]
 }
 
-updateIO (ReceiveSearch r) state = noEffects $ state { io = state.io { searchResults = Loaded r } }
+updateIO (ReceiveSearch r) (State state@{ io: IOState { song } }) =
+    noEffects $ State $ state { io = IOState { searchResults: Loaded r, song: song } }
 
-updateIO (RequestSong id) state = {
-    state: state { io = state.io { song = Loading } }
+updateIO (RequestSong id) (State state@{ io: IOState { searchResults } }) = {
+    state: State $ state { io = IOState { song: Loading, searchResults } }
   , effects: [ do
         res <- fetchSong id
         let song = (readJSON res) :: F Song
@@ -76,7 +77,8 @@ updateIO (RequestSong id) state = {
     ]
 }
 
-updateIO (ReceiveSong s) state = noEffects $ state { io = state.io { song = Loaded s } }
+updateIO (ReceiveSong s) (State state@{ io: IOState { searchResults } }) =
+    noEffects $ State $ state { io = IOState { song: Loaded s, searchResults } }
 
 --- AJAX Requests
 
