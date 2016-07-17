@@ -1,13 +1,14 @@
 module Model where
 
-import Prelude (pure, class Show, bind, ($), (<$>), show)
+import Prelude (pure, class Show, bind, ($), (<$>), show, class Eq, (==), (&&))
 
 import Data.Foreign.Class (class IsForeign, readProp, read)
 import Data.Foreign.Null (unNull)
 import Data.Foreign (readString, F, ForeignError(TypeMismatch))
 import Data.Either (Either(Left))
-import Data.Maybe (Maybe())
+import Data.Maybe (Maybe(Nothing))
 import Data.Argonaut (class EncodeJson, encodeJson, (:=), (~>), jsonEmptyObject, fromArray)
+import Test.QuickCheck.Arbitrary (class Arbitrary, arbitrary)
 
 import Parser (SongChord)
 
@@ -61,6 +62,26 @@ newtype SongMeta = SongMeta {
     year :: Year
 }
 
+instance eqSongMeta :: Eq SongMeta where
+    eq
+    (SongMeta { title, artist, album, year })
+    (SongMeta { title: title', artist: artist', album: album', year: year' }) =
+        title == title' && artist == artist' && album == album' && year == year'
+    eq _ _ = false
+
+instance arbSongMeta :: Arbitrary SongMeta where
+    arbitrary = do
+        title <- arbitrary
+        artist <- arbitrary
+        album <- arbitrary
+        year <- arbitrary
+        pure $ SongMeta {
+            title: title,
+            artist: artist,
+            album: album,
+            year: year
+        }
+
 instance encodeJsonSongMeta :: EncodeJson SongMeta where
     encodeJson (SongMeta { title, artist, album, year: Year(y) })
         = "title" := title
@@ -80,6 +101,12 @@ instance isForeignSongMeta :: IsForeign SongMeta where
         pure $ SongMeta { title, artist, album, year }
 
 newtype Year = Year Int
+
+instance arbYear :: Arbitrary Year where
+    arbitrary = Year <$> arbitrary
+
+instance eqYear :: Eq Year where
+    eq (Year y) (Year y') = y == y'
 
 instance isForeignYear :: IsForeign Year where
     read value = do
