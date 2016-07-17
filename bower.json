@@ -22,7 +22,8 @@
     "purescript-options": "^1.0.0",
     "purescript-easy-ffi": "^2.0.0",
     "purescript-argonaut": "^1.0.0",
-    "purescript-node-fs": "^1.0.0"
+    "purescript-node-fs": "^1.0.0",
+    "purescript-globals": "^1.0.0"
   },
   "devDependencies": {
     "purescript-quickcheck": "^1.0.0",
