@@ -46,6 +46,7 @@
     "purescript-control": "^1.0.0",
     "purescript-maybe": "~1.0.0",
     "purescript-foreign": "^1.0.0",
+    "purescript-proxy": "^1.0.0",
     "purescript-tuples": "^1.0.0",
     "purescript-dom": "^1.1.0",
     "purescript-nullable": "^1.0.1",
