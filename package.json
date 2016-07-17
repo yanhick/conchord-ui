@@ -3,6 +3,9 @@
   "version": "0.0.6",
   "description": "A UI for the conchord file format",
   "main": "index.js",
+  "engines": {
+      "node": "6.0.0"
+  },
   "scripts": {
     "clean": "rm -rf node_modules bower_components app.js server-output output",
     "start": "node index.js",
