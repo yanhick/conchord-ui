@@ -4,3 +4,4 @@ dist: trusty
 node_js: 6
 script:
     - npm run build
+    - npm test
