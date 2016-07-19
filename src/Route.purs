@@ -1,6 +1,8 @@
 module Route where
 
-import Prelude (($), (<$>), (<>), show, bind)
+import Prelude (($), (<$>), (<>), show, bind, class Eq, (==))
+import Global (decodeURIComponent)
+
 import Data.Functor ((<$))
 import Data.Maybe (Maybe(Just, Nothing), fromMaybe)
 import Data.String (stripPrefix)
@@ -29,6 +31,13 @@ instance isForeignRoute :: IsForeign Route where
         s <- readString value
         toRoute s
 
+instance eqRoute :: Eq Route where
+    eq HomePage HomePage = true
+    eq (SearchResultPage s) (SearchResultPage s') = s == s'
+    eq (SongPage id) (SongPage id') = id == id'
+    eq NotFoundPage NotFoundPage = true
+    eq _ _ = false
+
 toRoute :: String -> F Route
 toRoute "HomePage" = Right HomePage
 toRoute "NotFoundPage" = Right NotFoundPage
@@ -47,4 +56,4 @@ match url = fromMaybe NotFoundPage $ router url $
             <|>
             SongPage <$> (lit "song" *> int) <* end
             <|>
-            SearchResultPage <$> (lit "search" *> (param "q")) <* end
+            SearchResultPage <$> (lit "search" *> (decodeURIComponent <$> (param "q"))) <* end

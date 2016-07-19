@@ -9,7 +9,6 @@ import Network.HTTP.Affjax (AJAX(), get)
 import Network.HTTP.StatusCode (StatusCode(..))
 import Control.Monad.Eff.Class (liftEff)
 import DOM (DOM())
-import Global (decodeURIComponent)
 
 import Pux (EffModel, noEffects)
 import Pux.Html.Events (FormEvent)
@@ -37,15 +36,21 @@ type Affction = EffModel State Action (ajax :: AJAX, dom :: DOM)
 
 
 update :: Action -> State -> Affction
-update (PageView p@(SongPage s)) (State state) =
-    updateIO (RequestSong s) (State (state { currentPage = p }))
-update (PageView p@(SearchResultPage q)) (State state@{ currentPage: (SearchResultPage q') })
-    | q == q' = noEffects $ State state { ui = UIState { searchQuery: decodeURIComponent q } }
-update (PageView p@(SearchResultPage q)) (State state) =
-    updateIO (RequestSearch q) (State state { currentPage = p, ui = UIState { searchQuery: decodeURIComponent q } })
-update (PageView p) (State state) = noEffects $ State state { currentPage = p }
+update (PageView p) state = updatePage p state
 update (IOAction a) state = updateIO a state
 update (UIAction a) (State state@{ ui }) = noEffects $ State state { ui = updateUI a ui }
+
+--- PageView Actions
+
+updatePage :: Route -> State -> Affction
+updatePage r (State state@{ currentPage: r' })
+    | r == r' = noEffects $ State state
+updatePage p@(SongPage s) (State state) =
+    updateIO (RequestSong s) (State (state { currentPage = p }))
+updatePage p@(SearchResultPage q) (State state) =
+    updateIO (RequestSearch q) (State state { currentPage = p, ui = UIState { searchQuery: q } })
+updatePage p (State state) = noEffects $ State state { currentPage = p }
+
 
 --- UI Actions
 
