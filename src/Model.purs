@@ -6,7 +6,7 @@ import Data.Foreign.Class (class IsForeign, readProp, read)
 import Data.Foreign.Null (unNull)
 import Data.Foreign (readString, F, ForeignError(TypeMismatch))
 import Data.Either (Either(Left))
-import Data.Maybe (Maybe(Nothing))
+import Data.Maybe (Maybe())
 import Data.Argonaut (class EncodeJson, encodeJson, (:=), (~>), jsonEmptyObject, fromArray)
 import Test.QuickCheck.Arbitrary (class Arbitrary, arbitrary)
 
@@ -67,7 +67,6 @@ instance eqSongMeta :: Eq SongMeta where
     (SongMeta { title, artist, album, year })
     (SongMeta { title: title', artist: artist', album: album', year: year' }) =
         title == title' && artist == artist' && album == album' && year == year'
-    eq _ _ = false
 
 instance arbSongMeta :: Arbitrary SongMeta where
     arbitrary = do
