@@ -64,8 +64,15 @@ updatePage p (State state) = noEffects $ State state { currentPage = p }
 
 updateUI :: UIAction -> State -> Affction
 
-updateUI (SearchChange { target: { value } }) (State state@{ ui: UIState { headerVisibility } })
-    = noEffects $ State state { ui = UIState { searchQuery: value, headerVisibility } }
+updateUI (SearchChange { target: { value } }) (State state@{ ui: UIState { headerVisibility } }) =
+    noEffects $ State state { ui = UIState { searchQuery: value, headerVisibility } }
+
+updateUI SetShowHeader (State state@{ ui: UIState { headerVisibility: HideHeader, searchQuery } }) = {
+    state: State state { ui = UIState { headerVisibility: HideHeader, searchQuery } },
+    effects: [ do
+        pure $ UIAction SetHideHeaderTimeout
+    ]
+}
 
 updateUI SetShowHeader (State state@{ ui: UIState { searchQuery } }) =
     noEffects $ State state { ui = UIState { headerVisibility: ShowHeader, searchQuery } }
@@ -83,7 +90,7 @@ updateUI UpdateHeaderVisibility state = {
 updateUI SetHideHeaderTimeout (State state@{ ui: UIState { searchQuery } }) = {
     state: State state { ui = UIState { headerVisibility: PendingHideHeader, searchQuery } },
     effects: [ do
-        later' 5000 $ logShow ""
+        later' 3000 $ logShow ""
         pure $ UIAction UpdateHeaderVisibility
     ]
 }
