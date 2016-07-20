@@ -18,7 +18,7 @@ import Pux.Router (navigateTo)
 
 import Route (Route(SongPage, SearchResultPage))
 import Model (SearchResults, Song)
-import App (State(State), UIState(UIState), IOState(IOState), AsyncData(Loading, Loaded), HeaderVisibility(PendingHideHeader, HideHeader))
+import App (State(State), UIState(UIState), IOState(IOState), AsyncData(Loading, Loaded), HeaderVisibility(PendingHideHeader, HideHeader, ShowHeader))
 
 
 data Action =
@@ -30,7 +30,8 @@ data Action =
 data UIAction =
     SearchChange FormEvent |
     UpdateHeaderVisibility |
-    SetHideHeaderTimeout
+    SetHideHeaderTimeout |
+    SetShowHeader
 
 data IOAction =
     RequestSong Int |
@@ -65,6 +66,9 @@ updateUI :: UIAction -> State -> Affction
 
 updateUI (SearchChange { target: { value } }) (State state@{ ui: UIState { headerVisibility } })
     = noEffects $ State state { ui = UIState { searchQuery: value, headerVisibility } }
+
+updateUI SetShowHeader (State state@{ ui: UIState { searchQuery } }) =
+    noEffects $ State state { ui = UIState { headerVisibility: ShowHeader, searchQuery } }
 
 updateUI UpdateHeaderVisibility (State state@{ ui: UIState { headerVisibility: PendingHideHeader, searchQuery } }) =
     noEffects $ State state { ui = UIState { headerVisibility: HideHeader, searchQuery } }
@@ -109,8 +113,12 @@ updateIO (RequestSong id) (State state@{ io: IOState { searchResults } }) = {
     ]
 }
 
-updateIO (ReceiveSong s) (State state@{ io: IOState { searchResults } }) =
-    noEffects $ State $ state { io = IOState { song: Loaded s, searchResults } }
+updateIO (ReceiveSong s) (State state@{ io: IOState { searchResults } }) = {
+    state: State $ state { io = IOState { song: Loaded s, searchResults } },
+    effects: [ do
+        pure $ UIAction SetHideHeaderTimeout
+    ]
+}
 
 --- AJAX Requests
 
