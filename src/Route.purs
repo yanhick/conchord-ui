@@ -1,17 +1,16 @@
 module Route where
 
-import Prelude (($), (<$>), (<>), show, bind, class Eq, (==))
+import Prelude (($), (<$>), (<>), show, class Eq, (==))
 import Global (decodeURIComponent)
 
 import Data.Functor ((<$))
-import Data.Maybe (Maybe(Just, Nothing), fromMaybe)
-import Data.String (stripPrefix)
-import Data.Either (Either(Left, Right))
+import Data.Maybe (fromMaybe)
+import Data.Generic (class Generic, gEq)
 import Control.Alt ((<|>))
 import Control.Apply ((<*), (*>))
 
 import Data.Foreign.Class (class IsForeign)
-import Data.Foreign (readString, ForeignError(TypeMismatch), F)
+import Data.Foreign.Generic (readGeneric, defaultOptions)
 
 import Data.Argonaut (class EncodeJson, (:=), (~>), fromString)
 
@@ -20,6 +19,8 @@ import Pux.Router (router, lit, int, end, param)
 
 data Route = HomePage | SearchResultPage String | SongPage Int | NotFoundPage
 
+derive instance genericRoute :: Generic Route
+
 instance encodeJsonRoute :: EncodeJson Route where
     encodeJson HomePage = fromString "HomePage"
     encodeJson (SearchResultPage q) = fromString $ "SearchResultPage " <> q
@@ -27,28 +28,10 @@ instance encodeJsonRoute :: EncodeJson Route where
     encodeJson NotFoundPage = fromString "NotFoundPage"
 
 instance isForeignRoute :: IsForeign Route where
-    read value = do
-        s <- readString value
-        toRoute s
+    read = readGeneric defaultOptions
 
 instance eqRoute :: Eq Route where
-    eq HomePage HomePage = true
-    eq (SearchResultPage s) (SearchResultPage s') = s == s'
-    eq (SongPage id) (SongPage id') = id == id'
-    eq NotFoundPage NotFoundPage = true
-    eq _ _ = false
-
-toRoute :: String -> F Route
-toRoute "HomePage" = Right HomePage
-toRoute "NotFoundPage" = Right NotFoundPage
-toRoute r =
-    case stripPrefix "SongPage " r of
-        Just id -> Right $ SongPage 0
-        Nothing ->
-            case stripPrefix "SearchResultPage " r of
-                Just q -> Right $ SearchResultPage q
-                Nothing -> Left $ TypeMismatch "Route" r
-
+    eq = gEq
 
 match :: String -> Route
 match url = fromMaybe NotFoundPage $ router url $
