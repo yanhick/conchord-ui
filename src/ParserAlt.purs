@@ -26,7 +26,8 @@ interval = string "7" $> Seventh
 
 quality :: Parser SongChordQuality
 quality =   string "m" $> Minor
-        <|> Major
+        <|> pure Major
+
 
 chord :: Parser SongChord
 chord = do
