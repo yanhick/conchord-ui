@@ -25,7 +25,7 @@ import Signal.Channel (CHANNEL())
 import Pux (renderToString, start)
 import Signal ((~>))
 import Route (Route(SearchResultPage, SongPage))
-import App (init, AsyncData(Loaded, Empty), State(State), UIState(UIState), IOState(IOState))
+import App (init, AsyncData(Loaded, Empty), State(State), UIState(UIState), IOState(IOState), HeaderVisibility(ShowHeader))
 import Action (update)
 import View (view)
 
@@ -85,7 +85,7 @@ searchPageHandler = do
     send $ index (State {
         currentPage: (SearchResultPage $ maybe "" id qParam),
         io: IOState { searchResults: Loaded(pure getSearchResults), song: Empty },
-        ui: UIState { searchQuery: maybe "" id qParam }
+        ui: UIState { searchQuery: maybe "" id qParam, headerVisibility: ShowHeader }
     })
 
 songPageHandler :: forall e. Handler e
@@ -98,7 +98,7 @@ songPageHandler = do
         send $ index (State {
             currentPage: (SongPage 0),
             io: IOState { searchResults: Empty, song: Loaded(readJSON s)},
-            ui: UIState { searchQuery: "" }
+            ui: UIState { searchQuery: "", headerVisibility: ShowHeader }
         })
 
 homePageHandler :: forall e. Handler e
@@ -130,7 +130,8 @@ renderApp :: State -> Eff (
     dom :: DOM,
     channel :: CHANNEL,
     ajax :: AJAX,
-    err :: EXCEPTION
+    err :: EXCEPTION,
+    console :: CONSOLE
 ) String
 renderApp s = do
 

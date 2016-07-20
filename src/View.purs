@@ -8,14 +8,14 @@ import Data.Either (Either(Left, Right))
 import Pux.Html (Html, section, div, main, p, text, header, article
                 , h1, h2, h3, h4, h5, h6, span, i, nav, li, ul, form
                 , input, (#), (!), bind)
-import Pux.Html.Events (onSubmit, onChange)
+import Pux.Html.Events (onSubmit, onChange, onClick)
 import Pux.Html.Attributes (name, placeholder, type_, value, data_, action, method)
 import Pux.Router (link)
 
 import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(SongLyric), SearchResult(SearchResult), Year(Year))
-import Action (Action(UIAction, PageView), UIAction(SearchChange))
+import Action (Action(UIAction, PageView), UIAction(SearchChange, SetHideHeaderTimeout))
 import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage))
-import App (State(State), AsyncData(Loading, Loaded, Empty), UIState(UIState), IOState(IOState))
+import App (State(State), AsyncData(Loading, Loaded, Empty), UIState(UIState), IOState(IOState), HeaderVisibility(HideHeader))
 
 
 view :: State -> Html Action
@@ -41,7 +41,7 @@ header_ (IOState { searchResults }) (UIState { searchQuery }) =
 
 songPageHeader :: UIState -> Html Action
 songPageHeader (UIState { searchQuery }) =
-    header # do
+    header ! onClick (const $ UIAction SetHideHeaderTimeout) # do
         nav # do
             searchForm searchQuery
 
@@ -90,6 +90,9 @@ searchForm q =
 --- Song Views
 
 songPage :: IOState -> UIState -> Html Action
+songPage io ui@(UIState { headerVisibility: HideHeader }) =
+    div # do
+        songPageContent io ui
 songPage io ui =
     div # do
         songPageHeader ui

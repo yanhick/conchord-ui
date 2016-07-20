@@ -6,6 +6,7 @@ import Control.Monad.Eff (Eff())
 import Control.Monad.Eff.Exception (EXCEPTION())
 import DOM (DOM())
 import Signal.Channel (CHANNEL())
+import Control.Monad.Eff.Console (CONSOLE)
 import Network.HTTP.Affjax (AJAX())
 import Data.Foreign.Class (readJSON)
 import Data.Either (Either (Left, Right))
@@ -24,7 +25,8 @@ main :: Eff (
     dom :: DOM,
     channel :: CHANNEL,
     ajax :: AJAX,
-    err :: EXCEPTION
+    err :: EXCEPTION,
+    console :: CONSOLE
 ) Unit
 main = do
     urlSignal <- sampleUrl

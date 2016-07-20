@@ -4,7 +4,9 @@ import Prelude (($), bind, (<>), pure, show, (+), (-), (==))
 
 import Data.Foreign (F)
 import Data.Foreign.Class (readJSON)
-import Control.Monad.Aff (Aff())
+import Control.Monad.Aff (Aff(), later')
+import Control.Monad.Aff.Console (logShow)
+import Control.Monad.Eff.Console (CONSOLE)
 import Network.HTTP.Affjax (AJAX(), get)
 import Network.HTTP.StatusCode (StatusCode(..))
 import Control.Monad.Eff.Class (liftEff)
@@ -16,15 +18,19 @@ import Pux.Router (navigateTo)
 
 import Route (Route(SongPage, SearchResultPage))
 import Model (SearchResults, Song)
-import App (State(State), UIState(UIState), IOState(IOState), AsyncData(Loading, Loaded))
+import App (State(State), UIState(UIState), IOState(IOState), AsyncData(Loading, Loaded), HeaderVisibility(PendingHideHeader, HideHeader))
 
 
 data Action =
     IOAction IOAction |
     UIAction UIAction |
-    PageView Route
+    PageView Route |
+    Noop
 
-data UIAction = SearchChange FormEvent
+data UIAction =
+    SearchChange FormEvent |
+    UpdateHeaderVisibility |
+    SetHideHeaderTimeout
 
 data IOAction =
     RequestSong Int |
@@ -32,13 +38,14 @@ data IOAction =
     RequestSearch String |
     ReceiveSearch (F SearchResults)
 
-type Affction = EffModel State Action (ajax :: AJAX, dom :: DOM)
+type Affction = EffModel State Action (ajax :: AJAX, dom :: DOM, console :: CONSOLE)
 
 
 update :: Action -> State -> Affction
 update (PageView p) state = updatePage p state
 update (IOAction a) state = updateIO a state
-update (UIAction a) (State state@{ ui }) = noEffects $ State state { ui = updateUI a ui }
+update (UIAction a) state = updateUI a state
+update Noop state = noEffects state
 
 --- PageView Actions
 
@@ -47,20 +54,39 @@ updatePage r (State state@{ currentPage: r' })
     | r == r' = noEffects $ State state
 updatePage p@(SongPage s) (State state) =
     updateIO (RequestSong s) (State (state { currentPage = p }))
-updatePage p@(SearchResultPage q) (State state) =
-    updateIO (RequestSearch q) (State state { currentPage = p, ui = UIState { searchQuery: q } })
+updatePage p@(SearchResultPage q) (State state@{ ui: UIState { headerVisibility } }) =
+    updateIO (RequestSearch q) (State state { currentPage = p, ui = UIState { searchQuery: q, headerVisibility } })
 updatePage p (State state) = noEffects $ State state { currentPage = p }
 
 
 --- UI Actions
 
-updateUI :: UIAction -> UIState -> UIState
-updateUI (SearchChange ev) (UIState state) = UIState state { searchQuery = ev.target.value }
+updateUI :: UIAction -> State -> Affction
+
+updateUI (SearchChange { target: { value } }) (State state@{ ui: UIState { headerVisibility } })
+    = noEffects $ State state { ui = UIState { searchQuery: value, headerVisibility } }
+
+updateUI UpdateHeaderVisibility (State state@{ ui: UIState { headerVisibility: PendingHideHeader, searchQuery } }) =
+    noEffects $ State state { ui = UIState { headerVisibility: HideHeader, searchQuery } }
+
+updateUI UpdateHeaderVisibility state = {
+    state: state,
+    effects: [ do
+        pure $ UIAction SetHideHeaderTimeout
+    ]
+}
+
+updateUI SetHideHeaderTimeout (State state@{ ui: UIState { searchQuery } }) = {
+    state: State state { ui = UIState { headerVisibility: PendingHideHeader, searchQuery } },
+    effects: [ do
+        later' 5000 $ logShow ""
+        pure $ UIAction UpdateHeaderVisibility
+    ]
+}
 
 --- IO Actions
 
 updateIO :: IOAction -> State -> Affction
-
 updateIO (RequestSearch q) (State state@{ ui: UIState { searchQuery }, io: IOState { song }}) = {
     state: State $ state { io = IOState { searchResults: Loading, song: song } }
   , effects: [ do

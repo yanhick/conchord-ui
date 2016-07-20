@@ -2,7 +2,7 @@ module App where
 
 import Prelude (bind, ($), pure, otherwise)
 
-import Data.Foreign (F, isNull)
+import Data.Foreign (F, isNull, readString, ForeignError(TypeMismatch))
 import Data.Foreign.Class (class IsForeign, readProp, read)
 import Data.Either (Either(Left, Right))
 import Data.Argonaut (class EncodeJson, encodeJson, (:=), (~>), jsonEmptyObject, jsonNull)
@@ -34,8 +34,22 @@ instance encodeJsonState :: EncodeJson State where
         ~> "io" := encodeJson io
         ~> jsonEmptyObject
 
+data HeaderVisibility = ShowHeader | HideHeader | PendingHideHeader
+
+instance isForeignHeaderVisibility :: IsForeign HeaderVisibility where
+    read value = do
+        s <- readString value
+        toHeaderVisibility s
+
+toHeaderVisibility :: String -> F HeaderVisibility
+toHeaderVisibility "ShowHeader" = pure ShowHeader
+toHeaderVisibility "HideHeader" = pure HideHeader
+toHeaderVisibility "PendingHideHeader" = pure PendingHideHeader
+toHeaderVisibility s = Left $ TypeMismatch "HeaderVisibility" s
+
 newtype UIState = UIState {
-    searchQuery :: String
+    searchQuery :: String,
+    headerVisibility :: HeaderVisibility
 }
 
 instance encodeJsonUIState :: EncodeJson UIState where
@@ -46,7 +60,8 @@ instance encodeJsonUIState :: EncodeJson UIState where
 instance isForeignUIState :: IsForeign UIState where
     read value = do
         searchQuery <- readProp "searchQuery" value
-        pure $ UIState { searchQuery }
+        headerVisibility <- readProp "headerVisibility" value
+        pure $ UIState { searchQuery, headerVisibility }
 
 data AsyncData a = Loaded (F a) | Loading | Empty
 
@@ -82,7 +97,8 @@ init :: State
 init = State {
     currentPage: HomePage
   , ui: UIState {
-      searchQuery: ""
+      searchQuery: "",
+      headerVisibility: ShowHeader
   }
   , io: IOState {
       searchResults: Empty
