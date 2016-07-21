@@ -7,7 +7,8 @@ import Data.Maybe (Maybe(Just))
 import Data.Generic (class Generic, gEq, gShow)
 import Data.Foreign.Generic (readGeneric, defaultOptions)
 
-import Test.QuickCheck.Arbitrary (class Arbitrary, arbitrary)
+import Test.StrongCheck.Arbitrary (class Arbitrary)
+import Test.StrongCheck.Generic (gArbitrary)
 
 import Parser (SongChord, exampleChord)
 
@@ -34,6 +35,14 @@ newtype Song = Song {
 
 derive instance genericSong :: Generic Song
 
+instance arbitrarySong :: Arbitrary Song where
+    arbitrary = gArbitrary
+
+instance showSong :: Show Song where
+    show = gShow
+
+instance eqSong :: Eq Song where
+    eq = gEq
 
 instance isForeignSong :: IsForeign Song where
     read = readGeneric defaultOptions
@@ -50,20 +59,6 @@ derive instance genericSongMeta :: Generic SongMeta
 instance eqSongMeta :: Eq SongMeta where
     eq = gEq
 
-instance arbSongMeta :: Arbitrary SongMeta where
-    arbitrary = do
-        title <- arbitrary
-        artist <- arbitrary
-        album <- arbitrary
-        year <- arbitrary
-        pure $ SongMeta {
-            title: title,
-            artist: artist,
-            album: album,
-            year: year
-        }
-
-
 newtype Album = Album (Maybe String)
 
 instance isForeignSongMeta :: IsForeign SongMeta where
@@ -74,7 +69,7 @@ newtype Year = Year Int
 derive instance genericYear :: Generic Year
 
 instance arbYear :: Arbitrary Year where
-    arbitrary = Year <$> arbitrary
+    arbitrary = gArbitrary
 
 instance eqYear :: Eq Year where
     eq = gEq
