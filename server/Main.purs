@@ -72,7 +72,7 @@ appSetup = do
     get "/:file"       fileHandler
     get "/"            homePageHandler
     get "/api/search"   searchApiHandler
-    get "/api/song/:id" songHandler
+    get "/api/song/:id" songApiHandler
     useOnError         errorHandler
 
 fileHandler :: forall e. Handler e
@@ -98,7 +98,7 @@ songPageHandler = do
         let s = unsafePerformEff $ catchException (\_ -> pure "") (readTextFile UTF8 "song.json")
         send $ index (State {
             currentPage: (SongPage 0),
-            io: IOState { searchResults: Empty, song: either (const LoadError) Loaded (readJSON s)},
+            io: IOState { searchResults: Empty, song: either (LoadError <<< show) Loaded (readJSON s)},
             ui: UIState { searchQuery: "", headerVisibility: ShowHeader }
         })
 
@@ -108,10 +108,10 @@ homePageHandler = send $ index init
 searchApiHandler :: forall e. Handler e
 searchApiHandler = do
     qParam <- getQueryParam "q"
-    sendJson $ toJSONGeneric defaultOptions { unwrapNewtypes = true } getSearchResults
+    send $ toJSONGeneric defaultOptions { unwrapNewtypes = true } getSearchResults
 
-songHandler :: forall e. Handler e
-songHandler = do
+songApiHandler :: forall e. Handler e
+songApiHandler = do
     idParam <- getRouteParam "id"
     case idParam of
       Nothing -> nextThrow $ error "Id is required"
@@ -156,7 +156,7 @@ index s =
         </head>
         <body>
             <div id="app">""" <> renderAppHandler s <> """</div>
-                     <script>window.puxLastState =  """ <> (toJSONGeneric defaultOptions { unwrapNewtypes = true } s) <> """</script>
+                     <script>window.puxLastState =  JSON.stringify(""" <> (toJSONGeneric defaultOptions { unwrapNewtypes = true } s) <> """);</script>
             <script src="/app.js"></script>
         </body>
     </html>

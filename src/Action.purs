@@ -112,8 +112,8 @@ updateIO (RequestSearch q) (State state@{ ui: UIState { searchQuery }, io: IOSta
 updateIO (ReceiveSearch (Right r)) (State state@{ io: IOState { song } }) =
     noEffects $ State $ state { io = IOState { searchResults: Loaded r, song: song } }
 
-updateIO (ReceiveSearch (Left _)) (State state@{ io: IOState { song } }) =
-    noEffects $ State $ state { io = IOState { searchResults: LoadError, song: song } }
+updateIO (ReceiveSearch (Left e)) (State state@{ io: IOState { song } }) =
+    noEffects $ State $ state { io = IOState { searchResults: LoadError (show e), song: song } }
 
 updateIO (RequestSong id) (State state@{ io: IOState { searchResults } }) = {
     state: State $ state { io = IOState { song: Loading, searchResults } }
@@ -131,8 +131,8 @@ updateIO (ReceiveSong (Right s)) (State state@{ io: IOState { searchResults } })
     ]
 }
 
-updateIO (ReceiveSong (Left _)) (State state@{ io: IOState { searchResults } }) = {
-    state: State $ state { io = IOState { song: LoadError, searchResults } },
+updateIO (ReceiveSong (Left e)) (State state@{ io: IOState { searchResults } }) = {
+    state: State $ state { io = IOState { song: LoadError (show e), searchResults } },
     effects: [ do
         pure $ UIAction SetHideHeaderTimeout
     ]

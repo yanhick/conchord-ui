@@ -69,7 +69,7 @@ searchResultPageContent :: IOState -> UIState -> Html Action
 searchResultPageContent (IOState { searchResults: Empty }) _ = ul # text ""
 searchResultPageContent (IOState { searchResults: Loading }) _ = ul # text "Loading..."
 searchResultPageContent (IOState { searchResults: Loaded s }) _ = ul [] (searchResult <$> s)
-searchResultPageContent (IOState { searchResults: LoadError }) _ = ul # text "Could not find results"
+searchResultPageContent (IOState { searchResults: (LoadError e) }) _ = ul # text e
 
 
 searchResult :: SearchResult -> Html Action
@@ -101,7 +101,7 @@ songPage io ui =
 songPageContent :: IOState -> UIState -> Html Action
 songPageContent (IOState { song: Empty }) _ = main # text ""
 songPageContent (IOState { song: Loading }) _ = main # text "Loading Song"
-songPageContent (IOState { song: LoadError }) _ = main # text "Could not load song"
+songPageContent (IOState { song: (LoadError e) }) _ = main # text e
 songPageContent (IOState { song: Loaded (Song { meta, content }), searchResults }) (UIState { searchQuery }) =
     main # do
         songMeta meta

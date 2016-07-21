@@ -50,7 +50,8 @@ derive instance genericUIState :: Generic UIState
 instance isForeignUIState :: IsForeign UIState where
     read = readGeneric defaultOptions { unwrapNewtypes = true }
 
-data AsyncData a = Loaded a | Loading | Empty | LoadError
+type Error = String
+data AsyncData a = Loaded a | Loading | Empty | LoadError String
 
 derive instance genericAsyncDataSearchResult :: Generic (AsyncData (Array SearchResult))
 derive instance genericAsyncDataSong :: Generic (AsyncData Song)
