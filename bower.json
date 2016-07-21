@@ -25,7 +25,9 @@
     "purescript-node-fs": "^1.0.0",
     "purescript-globals": "^1.0.0",
     "purescript-foreign-generic": "^1.0.0",
-    "purescript-string-parsers": "^1.0.1"
+    "purescript-string-parsers": "^1.0.1",
+    "purescript-strongcheck": "^1.1.1",
+    "purescript-strongcheck-generics": "^0.4.0"
   },
   "devDependencies": {
     "purescript-quickcheck": "^1.0.0",

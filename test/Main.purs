@@ -1,17 +1,20 @@
 module Test.Main where
 
-import Prelude ((==), ($), Unit, show, (<>))
-import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Console (CONSOLE, log)
-import Control.Monad.Eff.Exception (EXCEPTION)
-import Control.Monad.Eff.Random (RANDOM)
-import Data.Foreign (F)
-import Data.Foreign.Class (readJSON)
-import Data.Either (Either (Left, Right))
-import Test.QuickCheck (quickCheck, (<?>))
+import Prelude ((==), ($), (<>), show, const)
 
-import Model (SongMeta())
+import Data.Foreign.Class (read)
+import Data.Foreign (toForeign)
+import Data.Either (either)
 
-main :: forall e. Eff (console :: CONSOLE, random :: RANDOM, err :: EXCEPTION | e) Unit
+import Test.StrongCheck (quickCheck, (<?>))
+
+
+import Parser (SongChord)
+
 main = do
-    log "test"
+    quickCheck \(c :: SongChord) ->
+        let
+            res = either (const false) ((==) c) (test c)
+            test c' = read $ toForeign $ show c'
+        in
+            res <?> "SongChord encode/decode not idempotent for: " <> show c

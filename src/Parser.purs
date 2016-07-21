@@ -1,18 +1,21 @@
 module Parser where
 
-import Prelude (pure, class Show, bind, ($), (>>=), Unit(), (<>), show, (<$>), (<*>))
+import Prelude (pure, class Show, bind, ($), (>>=), Unit(), (<>), show, (<$>), (<*>), class Eq)
 import Data.Functor (($>))
 import Data.Maybe (Maybe(Just), maybe)
 import Data.Either (Either(Left, Right))
 import Data.Foreign.Class (class IsForeign)
 import Data.Foreign (readString, ForeignError(TypeMismatch))
-import Data.Generic (class Generic)
+import Data.Generic (class Generic, gEq, gShow)
 import Data.Foreign.Generic (readGeneric, defaultOptions)
 import Control.Alt ((<|>))
 
 import Text.Parsing.StringParser (Parser, runParser)
 import Text.Parsing.StringParser.String (string, eof)
 import Text.Parsing.StringParser.Combinators (optionMaybe)
+
+import Test.StrongCheck.Arbitrary (class Arbitrary, arbitrary)
+import Test.StrongCheck.Generic (gArbitrary)
 
 instance isForeignSongChord :: IsForeign SongChord where
     read value = do
@@ -37,6 +40,12 @@ exampleChord = SongChord {
 }
 
 derive instance genericSongChord :: Generic SongChord
+
+instance arbitrarySongChord :: Arbitrary SongChord where
+    arbitrary = gArbitrary
+
+instance eqSongChord :: Eq SongChord where
+    eq = gEq
 
 instance showSongChord :: Show SongChord where
     show (SongChord { root, rootModifier, quality, interval }) =
