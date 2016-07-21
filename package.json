@@ -13,7 +13,7 @@
     "build": "pulp browserify -t app.js -I src --src-path client && pulp build -o server-output --src-path server -I src",
     "dev-client": "pulp -w browserify -t app.js -I src --src-path client",
     "dev-server": "pulp -w --then \"node index\" build -o server-output --src-path server -I src",
-    "release": "npm run build && git add app.js -f && git add server-output -f && git commit -m'release' && git push heroku HEAD:master -f && git reset --hard HEAD^",
+    "release": "npm test && npm run build && git add app.js -f && git add server-output -f && git commit -m'release' && git push heroku HEAD:master -f && git reset --hard HEAD^",
     "postinstall": "bower install"
   },
   "author": "Yannick Dominguez",
