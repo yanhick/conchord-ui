@@ -8,6 +8,9 @@ import Data.Foreign (readString, F, ForeignError(TypeMismatch))
 import Data.Either (Either(Left))
 import Data.Maybe (Maybe())
 import Data.Argonaut (class EncodeJson, encodeJson, (:=), (~>), jsonEmptyObject, fromArray)
+import Data.Generic (class Generic, gEq)
+import Data.Foreign.Generic (readGeneric, defaultOptions)
+
 import Test.QuickCheck.Arbitrary (class Arbitrary, arbitrary)
 
 import Parser (SongChord)
@@ -62,11 +65,10 @@ newtype SongMeta = SongMeta {
     year :: Year
 }
 
+derive instance genericSongMeta :: Generic SongMeta
+
 instance eqSongMeta :: Eq SongMeta where
-    eq
-    (SongMeta { title, artist, album, year })
-    (SongMeta { title: title', artist: artist', album: album', year: year' }) =
-        title == title' && artist == artist' && album == album' && year == year'
+    eq = gEq
 
 instance arbSongMeta :: Arbitrary SongMeta where
     arbitrary = do
@@ -101,16 +103,16 @@ instance isForeignSongMeta :: IsForeign SongMeta where
 
 newtype Year = Year Int
 
+derive instance genericYear :: Generic Year
+
 instance arbYear :: Arbitrary Year where
     arbitrary = Year <$> arbitrary
 
 instance eqYear :: Eq Year where
-    eq (Year y) (Year y') = y == y'
+    eq = gEq
 
 instance isForeignYear :: IsForeign Year where
-    read value = do
-        y <- read value
-        pure $ Year y
+    read = readGeneric defaultOptions { unwrapNewtypes = true }
 
 newtype SongContent = SongContent (Array SongSection)
 
