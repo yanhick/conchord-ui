@@ -116,7 +116,7 @@ songApiHandler = do
     case idParam of
       Nothing -> nextThrow $ error "Id is required"
       Just id -> do
-        sendFile "song.json"
+        send $ toJSONGeneric defaultOptions exampleSong
 
 errorHandler :: forall e. Error -> Handler e
 errorHandler err = do
