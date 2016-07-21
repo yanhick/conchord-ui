@@ -19,14 +19,12 @@ instance isForeignSongChord :: IsForeign SongChord where
           Left _ -> Left $ TypeMismatch s "Valid chord"
           Right c -> Right c
 
-type SongChordFields = {
+newtype SongChord = SongChord {
     root :: SongChordRoot,
     rootModifier :: Maybe SongChordRootModifier,
     quality :: SongChordQuality,
     interval :: Maybe SongChordInterval
 }
-
-newtype SongChord = SongChord SongChordFields
 
 instance showSongChord :: Show SongChord where
     show (SongChord { root, rootModifier, quality, interval }) =
