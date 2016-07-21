@@ -5,7 +5,6 @@ import Prelude (bind, ($), pure, otherwise)
 import Data.Foreign (F, isNull, readString, ForeignError(TypeMismatch))
 import Data.Foreign.Class (class IsForeign, readProp, read)
 import Data.Either (Either(Left, Right))
-import Data.Argonaut (class EncodeJson, encodeJson, (:=), (~>), jsonEmptyObject, jsonNull)
 import Data.Generic (class Generic, gEq, gShow)
 import Data.Foreign.Generic (readGeneric, defaultOptions, toJSONGeneric)
 
@@ -26,12 +25,6 @@ derive instance genericState :: Generic State
 instance isForeignState :: IsForeign State where
     read = readGeneric defaultOptions { unwrapNewtypes = true }
 
-instance encodeJsonState :: EncodeJson State where
-    encodeJson (State { currentPage, ui, io })
-        = "currentPage" := encodeJson currentPage
-        ~> "ui" := encodeJson ui
-        ~> "io" := encodeJson io
-        ~> jsonEmptyObject
 
 data HeaderVisibility = ShowHeader | HideHeader | PendingHideHeader
 
@@ -53,10 +46,6 @@ newtype UIState = UIState {
 
 derive instance genericUIState :: Generic UIState
 
-instance encodeJsonUIState :: EncodeJson UIState where
-    encodeJson (UIState { searchQuery })
-        = "searchQuery" := searchQuery
-        ~> jsonEmptyObject
 
 instance isForeignUIState :: IsForeign UIState where
     read = readGeneric defaultOptions { unwrapNewtypes = true }
@@ -66,11 +55,6 @@ data AsyncData a = Loaded a | Loading | Empty | LoadError
 derive instance genericAsyncDataSearchResult :: Generic (AsyncData (Array SearchResult))
 derive instance genericAsyncDataSong :: Generic (AsyncData Song)
 
-instance encodeJsonAsyncData :: (EncodeJson d) => EncodeJson (AsyncData d) where
-    encodeJson (Loaded d) = encodeJson d
-    encodeJson LoadError = jsonNull
-    encodeJson Loading = jsonNull
-    encodeJson Empty = jsonNull
 
 instance isForeignAsyncDataSong :: IsForeign (AsyncData Song) where
     read = readGeneric defaultOptions { unwrapNewtypes = true }
@@ -86,11 +70,6 @@ derive instance genericIOState :: Generic IOState
 instance isForeignIOState :: IsForeign IOState where
     read = readGeneric defaultOptions { unwrapNewtypes = true }
 
-instance encodeJsonIOState :: EncodeJson IOState where
-    encodeJson (IOState { searchResults, song })
-        = "searchResults" := encodeJson searchResults
-        ~> "song" := encodeJson song
-        ~> jsonEmptyObject
 
 init :: State
 init = State {

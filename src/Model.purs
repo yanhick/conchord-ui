@@ -7,7 +7,6 @@ import Data.Foreign.Null (unNull)
 import Data.Foreign (readString, F, ForeignError(TypeMismatch))
 import Data.Either (Either(Left))
 import Data.Maybe (Maybe())
-import Data.Argonaut (class EncodeJson, encodeJson, (:=), (~>), jsonEmptyObject, fromArray)
 import Data.Generic (class Generic, gEq, gShow)
 import Data.Foreign.Generic (readGeneric, defaultOptions, toJSONGeneric)
 
@@ -26,12 +25,6 @@ instance isForeignSearchResult :: IsForeign SearchResult where
 
 type SearchResults = Array SearchResult
 
-instance encodeJsonSearchResult :: EncodeJson SearchResult where
-    encodeJson (SearchResult { id, meta, desc })
-        = "id" := id
-        ~> "meta" := encodeJson meta
-        ~> "desc" := desc
-        ~> jsonEmptyObject
 
 
 --- Song Model
@@ -44,12 +37,6 @@ newtype Song = Song {
 
 derive instance genericSong :: Generic Song
 
-instance encodeJsonSong :: EncodeJson Song where
-    encodeJson (Song { id, meta, content })
-        = "id" := id
-        ~> "meta" := encodeJson meta
-        ~> "content" := encodeJson content
-        ~> jsonEmptyObject
 
 instance isForeignSong :: IsForeign Song where
     read = readGeneric defaultOptions { unwrapNewtypes = true }
@@ -79,13 +66,6 @@ instance arbSongMeta :: Arbitrary SongMeta where
             year: year
         }
 
-instance encodeJsonSongMeta :: EncodeJson SongMeta where
-    encodeJson (SongMeta { title, artist, album, year: Year(y) })
-        = "title" := title
-        ~> "artist" := artist
-        ~> "album" := album
-        ~> "year" := y
-        ~> jsonEmptyObject
 
 newtype Album = Album (Maybe String)
 
@@ -109,8 +89,6 @@ newtype SongContent = SongContent (Array SongSection)
 
 derive instance genericSongContent :: Generic SongContent
 
-instance encodeJsonSongContent :: EncodeJson SongContent where
-    encodeJson (SongContent s) = fromArray $ encodeJson <$> s
 
 instance isForeignSongContent :: IsForeign SongContent where
     read = readGeneric defaultOptions { unwrapNewtypes = true }
@@ -122,11 +100,6 @@ newtype SongSection = SongSection {
 
 derive instance genericSongSection :: Generic SongSection
 
-instance encodeJsonSongSection :: EncodeJson SongSection where
-    encodeJson (SongSection { name, lyrics })
-        = "name" := toJSONGeneric defaultOptions { unwrapNewtypes = true } name
-        ~> "lyrics" := encodeJson lyrics
-        ~> jsonEmptyObject
 
 instance isForeignSongSection :: IsForeign SongSection where
     read = readGeneric defaultOptions { unwrapNewtypes = true }
@@ -141,11 +114,6 @@ derive instance genericSongLyric :: Generic SongLyric
 instance isForeignSongLyric :: IsForeign SongLyric where
     read = readGeneric defaultOptions { unwrapNewtypes = true }
 
-instance encodeJsonSongLyric :: EncodeJson SongLyric where
-    encodeJson (SongLyric { lyric, chord })
-        = "lyric" := lyric
-        ~> "chord" := (show <$> chord)
-        ~> jsonEmptyObject
 
 
 data SongSectionName = Intro | Chorus | Verse | Outro | Bridge

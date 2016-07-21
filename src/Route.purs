@@ -12,7 +12,6 @@ import Control.Apply ((<*), (*>))
 import Data.Foreign.Class (class IsForeign)
 import Data.Foreign.Generic (readGeneric, defaultOptions)
 
-import Data.Argonaut (class EncodeJson, (:=), (~>), fromString)
 
 import Pux.Router (router, lit, int, end, param)
 
@@ -20,12 +19,6 @@ import Pux.Router (router, lit, int, end, param)
 data Route = HomePage | SearchResultPage String | SongPage Int | NotFoundPage
 
 derive instance genericRoute :: Generic Route
-
-instance encodeJsonRoute :: EncodeJson Route where
-    encodeJson HomePage = fromString "HomePage"
-    encodeJson (SearchResultPage q) = fromString $ "SearchResultPage " <> q
-    encodeJson (SongPage id) = fromString $ "SongPage " <> show id
-    encodeJson NotFoundPage = fromString "NotFoundPage"
 
 instance isForeignRoute :: IsForeign Route where
     read = readGeneric defaultOptions

@@ -33,7 +33,6 @@ import View (view)
 
 
 import Model (SongMeta(SongMeta), Year(Year), SearchResult(SearchResult))
-import Data.Argonaut (encodeJson)
 
 main :: Eff (
     console :: CONSOLE,
@@ -109,7 +108,7 @@ homePageHandler = send $ index init
 searchApiHandler :: forall e. Handler e
 searchApiHandler = do
     qParam <- getQueryParam "q"
-    sendJson $ encodeJson getSearchResults
+    sendJson $ toJSONGeneric defaultOptions { unwrapNewtypes = true } getSearchResults
 
 songHandler :: forall e. Handler e
 songHandler = do
