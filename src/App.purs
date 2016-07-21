@@ -21,59 +21,20 @@ newtype State = State {
   , io :: IOState
 }
 
-derive instance genericState :: Generic State
-
-instance isForeignState :: IsForeign State where
-    read = readGeneric defaultOptions
-
-instance arbitraryState :: Arbitrary State where
-    arbitrary = gArbitrary
-
-instance eqState :: Eq State where
-    eq = gEq
-
-instance showState :: Show State where
-    show = gShow
-
 data HeaderVisibility = ShowHeader | HideHeader | PendingHideHeader
-
-derive instance genericHeaderVisibility :: Generic HeaderVisibility
-
-instance isForeignHeaderVisibility :: IsForeign HeaderVisibility where
-    read = readGeneric defaultOptions
 
 newtype UIState = UIState {
     searchQuery :: String,
     headerVisibility :: HeaderVisibility
 }
 
-derive instance genericUIState :: Generic UIState
-
-
-instance isForeignUIState :: IsForeign UIState where
-    read = readGeneric defaultOptions
-
 type Error = String
-data AsyncData a = Loaded a | Loading | Empty | LoadError String
-
-derive instance genericAsyncDataSearchResult :: Generic (AsyncData (Array SearchResult))
-derive instance genericAsyncDataSong :: Generic (AsyncData Song)
-
-
-instance isForeignAsyncDataSong :: IsForeign (AsyncData Song) where
-    read = readGeneric defaultOptions
-
+data AsyncData a = Loaded a | Loading | Empty | LoadError Error
 
 newtype IOState = IOState {
     searchResults :: AsyncData SearchResults
   , song :: AsyncData Song
 }
-
-derive instance genericIOState :: Generic IOState
-
-instance isForeignIOState :: IsForeign IOState where
-    read = readGeneric defaultOptions
-
 
 init :: State
 init = State {
@@ -88,4 +49,39 @@ init = State {
   }
 }
 
+--- Generic boilerplate
 
+derive instance genericState :: Generic State
+
+instance isForeignState :: IsForeign State where
+    read = readGeneric defaultOptions
+
+instance arbitraryState :: Arbitrary State where
+    arbitrary = gArbitrary
+
+instance eqState :: Eq State where
+    eq = gEq
+
+instance showState :: Show State where
+    show = gShow
+
+derive instance genericHeaderVisibility :: Generic HeaderVisibility
+
+instance isForeignHeaderVisibility :: IsForeign HeaderVisibility where
+    read = readGeneric defaultOptions
+
+derive instance genericUIState :: Generic UIState
+
+instance isForeignUIState :: IsForeign UIState where
+    read = readGeneric defaultOptions
+
+derive instance genericAsyncDataSearchResult :: Generic (AsyncData (Array SearchResult))
+derive instance genericAsyncDataSong :: Generic (AsyncData Song)
+
+instance isForeignAsyncDataSong :: IsForeign (AsyncData Song) where
+    read = readGeneric defaultOptions
+
+derive instance genericIOState :: Generic IOState
+
+instance isForeignIOState :: IsForeign IOState where
+    read = readGeneric defaultOptions
