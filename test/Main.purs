@@ -7,10 +7,12 @@ import Data.Foreign.Generic (toJSONGeneric, defaultOptions)
 import Data.Foreign (toForeign)
 import Data.Either (either)
 
+import Text.Parsing.StringParser (runParser)
+
 import Test.StrongCheck (quickCheck, (<?>))
 
 
-import Model (Song)
+import Model (Song, SongMeta, parseSongMeta)
 import Parser (SongChord)
 import App (State)
 
@@ -35,5 +37,13 @@ main = do
             test s' = readJSON $ toJSONGeneric defaultOptions s
         in
             res <?> "App State encode/decode not idempotent for: " <> show s
+
+    quickCheck \(s :: SongMeta) ->
+        let
+            res = either (const false) ((==) s) (test s)
+            test s' = runParser parseSongMeta (show s)
+        in
+            res <?> "SongMeta parsing not idempotent for: " <> show s
+
 
 
