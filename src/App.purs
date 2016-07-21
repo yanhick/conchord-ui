@@ -1,11 +1,16 @@
 module App where
 
+import Prelude (class Eq, class Show)
+
 import Data.Foreign.Class (class IsForeign)
-import Data.Generic (class Generic)
+import Data.Generic (class Generic, gEq, gShow)
 import Data.Foreign.Generic (readGeneric, defaultOptions)
 
 import Model (SearchResults, SearchResult, Song)
 import Route (Route(HomePage))
+
+import Test.StrongCheck.Arbitrary (class Arbitrary)
+import Test.StrongCheck.Generic (gArbitrary)
 
 
 --- App State
@@ -21,6 +26,14 @@ derive instance genericState :: Generic State
 instance isForeignState :: IsForeign State where
     read = readGeneric defaultOptions
 
+instance arbitraryState :: Arbitrary State where
+    arbitrary = gArbitrary
+
+instance eqState :: Eq State where
+    eq = gEq
+
+instance showState :: Show State where
+    show = gShow
 
 data HeaderVisibility = ShowHeader | HideHeader | PendingHideHeader
 

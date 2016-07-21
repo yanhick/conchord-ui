@@ -12,6 +12,7 @@ import Test.StrongCheck (quickCheck, (<?>))
 
 import Model (Song)
 import Parser (SongChord)
+import App (State)
 
 main = do
     quickCheck \(c :: SongChord) ->
@@ -27,3 +28,12 @@ main = do
             test s' = readJSON $ toJSONGeneric defaultOptions s
         in
             res <?> "Song encode/decode not idempotent for: " <> show s
+
+    quickCheck \(s :: State) ->
+        let
+            res = either (const false) ((==) s) (test s)
+            test s' = readJSON $ toJSONGeneric defaultOptions s
+        in
+            res <?> "App State encode/decode not idempotent for: " <> show s
+
+
