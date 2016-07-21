@@ -1,14 +1,21 @@
 module Model where
 
-import Prelude (pure, class Show, bind, ($), (<$>), class Eq, (==), (&&))
+import Prelude (pure, class Show, bind, ($), (<$>), class Eq, (==), (&&), (<<<))
 
 import Data.Foreign.Class (class IsForeign)
-import Data.Maybe (Maybe(Just))
+import Data.String (fromCharArray)
+import Data.Array (fromFoldable)
+import Data.Int (fromString)
+import Data.Maybe (Maybe(Just), fromMaybe)
 import Data.Generic (class Generic, gEq, gShow)
 import Data.Foreign.Generic (readGeneric, defaultOptions)
 
 import Test.StrongCheck.Arbitrary (class Arbitrary)
 import Test.StrongCheck.Generic (gArbitrary)
+
+import Text.Parsing.StringParser (Parser, runParser)
+import Text.Parsing.StringParser.String (string, eof, anyChar, anyDigit)
+import Text.Parsing.StringParser.Combinators (optionMaybe, manyTill)
 
 import Parser (SongChord, exampleChord)
 
@@ -78,6 +85,9 @@ derive instance genericSongMeta :: Generic SongMeta
 instance eqSongMeta :: Eq SongMeta where
     eq = gEq
 
+instance showSongMeta  :: Show SongMeta where
+    show = gShow
+
 instance isForeignSongMeta :: IsForeign SongMeta where
     read = readGeneric defaultOptions
 
@@ -115,10 +125,30 @@ instance showSongSectionName :: Show SongSectionName where
 instance isForeignSongSectionName :: IsForeign SongSectionName where
     read = readGeneric defaultOptions
 
+--- Song parser
+
+parseNewline :: Parser String
+parseNewline = string "\n"
+
+parseSongMeta :: Parser SongMeta
+parseSongMeta = do
+    title <- untilNewline anyChar
+    artist <- untilNewline anyChar
+    year <- untilNewline anyDigit
+    album <- optionMaybe $ manyTill anyChar parseNewline
+    pure $ SongMeta {
+        title: charsToString title,
+        artist: charsToString artist,
+        year: Year $ fromMaybe 0 (fromString $ charsToString year),
+        album: fromCharArray <<< fromFoldable <$> album
+    }
+    where charsToString = fromCharArray <<< fromFoldable
+          untilNewline p = manyTill p parseNewline
+ 
 --- Test data
 
 exampleSong :: Song
-exampleSong = Song{
+exampleSong = Song {
     id: 1,
     meta: exampleSongMeta,
     content: exampleSongContent
