@@ -2,9 +2,7 @@ module Main where
 
 import Prelude
 import Data.Maybe (maybe, Maybe(..))
-import Data.Either (either)
 import Data.Foreign.EasyFFI (unsafeForeignFunction)
-import Data.Foreign.Class (readJSON)
 import Data.Foreign.Generic (defaultOptions, toJSONGeneric)
 import Data.Unfoldable (replicate)
 import Control.Monad.Eff.Console (log, CONSOLE)
@@ -27,7 +25,7 @@ import Signal.Channel (CHANNEL())
 import Pux (renderToString, start)
 import Signal ((~>))
 import Route (Route(SearchResultPage, SongPage))
-import App (init, AsyncData(Loaded, Empty, LoadError), State(State), UIState(UIState), IOState(IOState), HeaderVisibility(ShowHeader))
+import App (init, AsyncData(Loaded, Empty), State(State), UIState(UIState), IOState(IOState), HeaderVisibility(ShowHeader))
 import Action (update)
 import View (view)
 

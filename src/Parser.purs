@@ -6,15 +6,14 @@ import Data.Maybe (Maybe(Just), maybe)
 import Data.Either (Either(Left, Right))
 import Data.Foreign.Class (class IsForeign)
 import Data.Foreign (readString, ForeignError(TypeMismatch))
-import Data.Generic (class Generic, gEq, gShow)
-import Data.Foreign.Generic (readGeneric, defaultOptions)
+import Data.Generic (class Generic, gEq)
 import Control.Alt ((<|>))
 
 import Text.Parsing.StringParser (Parser, runParser)
 import Text.Parsing.StringParser.String (string, eof)
 import Text.Parsing.StringParser.Combinators (optionMaybe)
 
-import Test.StrongCheck.Arbitrary (class Arbitrary, arbitrary)
+import Test.StrongCheck.Arbitrary (class Arbitrary)
 import Test.StrongCheck.Generic (gArbitrary)
 
 instance isForeignSongChord :: IsForeign SongChord where

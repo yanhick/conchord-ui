@@ -1,14 +1,11 @@
 module Model where
 
-import Prelude (pure, class Show, bind, ($), (<$>), show, class Eq, (==), (&&))
+import Prelude (pure, class Show, bind, ($), (<$>), class Eq, (==), (&&))
 
-import Data.Foreign.Class (class IsForeign, readProp, read)
-import Data.Foreign.Null (unNull)
-import Data.Foreign (readString, F, ForeignError(TypeMismatch))
-import Data.Either (Either(Left))
+import Data.Foreign.Class (class IsForeign)
 import Data.Maybe (Maybe(Just))
 import Data.Generic (class Generic, gEq, gShow)
-import Data.Foreign.Generic (readGeneric, defaultOptions, toJSONGeneric)
+import Data.Foreign.Generic (readGeneric, defaultOptions)
 
 import Test.QuickCheck.Arbitrary (class Arbitrary, arbitrary)
 

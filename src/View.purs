@@ -3,7 +3,6 @@ module View where
 import Prelude (($), (<$>), show, const, (<>))
 
 import Data.Maybe (maybe, fromMaybe)
-import Data.Either (Either(Left, Right))
 
 import Pux.Html (Html, section, div, main, p, text, header, article
                 , h1, h2, h3, h4, h5, h6, span, i, nav, li, ul, form

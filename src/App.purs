@@ -1,12 +1,8 @@
 module App where
 
-import Prelude (bind, ($), pure, otherwise)
-
-import Data.Foreign (F, isNull, readString, ForeignError(TypeMismatch))
-import Data.Foreign.Class (class IsForeign, readProp, read)
-import Data.Either (Either(Left, Right))
-import Data.Generic (class Generic, gEq, gShow)
-import Data.Foreign.Generic (readGeneric, defaultOptions, toJSONGeneric)
+import Data.Foreign.Class (class IsForeign)
+import Data.Generic (class Generic)
+import Data.Foreign.Generic (readGeneric, defaultOptions)
 
 import Model (SearchResults, SearchResult, Song)
 import Route (Route(HomePage))
