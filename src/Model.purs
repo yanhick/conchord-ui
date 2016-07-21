@@ -16,14 +16,7 @@ import Parser (SongChord, exampleChord)
 
 newtype SearchResult = SearchResult { id :: Int, meta :: SongMeta, desc :: String }
 
-derive instance genericSearchResult :: Generic SearchResult
-
-instance isForeignSearchResult :: IsForeign SearchResult where
-    read = readGeneric defaultOptions
-
 type SearchResults = Array SearchResult
-
-
 
 --- Song Model
 
@@ -32,6 +25,39 @@ newtype Song = Song {
     meta :: SongMeta,
     content :: SongContent
 }
+
+newtype SongMeta = SongMeta {
+    title :: String,
+    artist :: String,
+    album :: Maybe String,
+    year :: Year
+}
+
+newtype Album = Album (Maybe String)
+
+newtype Year = Year Int
+
+newtype SongContent = SongContent (Array SongSection)
+
+newtype SongSection = SongSection {
+    name :: SongSectionName,
+    lyrics :: Array SongLyric
+}
+
+newtype SongLyric = SongLyric {
+    lyric :: Maybe String,
+    chord :: Maybe SongChord
+}
+
+data SongSectionName = Intro | Chorus | Verse | Outro | Bridge
+
+
+--- Generic boilerplate
+
+derive instance genericSearchResult :: Generic SearchResult
+
+instance isForeignSearchResult :: IsForeign SearchResult where
+    read = readGeneric defaultOptions
 
 derive instance genericSong :: Generic Song
 
@@ -47,24 +73,13 @@ instance eqSong :: Eq Song where
 instance isForeignSong :: IsForeign Song where
     read = readGeneric defaultOptions
 
-newtype SongMeta = SongMeta {
-    title :: String,
-    artist :: String,
-    album :: Maybe String,
-    year :: Year
-}
-
 derive instance genericSongMeta :: Generic SongMeta
 
 instance eqSongMeta :: Eq SongMeta where
     eq = gEq
 
-newtype Album = Album (Maybe String)
-
 instance isForeignSongMeta :: IsForeign SongMeta where
     read = readGeneric defaultOptions
-
-newtype Year = Year Int
 
 derive instance genericYear :: Generic Year
 
@@ -77,37 +92,20 @@ instance eqYear :: Eq Year where
 instance isForeignYear :: IsForeign Year where
     read = readGeneric defaultOptions
 
-newtype SongContent = SongContent (Array SongSection)
-
 derive instance genericSongContent :: Generic SongContent
-
 
 instance isForeignSongContent :: IsForeign SongContent where
     read = readGeneric defaultOptions
 
-newtype SongSection = SongSection {
-    name :: SongSectionName,
-    lyrics :: Array SongLyric
-}
-
 derive instance genericSongSection :: Generic SongSection
-
 
 instance isForeignSongSection :: IsForeign SongSection where
     read = readGeneric defaultOptions
-
-newtype SongLyric = SongLyric {
-    lyric :: Maybe String,
-    chord :: Maybe SongChord
-}
 
 derive instance genericSongLyric :: Generic SongLyric
 
 instance isForeignSongLyric :: IsForeign SongLyric where
     read = readGeneric defaultOptions
-
-
-data SongSectionName = Intro | Chorus | Verse | Outro | Bridge
 
 derive instance genericSongSectionName :: Generic SongSectionName
 
@@ -116,6 +114,8 @@ instance showSongSectionName :: Show SongSectionName where
 
 instance isForeignSongSectionName :: IsForeign SongSectionName where
     read = readGeneric defaultOptions
+
+--- Test data
 
 exampleSong :: Song
 exampleSong = Song{

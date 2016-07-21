@@ -16,12 +16,7 @@ import Text.Parsing.StringParser.Combinators (optionMaybe)
 import Test.StrongCheck.Arbitrary (class Arbitrary)
 import Test.StrongCheck.Generic (gArbitrary)
 
-instance isForeignSongChord :: IsForeign SongChord where
-    read value = do
-        s <- readString value
-        case runParser parseChord s of
-          Left _ -> Left $ TypeMismatch s "Valid chord"
-          Right c -> Right c
+--- SongChord Model
 
 newtype SongChord = SongChord {
     root :: SongChordRoot,
@@ -30,21 +25,15 @@ newtype SongChord = SongChord {
     interval :: Maybe SongChordInterval
 }
 
-exampleChord :: SongChord
-exampleChord = SongChord {
-    root: A,
-    rootModifier: Just Sharp,
-    quality: Minor,
-    interval: Just Seventh
-}
+data SongChordRoot = A | B | C | D | E | F | G
 
-derive instance genericSongChord :: Generic SongChord
+data SongChordRootModifier = Sharp | Flat
 
-instance arbitrarySongChord :: Arbitrary SongChord where
-    arbitrary = gArbitrary
+data SongChordQuality = Major | Minor
 
-instance eqSongChord :: Eq SongChord where
-    eq = gEq
+data SongChordInterval = Seventh
+
+--- SongChord instances
 
 instance showSongChord :: Show SongChord where
     show (SongChord { root, rootModifier, quality, interval }) =
@@ -57,21 +46,27 @@ instance showChordQuality :: Show SongChordQuality where
 instance showSongChordInterval :: Show SongChordInterval where
     show Seventh = "7"
 
-data SongChordRoot = A | B | C | D | E | F | G
+instance isForeignSongChord :: IsForeign SongChord where
+    read value = do
+        s <- readString value
+        case runParser parseChord s of
+          Left _ -> Left $ TypeMismatch s "Valid chord"
+          Right c -> Right c
 
-derive instance genericSongChordRoot :: Generic SongChordRoot
+instance showSongChordRoot :: Show SongChordRoot where
+    show A = "A"
+    show B = "B"
+    show C = "C"
+    show D = "D"
+    show E = "E"
+    show F = "F"
+    show G = "G"
 
-data SongChordRootModifier = Sharp | Flat
+instance showSongChordRootModifier :: Show SongChordRootModifier where
+    show Sharp = "#"
+    show Flat = "b"
 
-derive instance genericSongChordRootModifier :: Generic SongChordRootModifier
-
-data SongChordQuality = Major | Minor
-
-derive instance genericSongChordQuality :: Generic SongChordQuality
-
-data SongChordInterval = Seventh
-
-derive instance genericSongChordInterval :: Generic SongChordInterval
+--- SongChord parser
 
 parseRoot :: Parser SongChordRoot
 parseRoot =  string "A" $> A
@@ -102,15 +97,30 @@ parseChord = do
 mkChord :: SongChordRoot -> Maybe SongChordRootModifier -> SongChordQuality -> Maybe SongChordInterval -> Unit -> SongChord
 mkChord r m q i _ = SongChord { root: r, rootModifier: m, quality: q, interval: i }
 
-instance showSongChordRoot :: Show SongChordRoot where
-    show A = "A"
-    show B = "B"
-    show C = "C"
-    show D = "D"
-    show E = "E"
-    show F = "F"
-    show G = "G"
+--- Generic boilerplate
 
-instance showSongChordRootModifier :: Show SongChordRootModifier where
-    show Sharp = "#"
-    show Flat = "b"
+derive instance genericSongChord :: Generic SongChord
+
+instance arbitrarySongChord :: Arbitrary SongChord where
+    arbitrary = gArbitrary
+
+instance eqSongChord :: Eq SongChord where
+    eq = gEq
+
+derive instance genericSongChordRoot :: Generic SongChordRoot
+
+derive instance genericSongChordRootModifier :: Generic SongChordRootModifier
+
+derive instance genericSongChordQuality :: Generic SongChordQuality
+
+derive instance genericSongChordInterval :: Generic SongChordInterval
+
+--- Test data
+
+exampleChord :: SongChord
+exampleChord = SongChord {
+    root: A,
+    rootModifier: Just Sharp,
+    quality: Minor,
+    interval: Just Seventh
+}
