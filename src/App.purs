@@ -6,8 +6,10 @@ import Data.Foreign (F, isNull, readString, ForeignError(TypeMismatch))
 import Data.Foreign.Class (class IsForeign, readProp, read)
 import Data.Either (Either(Left, Right))
 import Data.Argonaut (class EncodeJson, encodeJson, (:=), (~>), jsonEmptyObject, jsonNull)
+import Data.Generic (class Generic, gEq, gShow)
+import Data.Foreign.Generic (readGeneric, defaultOptions, toJSONGeneric)
 
-import Model (SearchResults, Song)
+import Model (SearchResults, SearchResult, Song)
 import Route (Route(HomePage))
 
 
@@ -19,13 +21,10 @@ newtype State = State {
   , io :: IOState
 }
 
-instance isForeignState :: IsForeign State where
-    read value = do
-        currentPage <- readProp "currentPage" value
-        ui <- readProp "ui" value
-        io <- readProp "io" value
-        pure $ State { currentPage, ui, io }
+derive instance genericState :: Generic State
 
+instance isForeignState :: IsForeign State where
+    read = readGeneric defaultOptions { unwrapNewtypes = true }
 
 instance encodeJsonState :: EncodeJson State where
     encodeJson (State { currentPage, ui, io })
@@ -36,10 +35,10 @@ instance encodeJsonState :: EncodeJson State where
 
 data HeaderVisibility = ShowHeader | HideHeader | PendingHideHeader
 
+derive instance genericHeaderVisibility :: Generic HeaderVisibility
+
 instance isForeignHeaderVisibility :: IsForeign HeaderVisibility where
-    read value = do
-        s <- readString value
-        toHeaderVisibility s
+    read = readGeneric defaultOptions { unwrapNewtypes = true }
 
 toHeaderVisibility :: String -> F HeaderVisibility
 toHeaderVisibility "ShowHeader" = pure ShowHeader
@@ -52,28 +51,29 @@ newtype UIState = UIState {
     headerVisibility :: HeaderVisibility
 }
 
+derive instance genericUIState :: Generic UIState
+
 instance encodeJsonUIState :: EncodeJson UIState where
     encodeJson (UIState { searchQuery })
         = "searchQuery" := searchQuery
         ~> jsonEmptyObject
 
 instance isForeignUIState :: IsForeign UIState where
-    read value = do
-        searchQuery <- readProp "searchQuery" value
-        headerVisibility <- readProp "headerVisibility" value
-        pure $ UIState { searchQuery, headerVisibility }
+    read = readGeneric defaultOptions { unwrapNewtypes = true }
 
-data AsyncData a = Loaded (F a) | Loading | Empty
+data AsyncData a = Loaded a | Loading | Empty | LoadError
+
+derive instance genericAsyncDataSearchResult :: Generic (AsyncData (Array SearchResult))
+derive instance genericAsyncDataSong :: Generic (AsyncData Song)
 
 instance encodeJsonAsyncData :: (EncodeJson d) => EncodeJson (AsyncData d) where
-    encodeJson (Loaded (Right d)) = encodeJson d
-    encodeJson (Loaded (Left _)) = jsonNull
+    encodeJson (Loaded d) = encodeJson d
+    encodeJson LoadError = jsonNull
     encodeJson Loading = jsonNull
     encodeJson Empty = jsonNull
 
-instance isForeignAsyncData :: (IsForeign a) => IsForeign (AsyncData a) where
-    read value | isNull value = pure Empty
-               | otherwise = pure (Loaded (read value))
+instance isForeignAsyncDataSong :: IsForeign (AsyncData Song) where
+    read = readGeneric defaultOptions { unwrapNewtypes = true }
 
 
 newtype IOState = IOState {
@@ -81,11 +81,10 @@ newtype IOState = IOState {
   , song :: AsyncData Song
 }
 
+derive instance genericIOState :: Generic IOState
+
 instance isForeignIOState :: IsForeign IOState where
-    read value = do
-        searchResults <- readProp "searchResults" value
-        song <- readProp "song" value
-        pure $ IOState { searchResults, song }
+    read = readGeneric defaultOptions { unwrapNewtypes = true }
 
 instance encodeJsonIOState :: EncodeJson IOState where
     encodeJson (IOState { searchResults, song })

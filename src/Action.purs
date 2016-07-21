@@ -2,6 +2,7 @@ module Action where
 
 import Prelude (($), bind, (<>), pure, show, (+), (-), (==))
 
+import Data.Either (Either (Left, Right))
 import Data.Foreign (F)
 import Data.Foreign.Class (readJSON)
 import Control.Monad.Aff (Aff(), later')
@@ -18,7 +19,7 @@ import Pux.Router (navigateTo)
 
 import Route (Route(SongPage, SearchResultPage))
 import Model (SearchResults, Song)
-import App (State(State), UIState(UIState), IOState(IOState), AsyncData(Loading, Loaded), HeaderVisibility(PendingHideHeader, HideHeader, ShowHeader))
+import App (State(State), UIState(UIState), IOState(IOState), AsyncData(Loading, Loaded, LoadError), HeaderVisibility(PendingHideHeader, HideHeader, ShowHeader))
 
 
 data Action =
@@ -108,8 +109,11 @@ updateIO (RequestSearch q) (State state@{ ui: UIState { searchQuery }, io: IOSta
     ]
 }
 
-updateIO (ReceiveSearch r) (State state@{ io: IOState { song } }) =
+updateIO (ReceiveSearch (Right r)) (State state@{ io: IOState { song } }) =
     noEffects $ State $ state { io = IOState { searchResults: Loaded r, song: song } }
+
+updateIO (ReceiveSearch (Left _)) (State state@{ io: IOState { song } }) =
+    noEffects $ State $ state { io = IOState { searchResults: LoadError, song: song } }
 
 updateIO (RequestSong id) (State state@{ io: IOState { searchResults } }) = {
     state: State $ state { io = IOState { song: Loading, searchResults } }
@@ -120,8 +124,15 @@ updateIO (RequestSong id) (State state@{ io: IOState { searchResults } }) = {
     ]
 }
 
-updateIO (ReceiveSong s) (State state@{ io: IOState { searchResults } }) = {
+updateIO (ReceiveSong (Right s)) (State state@{ io: IOState { searchResults } }) = {
     state: State $ state { io = IOState { song: Loaded s, searchResults } },
+    effects: [ do
+        pure $ UIAction SetHideHeaderTimeout
+    ]
+}
+
+updateIO (ReceiveSong (Left _)) (State state@{ io: IOState { searchResults } }) = {
+    state: State $ state { io = IOState { song: LoadError, searchResults } },
     effects: [ do
         pure $ UIAction SetHideHeaderTimeout
     ]

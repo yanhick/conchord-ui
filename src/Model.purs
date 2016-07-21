@@ -8,8 +8,8 @@ import Data.Foreign (readString, F, ForeignError(TypeMismatch))
 import Data.Either (Either(Left))
 import Data.Maybe (Maybe())
 import Data.Argonaut (class EncodeJson, encodeJson, (:=), (~>), jsonEmptyObject, fromArray)
-import Data.Generic (class Generic, gEq)
-import Data.Foreign.Generic (readGeneric, defaultOptions)
+import Data.Generic (class Generic, gEq, gShow)
+import Data.Foreign.Generic (readGeneric, defaultOptions, toJSONGeneric)
 
 import Test.QuickCheck.Arbitrary (class Arbitrary, arbitrary)
 
@@ -19,12 +19,10 @@ import Parser (SongChord)
 
 newtype SearchResult = SearchResult { id :: Int, meta :: SongMeta, desc :: String }
 
+derive instance genericSearchResult :: Generic SearchResult
+
 instance isForeignSearchResult :: IsForeign SearchResult where
-    read value = do
-        id <- readProp "id" value
-        meta <- readProp "meta" value
-        desc <- readProp "desc" value
-        pure $ SearchResult { id, meta, desc }
+    read = readGeneric defaultOptions { unwrapNewtypes = true }
 
 type SearchResults = Array SearchResult
 
@@ -44,6 +42,8 @@ newtype Song = Song {
     content :: SongContent
 }
 
+derive instance genericSong :: Generic Song
+
 instance encodeJsonSong :: EncodeJson Song where
     encodeJson (Song { id, meta, content })
         = "id" := id
@@ -52,11 +52,7 @@ instance encodeJsonSong :: EncodeJson Song where
         ~> jsonEmptyObject
 
 instance isForeignSong :: IsForeign Song where
-    read value = do
-        id <- readProp "id" value
-        meta <- readProp "meta" value
-        content <- readProp "content" value
-        pure $ Song { id, meta, content }
+    read = readGeneric defaultOptions { unwrapNewtypes = true }
 
 newtype SongMeta = SongMeta {
     title :: String,
@@ -94,12 +90,7 @@ instance encodeJsonSongMeta :: EncodeJson SongMeta where
 newtype Album = Album (Maybe String)
 
 instance isForeignSongMeta :: IsForeign SongMeta where
-    read value = do
-        title <- readProp "title" value
-        artist <- readProp "artist" value
-        album <- unNull <$> readProp "album" value
-        year <- readProp "year" value
-        pure $ SongMeta { title, artist, album, year }
+    read = readGeneric defaultOptions { unwrapNewtypes = true }
 
 newtype Year = Year Int
 
@@ -116,41 +107,39 @@ instance isForeignYear :: IsForeign Year where
 
 newtype SongContent = SongContent (Array SongSection)
 
+derive instance genericSongContent :: Generic SongContent
+
 instance encodeJsonSongContent :: EncodeJson SongContent where
     encodeJson (SongContent s) = fromArray $ encodeJson <$> s
 
 instance isForeignSongContent :: IsForeign SongContent where
-    read value = do
-        c <- read value
-        pure $ SongContent c
+    read = readGeneric defaultOptions { unwrapNewtypes = true }
 
 newtype SongSection = SongSection {
     name :: SongSectionName,
     lyrics :: Array SongLyric
 }
 
+derive instance genericSongSection :: Generic SongSection
+
 instance encodeJsonSongSection :: EncodeJson SongSection where
     encodeJson (SongSection { name, lyrics })
-        = "name" := show name
+        = "name" := toJSONGeneric defaultOptions { unwrapNewtypes = true } name
         ~> "lyrics" := encodeJson lyrics
         ~> jsonEmptyObject
 
 instance isForeignSongSection :: IsForeign SongSection where
-    read value = do
-        name <- readProp "name" value
-        lyrics <- readProp "lyrics" value
-        pure $ SongSection { name, lyrics }
+    read = readGeneric defaultOptions { unwrapNewtypes = true }
 
 newtype SongLyric = SongLyric {
     lyric :: Maybe String,
     chord :: Maybe SongChord
 }
 
+derive instance genericSongLyric :: Generic SongLyric
+
 instance isForeignSongLyric :: IsForeign SongLyric where
-    read value = do
-        lyric <- unNull <$> readProp "lyric" value
-        chord <- unNull <$> readProp "chord" value
-        pure $ SongLyric { lyric, chord }
+    read = readGeneric defaultOptions { unwrapNewtypes = true }
 
 instance encodeJsonSongLyric :: EncodeJson SongLyric where
     encodeJson (SongLyric { lyric, chord })
@@ -161,22 +150,10 @@ instance encodeJsonSongLyric :: EncodeJson SongLyric where
 
 data SongSectionName = Intro | Chorus | Verse | Outro | Bridge
 
+derive instance genericSongSectionName :: Generic SongSectionName
+
 instance showSongSectionName :: Show SongSectionName where
-    show Intro = "Intro"
-    show Chorus = "Chorus"
-    show Verse = "Verse"
-    show Outro = "Outro"
-    show Bridge = "Bridge"
+    show = gShow
 
 instance isForeignSongSectionName :: IsForeign SongSectionName where
-    read value = do
-        s <- readString value
-        toSongSectionName s
-
-toSongSectionName :: String -> F SongSectionName
-toSongSectionName "Intro" = pure Intro
-toSongSectionName "Chorus" = pure Chorus
-toSongSectionName "Verse" = pure Verse
-toSongSectionName "Outro" = pure Outro
-toSongSectionName "Bridge" = pure Bridge
-toSongSectionName s = Left $ TypeMismatch "Valid Song Section Name" s
+    read = readGeneric defaultOptions

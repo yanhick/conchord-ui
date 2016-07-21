@@ -15,7 +15,7 @@ import Pux.Router (link)
 import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(SongLyric), SearchResult(SearchResult), Year(Year))
 import Action (Action(UIAction, PageView), UIAction(SearchChange, SetShowHeader))
 import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage))
-import App (State(State), AsyncData(Loading, Loaded, Empty), UIState(UIState), IOState(IOState), HeaderVisibility(HideHeader))
+import App (State(State), AsyncData(Loading, Loaded, Empty, LoadError), UIState(UIState), IOState(IOState), HeaderVisibility(HideHeader))
 
 
 view :: State -> Html Action
@@ -68,8 +68,8 @@ searchResultPage (State { io, ui }) =
 searchResultPageContent :: IOState -> UIState -> Html Action
 searchResultPageContent (IOState { searchResults: Empty }) _ = ul # text ""
 searchResultPageContent (IOState { searchResults: Loading }) _ = ul # text "Loading..."
-searchResultPageContent (IOState { searchResults: Loaded (Right s) }) _ = ul [] (searchResult <$> s)
-searchResultPageContent (IOState { searchResults: Loaded (Left _) }) _ = ul # text "Could not find results"
+searchResultPageContent (IOState { searchResults: Loaded s }) _ = ul [] (searchResult <$> s)
+searchResultPageContent (IOState { searchResults: LoadError }) _ = ul # text "Could not find results"
 
 
 searchResult :: SearchResult -> Html Action
@@ -101,8 +101,8 @@ songPage io ui =
 songPageContent :: IOState -> UIState -> Html Action
 songPageContent (IOState { song: Empty }) _ = main # text ""
 songPageContent (IOState { song: Loading }) _ = main # text "Loading Song"
-songPageContent (IOState { song: Loaded (Left e) }) _ = main # text (show e)
-songPageContent (IOState { song: Loaded (Right (Song { meta, content })), searchResults }) (UIState { searchQuery }) =
+songPageContent (IOState { song: LoadError }) _ = main # text "Could not load song"
+songPageContent (IOState { song: Loaded (Song { meta, content }), searchResults }) (UIState { searchQuery }) =
     main # do
         songMeta meta
         songContent content

@@ -6,6 +6,7 @@ import Data.Maybe (Maybe(), maybe)
 import Data.Either (Either(Left, Right))
 import Data.Foreign.Class (class IsForeign)
 import Data.Foreign (readString, ForeignError(TypeMismatch))
+import Data.Generic (class Generic)
 import Control.Alt ((<|>))
 
 import Text.Parsing.StringParser (Parser, runParser)
@@ -26,6 +27,8 @@ newtype SongChord = SongChord {
     interval :: Maybe SongChordInterval
 }
 
+derive instance genericSongChord :: Generic SongChord
+
 instance showSongChord :: Show SongChord where
     show (SongChord { root, rootModifier, quality, interval }) =
         show root <> (maybe "" show rootModifier) <> show quality <> (maybe "" show interval)
@@ -39,11 +42,19 @@ instance showSongChordInterval :: Show SongChordInterval where
 
 data SongChordRoot = A | B | C | D | E | F | G
 
+derive instance genericSongChordRoot :: Generic SongChordRoot
+
 data SongChordRootModifier = Sharp | Flat
+
+derive instance genericSongChordRootModifier :: Generic SongChordRootModifier
 
 data SongChordQuality = Major | Minor
 
+derive instance genericSongChordQuality :: Generic SongChordQuality
+
 data SongChordInterval = Seventh
+
+derive instance genericSongChordInterval :: Generic SongChordInterval
 
 parseRoot :: Parser SongChordRoot
 parseRoot =  string "A" $> A

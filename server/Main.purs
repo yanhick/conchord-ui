@@ -2,8 +2,10 @@ module Main where
 
 import Prelude
 import Data.Maybe (maybe, Maybe(..))
+import Data.Either (either)
 import Data.Foreign.EasyFFI (unsafeForeignFunction)
 import Data.Foreign.Class (readJSON)
+import Data.Foreign.Generic (defaultOptions, toJSONGeneric)
 import Data.Unfoldable (replicate)
 import Control.Monad.Eff.Console (log, CONSOLE)
 import Control.Monad.Eff (Eff())
@@ -25,7 +27,7 @@ import Signal.Channel (CHANNEL())
 import Pux (renderToString, start)
 import Signal ((~>))
 import Route (Route(SearchResultPage, SongPage))
-import App (init, AsyncData(Loaded, Empty), State(State), UIState(UIState), IOState(IOState), HeaderVisibility(ShowHeader))
+import App (init, AsyncData(Loaded, Empty, LoadError), State(State), UIState(UIState), IOState(IOState), HeaderVisibility(ShowHeader))
 import Action (update)
 import View (view)
 
@@ -84,7 +86,7 @@ searchPageHandler = do
     qParam <- getQueryParam "q"
     send $ index (State {
         currentPage: (SearchResultPage $ maybe "" id qParam),
-        io: IOState { searchResults: Loaded(pure getSearchResults), song: Empty },
+        io: IOState { searchResults: Loaded getSearchResults, song: Empty },
         ui: UIState { searchQuery: maybe "" id qParam, headerVisibility: ShowHeader }
     })
 
@@ -97,7 +99,7 @@ songPageHandler = do
         let s = unsafePerformEff $ catchException (\_ -> pure "") (readTextFile UTF8 "song.json")
         send $ index (State {
             currentPage: (SongPage 0),
-            io: IOState { searchResults: Empty, song: Loaded(readJSON s)},
+            io: IOState { searchResults: Empty, song: either (const LoadError) Loaded (readJSON s)},
             ui: UIState { searchQuery: "", headerVisibility: ShowHeader }
         })
 
@@ -155,7 +157,7 @@ index s =
         </head>
         <body>
             <div id="app">""" <> renderAppHandler s <> """</div>
-            <script>window.puxLastState =  JSON.stringify(""" <> show (encodeJson s) <> """);</script>
+                     <script>window.puxLastState =  """ <> (toJSONGeneric defaultOptions { unwrapNewtypes = true } s) <> """</script>
             <script src="/app.js"></script>
         </body>
     </html>
