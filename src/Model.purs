@@ -1,12 +1,12 @@
 module Model where
 
-import Prelude (pure, class Show, bind, ($), (<$>), class Eq, (==), (&&), (<<<))
+import Prelude (pure, class Show, bind, ($), (<$>), class Eq, (==), (&&), (<<<), (<>), show)
 
 import Data.Foreign.Class (class IsForeign)
 import Data.String (fromCharArray)
 import Data.Array (fromFoldable)
 import Data.Int (fromString)
-import Data.Maybe (Maybe(Just), fromMaybe)
+import Data.Maybe (Maybe(Just), fromMaybe, maybe)
 import Data.Generic (class Generic, gEq, gShow)
 import Data.Foreign.Generic (readGeneric, defaultOptions)
 
@@ -82,11 +82,11 @@ instance isForeignSong :: IsForeign Song where
 
 derive instance genericSongMeta :: Generic SongMeta
 
+instance arbitrarySongMeta :: Arbitrary SongMeta where
+    arbitrary = gArbitrary
+
 instance eqSongMeta :: Eq SongMeta where
     eq = gEq
-
-instance showSongMeta  :: Show SongMeta where
-    show = gShow
 
 instance isForeignSongMeta :: IsForeign SongMeta where
     read = readGeneric defaultOptions
@@ -144,6 +144,14 @@ parseSongMeta = do
     }
     where charsToString = fromCharArray <<< fromFoldable
           untilNewline p = manyTill p parseNewline
+
+instance showSongMeta  :: Show SongMeta where
+    show (SongMeta { title, artist, year: Year y, album })
+        = title <> "\n" <>
+          artist <> "\n" <>
+          show y <> "\n" <>
+          maybe "" (\s -> s <> "\n") album
+
  
 --- Test data
 
