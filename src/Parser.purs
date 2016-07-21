@@ -2,11 +2,12 @@ module Parser where
 
 import Prelude (pure, class Show, bind, ($), (>>=), Unit(), (<>), show, (<$>), (<*>))
 import Data.Functor (($>))
-import Data.Maybe (Maybe(), maybe)
+import Data.Maybe (Maybe(Just), maybe)
 import Data.Either (Either(Left, Right))
 import Data.Foreign.Class (class IsForeign)
 import Data.Foreign (readString, ForeignError(TypeMismatch))
 import Data.Generic (class Generic)
+import Data.Foreign.Generic (readGeneric, defaultOptions)
 import Control.Alt ((<|>))
 
 import Text.Parsing.StringParser (Parser, runParser)
@@ -25,6 +26,14 @@ newtype SongChord = SongChord {
     rootModifier :: Maybe SongChordRootModifier,
     quality :: SongChordQuality,
     interval :: Maybe SongChordInterval
+}
+
+exampleChord :: SongChord
+exampleChord = SongChord {
+    root: A,
+    rootModifier: Just Sharp,
+    quality: Minor,
+    interval: Just Seventh
 }
 
 derive instance genericSongChord :: Generic SongChord

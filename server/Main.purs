@@ -32,7 +32,7 @@ import Action (update)
 import View (view)
 
 
-import Model (SongMeta(SongMeta), Year(Year), SearchResult(SearchResult))
+import Model (SongMeta(SongMeta), Year(Year), SearchResult(SearchResult), exampleSong)
 
 main :: Eff (
     console :: CONSOLE,
@@ -98,7 +98,7 @@ songPageHandler = do
         let s = unsafePerformEff $ catchException (\_ -> pure "") (readTextFile UTF8 "song.json")
         send $ index (State {
             currentPage: (SongPage 0),
-            io: IOState { searchResults: Empty, song: either (LoadError <<< show) Loaded (readJSON s)},
+            io: IOState { searchResults: Empty, song: Loaded exampleSong },
             ui: UIState { searchQuery: "", headerVisibility: ShowHeader }
         })
 
@@ -108,7 +108,7 @@ homePageHandler = send $ index init
 searchApiHandler :: forall e. Handler e
 searchApiHandler = do
     qParam <- getQueryParam "q"
-    send $ toJSONGeneric defaultOptions { unwrapNewtypes = true } getSearchResults
+    send $ toJSONGeneric defaultOptions getSearchResults
 
 songApiHandler :: forall e. Handler e
 songApiHandler = do
@@ -156,7 +156,7 @@ index s =
         </head>
         <body>
             <div id="app">""" <> renderAppHandler s <> """</div>
-                     <script>window.puxLastState =  JSON.stringify(""" <> (toJSONGeneric defaultOptions { unwrapNewtypes = true } s) <> """);</script>
+                     <script>window.puxLastState =  JSON.stringify(""" <> (toJSONGeneric defaultOptions s) <> """);</script>
             <script src="/app.js"></script>
         </body>
     </html>

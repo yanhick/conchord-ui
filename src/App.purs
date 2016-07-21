@@ -23,7 +23,7 @@ newtype State = State {
 derive instance genericState :: Generic State
 
 instance isForeignState :: IsForeign State where
-    read = readGeneric defaultOptions { unwrapNewtypes = true }
+    read = readGeneric defaultOptions
 
 
 data HeaderVisibility = ShowHeader | HideHeader | PendingHideHeader
@@ -31,13 +31,7 @@ data HeaderVisibility = ShowHeader | HideHeader | PendingHideHeader
 derive instance genericHeaderVisibility :: Generic HeaderVisibility
 
 instance isForeignHeaderVisibility :: IsForeign HeaderVisibility where
-    read = readGeneric defaultOptions { unwrapNewtypes = true }
-
-toHeaderVisibility :: String -> F HeaderVisibility
-toHeaderVisibility "ShowHeader" = pure ShowHeader
-toHeaderVisibility "HideHeader" = pure HideHeader
-toHeaderVisibility "PendingHideHeader" = pure PendingHideHeader
-toHeaderVisibility s = Left $ TypeMismatch "HeaderVisibility" s
+    read = readGeneric defaultOptions
 
 newtype UIState = UIState {
     searchQuery :: String,
@@ -48,7 +42,7 @@ derive instance genericUIState :: Generic UIState
 
 
 instance isForeignUIState :: IsForeign UIState where
-    read = readGeneric defaultOptions { unwrapNewtypes = true }
+    read = readGeneric defaultOptions
 
 type Error = String
 data AsyncData a = Loaded a | Loading | Empty | LoadError String
@@ -58,7 +52,7 @@ derive instance genericAsyncDataSong :: Generic (AsyncData Song)
 
 
 instance isForeignAsyncDataSong :: IsForeign (AsyncData Song) where
-    read = readGeneric defaultOptions { unwrapNewtypes = true }
+    read = readGeneric defaultOptions
 
 
 newtype IOState = IOState {
@@ -69,7 +63,7 @@ newtype IOState = IOState {
 derive instance genericIOState :: Generic IOState
 
 instance isForeignIOState :: IsForeign IOState where
-    read = readGeneric defaultOptions { unwrapNewtypes = true }
+    read = readGeneric defaultOptions
 
 
 init :: State
