@@ -107,7 +107,7 @@ parseSongSection = do
     parseNewline
     lyrics <- manyTill (parseSongLyric end) parseCarriageReturn
     pure $ SongSection { name, lyrics: fromFoldable lyrics }
-        where end = lookAhead (string "/") <|> lookAhead parseCarriageReturn <|> lookAhead (string "\\")
+        where end = lookAhead (string "/") <|> lookAhead parseCarriageReturn <|> lookAhead (string "\\") <|> lookAhead (string "|")
 
 serializeSongSection :: SongSection -> String
 serializeSongSection (SongSection { name, lyrics }) =
@@ -121,13 +121,13 @@ parseChordAndLyric :: forall a. Parser a -> Parser SongLyric
 parseChordAndLyric end = do
     string "/"
     chord <- parseChord
-    string "/"
+    string "/ "
     lyric <- manyTill anyChar end
     pure $ ChordAndLyric chord $ parseLyric lyric
 
 parseOnlyLyric :: forall a. Parser a -> Parser SongLyric
 parseOnlyLyric end = do
-    string "//"
+    string "| "
     lyric <- manyTill anyChar end
     pure $ OnlyLyric $ parseLyric lyric
 
@@ -135,16 +135,16 @@ parseOnlyChord :: forall a. Parser a -> Parser SongLyric
 parseOnlyChord end = do
     string "\\"
     chord <- parseChord
-    string "\\"
+    string "\\ "
     pure $ OnlyChord chord
 
 parseLyric :: List Char -> String
 parseLyric l = fromCharArray <<< fromFoldable $ l
 
 serializeSongLyric :: SongLyric -> String
-serializeSongLyric (ChordAndLyric chord lyric) = "/" <> show chord <> "/" <> lyric
-serializeSongLyric (OnlyLyric lyric) = "//" <> lyric
-serializeSongLyric (OnlyChord chord) = "\\" <> show chord <> "\\"
+serializeSongLyric (ChordAndLyric chord lyric) = "/" <> show chord <> "/ " <> lyric
+serializeSongLyric (OnlyLyric lyric) = "| " <> lyric
+serializeSongLyric (OnlyChord chord) = "\\" <> show chord <> "\\ "
 
 parseSongContent :: Parser SongContent
 parseSongContent = do

@@ -5,6 +5,7 @@ import Data.Maybe (maybe, Maybe(..))
 import Data.Foreign.EasyFFI (unsafeForeignFunction)
 import Data.Foreign.Generic (defaultOptions, toJSONGeneric)
 import Data.Unfoldable (replicate)
+import Data.Either (either)
 import Control.Monad.Eff.Console (log, CONSOLE)
 import Control.Monad.Eff (Eff())
 import Control.Monad.Eff.Exception (Error(), message, error, EXCEPTION(), catchException)
@@ -25,12 +26,13 @@ import Signal.Channel (CHANNEL())
 import Pux (renderToString, start)
 import Signal ((~>))
 import Route (Route(SearchResultPage, SongPage))
-import App (init, AsyncData(Loaded, Empty), State(State), UIState(UIState), IOState(IOState), HeaderVisibility(ShowHeader))
+import App (init, AsyncData(LoadError, Loaded, Empty), State(State), UIState(UIState), IOState(IOState), HeaderVisibility(ShowHeader))
 import Action (update)
 import View (view)
+import Text.Parsing.StringParser (runParser)
 
 
-import Model (SearchResult(SearchResult), exampleSong, exampleSongMeta)
+import Model (SearchResult(SearchResult), exampleSong, exampleSongMeta, parseSong)
 
 main :: Eff (
     console :: CONSOLE,
@@ -85,10 +87,10 @@ songPageHandler = do
     case idParam of
       Nothing -> nextThrow $ error "Id is required"
       Just id -> do
-        let s = unsafePerformEff $ catchException (\_ -> pure "") (readTextFile UTF8 "song.json")
+        let s = unsafePerformEff $ catchException (\_ -> pure "") (readTextFile UTF8 "example-song.con")
         send $ index (State {
             currentPage: (SongPage 0),
-            io: IOState { searchResults: Empty, song: Loaded exampleSong },
+            io: IOState { searchResults: Empty, song: either (LoadError <<< show) Loaded $ runParser parseSong s },
             ui: UIState { searchQuery: "", headerVisibility: ShowHeader }
         })
 
