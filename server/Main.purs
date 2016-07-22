@@ -30,7 +30,7 @@ import Action (update)
 import View (view)
 
 
-import Model (SongMeta(SongMeta), Year(Year), SearchResult(SearchResult), exampleSong)
+import Model (SearchResult(SearchResult), exampleSong, exampleSongMeta)
 
 main :: Eff (
     console :: CONSOLE,
@@ -44,18 +44,10 @@ main = do
     listenHttp appSetup port \_ ->
         log $ "listening on " <> show port
 
-getSongMeta :: SongMeta
-getSongMeta = SongMeta {
-    title: "Tokyo vampires and wolves",
-    artist: "The Wombats",
-    album: Just "This modern glitch",
-    year: Year 2011
-}
-
 getSearchResult :: SearchResult
 getSearchResult = SearchResult {
     id: 0,
-    meta: getSongMeta,
+    meta: exampleSongMeta,
     desc: "We're self-imploding, under the weight of your advice. I wear a suitcase, under each one of my eyes."
 }
 

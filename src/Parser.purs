@@ -1,6 +1,6 @@
 module Parser where
 
-import Prelude (pure, class Show, bind, ($), (>>=), Unit(), (<>), show, (<$>), (<*>), class Eq)
+import Prelude (pure, class Show, bind, ($), (>>=), (<>), show, (<$>), (<*>), class Eq)
 import Data.Functor (($>))
 import Data.Maybe (Maybe(Just), maybe)
 import Data.Either (Either(Left, Right))
