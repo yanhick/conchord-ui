@@ -14,7 +14,7 @@ import Test.StrongCheck (quickCheck, (<?>))
 
 
 import Model (Song, SongMeta, SongLyric, parseSongMeta, Song, parseSong, serializeSong, serializeSongMeta, serializeSongLyric, parseSongLyric, 
-             SongSection, parseSongSection, serializeSongSection)
+             SongSection, parseSongSection, serializeSongSection, SongContent, parseSongContent, serializeSongContent)
 import Parser (SongChord)
 import App (State)
 
@@ -64,6 +64,15 @@ main = do
             res <?> "SongSection parsing not idempotent for:\n\n" <> show s <> "\n\n" <>
             serializeSongSection s <> "\n\nParsed:\n\n" <>
             show (runParser parseSongSection (serializeSongSection s))
+
+    quickCheck \(s :: SongContent) ->
+        let
+            res = either (const false) ((==) s) (test s)
+            test s' = runParser parseSongContent (serializeSongContent s)
+        in
+            res <?> "SongContent parsing not idempotent for:\n\n" <> show s <> "\n\n" <>
+            serializeSongContent s <> "\n\nParsed:\n\n" <>
+            show (runParser parseSongContent (serializeSongContent s))
 
     {--quickCheck \(s :: Song) ->--}
         {--let--}

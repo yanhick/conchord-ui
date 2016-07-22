@@ -151,11 +151,11 @@ serializeSongLyric (OnlyChord chord) = "\\" <> show chord <> "\\"
 
 parseSongContent :: Parser SongContent
 parseSongContent = do
-    content <- many parseSongSection
+    content <- manyTill parseSongSection (lookAhead eof)
     pure $ SongContent $ fromFoldable content
 
 serializeSongContent :: SongContent -> String
-serializeSongContent (SongContent s) = joinWith "\n" $ serializeSongSection <$> s
+serializeSongContent (SongContent s) = joinWith "" $ serializeSongSection <$> s
 
 parseSong :: Parser Song
 parseSong = do
@@ -218,6 +218,15 @@ instance isForeignYear :: IsForeign Year where
     read = readGeneric defaultOptions
 
 derive instance genericSongContent :: Generic SongContent
+
+instance arbitrarySongContent :: Arbitrary SongContent where
+    arbitrary = gArbitrary
+
+instance eqSongContent :: Eq SongContent where
+    eq = gEq
+
+instance showSongContent :: Show SongContent where
+    show = gShow
 
 instance isForeignSongContent :: IsForeign SongContent where
     read = readGeneric defaultOptions
