@@ -25,7 +25,7 @@ import Signal.Channel (CHANNEL())
 
 import Pux (renderToString, start)
 import Signal ((~>))
-import Route (Route(SearchResultPage, SongPage))
+import Route (Route(SearchResultPage, SongPage, NewSongPage))
 import App (init, AsyncData(LoadError, Loaded, Empty), State(State), UIState(UIState), IOState(IOState), HeaderVisibility(ShowHeader))
 import Action (update)
 import View (view)
@@ -59,7 +59,7 @@ getSearchResults = replicate 15 getSearchResult
 appSetup :: forall e. App (console :: CONSOLE | e)
 appSetup = do
     liftEff $ log "Setting up"
-    get "/search"      searchPageHandler
+    get "/new"         newSongPageHandler
     get "/song/:id"    songPageHandler
     get "/:file"       fileHandler
     get "/"            homePageHandler
@@ -71,6 +71,14 @@ fileHandler :: forall e. Handler e
 fileHandler = do
     fileName <- getRouteParam "file"
     sendFile $ maybe "index.html" id fileName
+
+newSongPageHandler :: forall e. Handler e
+newSongPageHandler = do
+    send $ index (State {
+        currentPage: NewSongPage,
+        io: IOState { searchResults: Empty, song: Empty },
+        ui: UIState { searchQuery: "", headerVisibility: ShowHeader }
+    })
 
 searchPageHandler :: forall e. Handler e
 searchPageHandler = do

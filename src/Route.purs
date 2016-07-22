@@ -1,6 +1,6 @@
 module Route where
 
-import Prelude (($), (<$>), (<>), show, class Eq, (==))
+import Prelude (($), (<$>), (<>), class Eq, (==))
 import Global (decodeURIComponent)
 
 import Data.Functor ((<$))
@@ -16,7 +16,7 @@ import Data.Foreign.Generic (readGeneric, defaultOptions)
 import Pux.Router (router, lit, int, end, param)
 
 
-data Route = HomePage | SearchResultPage String | SongPage Int | NotFoundPage
+data Route = HomePage | SearchResultPage String | SongPage Int | NewSongPage | NotFoundPage
 
 derive instance genericRoute :: Generic Route
 
@@ -31,5 +31,7 @@ match url = fromMaybe NotFoundPage $ router url $
             HomePage <$ end
             <|>
             SongPage <$> (lit "song" *> int) <* end
+            <|>
+            NewSongPage <$ (lit "new") <* end
             <|>
             SearchResultPage <$> (lit "search" *> (decodeURIComponent <$> (param "q"))) <* end

@@ -11,7 +11,7 @@ import Pux.Router (link)
 
 import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(ChordAndLyric, OnlyChord, OnlyLyric), SearchResult(SearchResult), Year(Year), serializeSongSectionName)
 import Action (Action(UIAction, PageView), UIAction(SearchChange, SetShowHeader))
-import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage))
+import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage, NewSongPage))
 import App (State(State), AsyncData(Loading, Loaded, Empty, LoadError), UIState(UIState), IOState(IOState), HeaderVisibility(HideHeader))
 
 
@@ -24,6 +24,7 @@ page :: Route -> State -> Html Action
 page (SongPage _) (State { ui, io }) = songPage io ui
 page (SearchResultPage _) state = searchResultPage state
 page HomePage state = homePage state
+page NewSongPage state = newSongPage state
 page NotFoundPage _ = notFoundPage
 
 --- Common
@@ -83,6 +84,15 @@ searchForm :: String -> Html Action
 searchForm q =
     form ! action "/search" ! method "GET" ! onSubmit (const $ PageView (SearchResultPage q)) # do
         input [ name "q", type_ "search", placeholder "Search", value q, onChange (\f -> UIAction (SearchChange f))] []
+
+
+--- New Song views
+
+newSongPage :: State -> Html Action
+newSongPage state =
+    div # do
+        text "New Song"
+
 
 --- Song Views
 
