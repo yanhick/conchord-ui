@@ -11,7 +11,7 @@ import Pux.Html.Events (onSubmit, onChange, onMouseMove)
 import Pux.Html.Attributes (name, placeholder, type_, value, data_, action, method)
 import Pux.Router (link)
 
-import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(SongLyric), SearchResult(SearchResult), Year(Year))
+import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(SongLyric), SearchResult(SearchResult), Year(Year), serializeSongSectionName)
 import Action (Action(UIAction, PageView), UIAction(SearchChange, SetShowHeader))
 import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage))
 import App (State(State), AsyncData(Loading, Loaded, Empty, LoadError), UIState(UIState), IOState(IOState), HeaderVisibility(HideHeader))
@@ -119,14 +119,13 @@ songContent (SongContent s) = article [] (songSection <$> s)
 songSection :: SongSection -> Html Action
 songSection (SongSection {name, lyrics}) =
     section # do
-        h4 # text (show name)
+        h4 # text (serializeSongSectionName name)
         p [] (songLyric <$> lyrics)
 
 songLyric :: SongLyric -> Html Action
 songLyric (SongLyric {lyric, chord}) =
-    span ! data_ "lyrics" l # do
+    span ! data_ "lyrics" lyric # do
         i ! data_ "chord" c # text ""
-        text l
+        text lyric
     where
         c = maybe "" show chord
-        l = fromMaybe "" lyric

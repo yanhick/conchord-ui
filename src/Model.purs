@@ -4,8 +4,9 @@ import Prelude (pure, class Show, bind, ($), (<$>), class Eq, (==), (&&), (<<<),
 
 import Control.Alt ((<|>))
 import Data.Foreign.Class (class IsForeign)
-import Data.String (fromCharArray)
+import Data.String (fromCharArray, joinWith)
 import Data.Array (fromFoldable, concat)
+import Data.List (List(Nil))
 import Data.Int (fromString)
 import Data.Maybe (Maybe(Just, Nothing), fromMaybe, maybe)
 import Data.Functor (($>))
@@ -54,11 +55,114 @@ newtype SongSection = SongSection {
 }
 
 newtype SongLyric = SongLyric {
-    lyric :: Maybe String,
+    lyric :: String,
     chord :: Maybe SongChord
 }
 
 data SongSectionName = Intro | Chorus | Verse | Outro | Bridge
+
+
+--- Song parser
+
+parseNewline :: Parser String
+parseNewline = string "\n"
+
+parseCarriageReturn :: Parser String
+parseCarriageReturn = string "\n\n"
+
+parseSongMeta :: Parser SongMeta
+parseSongMeta = do
+    title <- untilNewline anyChar
+    artist <- untilNewline anyChar
+    year <- untilNewline anyDigit
+    album <- optionMaybe $ manyTill anyChar parseNewline
+    pure $ SongMeta {
+        title: charsToString title,
+        artist: charsToString artist,
+        year: Year $ fromMaybe 0 (fromString $ charsToString year),
+        album: fromCharArray <<< fromFoldable <$> album
+    }
+    where charsToString = fromCharArray <<< fromFoldable
+          untilNewline p = manyTill p parseNewline
+
+serializeSongMeta :: SongMeta -> String
+serializeSongMeta (SongMeta { title, artist, year: Year y, album })
+    = title <> "\n" <>
+      artist <> "\n" <>
+      show y <> "\n" <>
+      maybe "" (\s -> s <> "\n") album
+
+parseSongSectionName :: Parser SongSectionName
+parseSongSectionName =
+        string "Intro" $> Intro
+    <|> string "Chorus" $> Chorus
+    <|> string "Verse" $> Verse
+    <|> string "Outro" $> Outro
+    <|> string "Bridge" $> Bridge
+
+serializeSongSectionName :: SongSectionName -> String
+serializeSongSectionName Intro = "Intro"
+serializeSongSectionName Chorus = "Chorus"
+serializeSongSectionName Verse = "Verse"
+serializeSongSectionName Outro = "Outro"
+serializeSongSectionName Bridge = "Bridge"
+
+parseSongSection :: Parser SongSection
+parseSongSection = do
+    name <- parseSongSectionName
+    parseNewline
+    lyrics <- manyTill (parseSongLyric end) parseCarriageReturn
+    pure $ SongSection { name, lyrics: fromFoldable lyrics }
+        where end = lookAhead (string "|") <|> lookAhead parseCarriageReturn
+
+serializeSongSection :: SongSection -> String
+serializeSongSection (SongSection { name, lyrics }) =
+    serializeSongSectionName name <> "\n" <>
+    joinWith "" (serializeSongLyric <$> lyrics)
+
+parseSongLyric :: forall a. Parser a -> Parser SongLyric
+parseSongLyric end = parseSongChordAndLyric end <|> parseSongLyricWithoutChord end
+
+parseSongChordAndLyric :: forall a. Parser a -> Parser SongLyric
+parseSongChordAndLyric end = do
+    string "|"
+    chord <- parseChord
+    string "| "
+    lyric <- manyTill anyChar end
+    pure $ SongLyric { chord: Just chord, lyric: parseLyric lyric }
+
+parseSongLyricWithoutChord :: forall a. Parser a -> Parser SongLyric
+parseSongLyricWithoutChord end = do
+    lyric <- manyTill anyChar end
+    pure $ SongLyric { chord: Nothing, lyric: parseLyric lyric }
+
+parseLyric :: List Char -> String
+parseLyric l = fromCharArray <<< fromFoldable $ l
+
+serializeSongLyric :: SongLyric -> String
+serializeSongLyric (SongLyric { chord, lyric }) =
+    maybe "" (\c -> "|" <> show c <> "| ") chord <> lyric
+
+parseSongContent :: Parser SongContent
+parseSongContent = do
+    content <- many parseSongSection
+    pure $ SongContent $ fromFoldable content
+
+serializeSongContent :: SongContent -> String
+serializeSongContent (SongContent s) = joinWith "\n" $ serializeSongSection <$> s
+
+parseSong :: Parser Song
+parseSong = do
+    meta <- parseSongMeta
+    parseNewline
+    content <- parseSongContent
+    eof
+    pure $ Song { id: 0, meta, content }
+
+serializeSong :: Song -> String
+serializeSong (Song { id, meta, content }) =
+    serializeSongMeta meta <>
+    serializeSongContent content
 
 
 --- Generic boilerplate
@@ -70,11 +174,11 @@ instance isForeignSearchResult :: IsForeign SearchResult where
 
 derive instance genericSong :: Generic Song
 
-instance arbitrarySong :: Arbitrary Song where
-    arbitrary = gArbitrary
-
 instance showSong :: Show Song where
     show = gShow
+
+instance arbitrarySong :: Arbitrary Song where
+    arbitrary = gArbitrary
 
 instance eqSong :: Eq Song where
     eq = gEq
@@ -86,6 +190,9 @@ derive instance genericSongMeta :: Generic SongMeta
 
 instance arbitrarySongMeta :: Arbitrary SongMeta where
     arbitrary = gArbitrary
+
+instance showSongMeta :: Show SongMeta where
+    show = gShow
 
 instance eqSongMeta :: Eq SongMeta where
     eq = gEq
@@ -111,98 +218,28 @@ instance isForeignSongContent :: IsForeign SongContent where
 
 derive instance genericSongSection :: Generic SongSection
 
-instance showSongSection :: Show SongSection where
-    show = gShow
-
 instance isForeignSongSection :: IsForeign SongSection where
     read = readGeneric defaultOptions
 
 derive instance genericSongLyric :: Generic SongLyric
 
+instance arbitrarySongLyric :: Arbitrary SongLyric where
+    arbitrary = gArbitrary
+
 instance showSongLyric :: Show SongLyric where
     show = gShow
+
+instance eqSongLyric :: Eq SongLyric where
+    eq = gEq
 
 instance isForeignSongLyric :: IsForeign SongLyric where
     read = readGeneric defaultOptions
 
 derive instance genericSongSectionName :: Generic SongSectionName
 
-instance showSongSectionName :: Show SongSectionName where
-    show = gShow
-
 instance isForeignSongSectionName :: IsForeign SongSectionName where
     read = readGeneric defaultOptions
 
---- Song parser
-
-parseNewline :: Parser String
-parseNewline = string "\n"
-
-parseCarriageReturn :: Parser String
-parseCarriageReturn = string "\n\n"
-
-parseSongMeta :: Parser SongMeta
-parseSongMeta = do
-    title <- untilNewline anyChar
-    artist <- untilNewline anyChar
-    year <- untilNewline anyDigit
-    album <- optionMaybe $ manyTill anyChar parseNewline
-    pure $ SongMeta {
-        title: charsToString title,
-        artist: charsToString artist,
-        year: Year $ fromMaybe 0 (fromString $ charsToString year),
-        album: fromCharArray <<< fromFoldable <$> album
-    }
-    where charsToString = fromCharArray <<< fromFoldable
-          untilNewline p = manyTill p parseNewline
-
-instance showSongMeta  :: Show SongMeta where
-    show (SongMeta { title, artist, year: Year y, album })
-        = title <> "\n" <>
-          artist <> "\n" <>
-          show y <> "\n" <>
-          maybe "" (\s -> s <> "\n") album
-
-parseSongSectionName :: Parser SongSectionName
-parseSongSectionName =
-        string "Intro" $> Intro
-    <|> string "Chorus" $> Chorus
-    <|> string "Verse" $> Verse
-    <|> string "Outro" $> Outro
-    <|> string "Bridge" $> Bridge
-
-parseSongSection :: Parser SongSection
-parseSongSection = do
-    name <- parseSongSectionName
-    parseNewline
-    lyrics <- manyTill (parseSongChordAndLyric <|> parseSongLyricWithoutChord) parseCarriageReturn
-    pure $ SongSection { name, lyrics: fromFoldable lyrics }
-
-parseSongChordAndLyric :: Parser SongLyric
-parseSongChordAndLyric = do
-    string "|"
-    chord <- parseChord
-    string "| "
-    lyric <- manyTill anyChar (lookAhead (string "|") <|> lookAhead parseCarriageReturn)
-    pure $ SongLyric { chord: Just chord, lyric: Just $ fromCharArray <<< fromFoldable $ lyric }
-
-parseSongLyricWithoutChord :: Parser SongLyric
-parseSongLyricWithoutChord = do
-    lyric <- manyTill anyChar (lookAhead (string "|") <|> lookAhead parseCarriageReturn)
-    pure $ SongLyric { chord: Nothing, lyric: Just $ fromCharArray <<< fromFoldable $ lyric }
-
-parseSongContent :: Parser SongContent
-parseSongContent = do
-    content <- many parseSongSection
-    pure $ SongContent $ fromFoldable content
-
-parseSong :: Parser Song
-parseSong = do
-    meta <- parseSongMeta
-    parseNewline
-    content <- parseSongContent
-    eof
-    pure $ Song { id: 0, meta, content }
 
 --- Test data
 
@@ -226,6 +263,6 @@ exampleSongContent = SongContent [ SongSection {
     name: Intro,
     lyrics: [ SongLyric {
         chord: Just exampleChord,
-        lyric: Just "test"
+        lyric: "test"
     }]
 }]
