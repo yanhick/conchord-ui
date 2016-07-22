@@ -2,13 +2,15 @@ module Action where
 
 import Prelude (($), bind, (<>), pure, show, (+), (-), (==))
 
+import Data.Maybe (Maybe (Just))
+import Data.Argonaut (class EncodeJson, (~>), (:=), jsonEmptyObject, encodeJson)
 import Data.Either (Either (Left, Right))
 import Data.Foreign (F)
 import Data.Foreign.Class (readJSON)
 import Control.Monad.Aff (Aff(), later')
 import Control.Monad.Aff.Console (logShow)
 import Control.Monad.Eff.Console (CONSOLE)
-import Network.HTTP.Affjax (AJAX(), get)
+import Network.HTTP.Affjax (AJAX(), get, post)
 import Network.HTTP.StatusCode (StatusCode(..))
 import Control.Monad.Eff.Class (liftEff)
 import DOM (DOM())
@@ -31,6 +33,7 @@ data Action =
 data UIAction =
     SearchChange FormEvent |
     UpdateHeaderVisibility |
+    NewSongChange FormEvent |
     SetHideHeaderTimeout |
     SetShowHeader
 
@@ -38,7 +41,11 @@ data IOAction =
     RequestSong Int |
     ReceiveSong (F Song) |
     RequestSearch String |
-    ReceiveSearch (F SearchResults)
+    ReceiveSearch (F SearchResults) |
+    SubmitNewSong |
+    ReceiveSubmitNewSong PostResponse
+
+data PostResponse = Ok | Ko String
 
 type Affction = EffModel State Action (ajax :: AJAX, dom :: DOM, console :: CONSOLE)
 
@@ -56,8 +63,8 @@ updatePage r (State state@{ currentPage: r' })
     | r == r' = noEffects $ State state
 updatePage p@(SongPage s) (State state) =
     updateIO (RequestSong s) (State (state { currentPage = p }))
-updatePage p@(SearchResultPage q) (State state@{ ui: UIState { headerVisibility } }) =
-    updateIO (RequestSearch q) (State state { currentPage = p, ui = UIState { searchQuery: q, headerVisibility } })
+updatePage p@(SearchResultPage q) (State state@{ ui: UIState { headerVisibility, newSong } }) =
+    updateIO (RequestSearch q) (State state { currentPage = p, ui = UIState { searchQuery: q, headerVisibility, newSong } })
 updatePage p (State state) = noEffects $ State state { currentPage = p }
 
 
@@ -65,21 +72,21 @@ updatePage p (State state) = noEffects $ State state { currentPage = p }
 
 updateUI :: UIAction -> State -> Affction
 
-updateUI (SearchChange { target: { value } }) (State state@{ ui: UIState { headerVisibility } }) =
-    noEffects $ State state { ui = UIState { searchQuery: value, headerVisibility } }
+updateUI (SearchChange { target: { value } }) (State state@{ ui: UIState { headerVisibility, newSong } }) =
+    noEffects $ State state { ui = UIState { searchQuery: value, headerVisibility, newSong } }
 
-updateUI SetShowHeader (State state@{ ui: UIState { headerVisibility: HideHeader, searchQuery } }) = {
-    state: State state { ui = UIState { headerVisibility: HideHeader, searchQuery } },
+updateUI SetShowHeader (State state@{ ui: UIState { headerVisibility: HideHeader, searchQuery, newSong } }) = {
+    state: State state { ui = UIState { headerVisibility: HideHeader, searchQuery, newSong } },
     effects: [ do
         pure $ UIAction SetHideHeaderTimeout
     ]
 }
 
-updateUI SetShowHeader (State state@{ ui: UIState { searchQuery } }) =
-    noEffects $ State state { ui = UIState { headerVisibility: ShowHeader, searchQuery } }
+updateUI SetShowHeader (State state@{ ui: UIState { searchQuery, newSong } }) =
+    noEffects $ State state { ui = UIState { headerVisibility: ShowHeader, searchQuery, newSong } }
 
-updateUI UpdateHeaderVisibility (State state@{ ui: UIState { headerVisibility: PendingHideHeader, searchQuery } }) =
-    noEffects $ State state { ui = UIState { headerVisibility: HideHeader, searchQuery } }
+updateUI UpdateHeaderVisibility (State state@{ ui: UIState { headerVisibility: PendingHideHeader, searchQuery, newSong } }) =
+    noEffects $ State state { ui = UIState { headerVisibility: HideHeader, searchQuery, newSong } }
 
 updateUI UpdateHeaderVisibility state = {
     state: state,
@@ -88,13 +95,16 @@ updateUI UpdateHeaderVisibility state = {
     ]
 }
 
-updateUI SetHideHeaderTimeout (State state@{ ui: UIState { searchQuery } }) = {
-    state: State state { ui = UIState { headerVisibility: PendingHideHeader, searchQuery } },
+updateUI SetHideHeaderTimeout (State state@{ ui: UIState { searchQuery, newSong } }) = {
+    state: State state { ui = UIState { headerVisibility: PendingHideHeader, searchQuery, newSong } },
     effects: [ do
         later' 3000 $ logShow ""
         pure $ UIAction UpdateHeaderVisibility
     ]
 }
+
+updateUI (NewSongChange { target: { value } }) (State state@{ ui: UIState { headerVisibility, searchQuery} }) =
+    noEffects $ State state { ui = UIState { searchQuery, headerVisibility, newSong: value } }
 
 --- IO Actions
 
@@ -138,6 +148,18 @@ updateIO (ReceiveSong (Left e)) (State state@{ io: IOState { searchResults } }) 
     ]
 }
 
+updateIO SubmitNewSong state@(State { ui: UIState { newSong } })= {
+    state: state,
+    effects: [ do
+        res <- postNewSong (PostNewSong newSong)
+        pure $ IOAction $ ReceiveSubmitNewSong res
+    ]
+}
+
+updateIO (ReceiveSubmitNewSong Ok) state = noEffects state
+updateIO (ReceiveSubmitNewSong (Ko e)) (State state@{ ui: UIState { headerVisibility, searchQuery} }) =
+    noEffects $ State state { ui = UIState { searchQuery, headerVisibility, newSong: e } }
+
 --- AJAX Requests
 
 fetchSearch :: forall eff. String -> Aff (ajax :: AJAX | eff) String
@@ -153,3 +175,17 @@ fetchSong id = do
     pure case result.status of
              (StatusCode 200) -> result.response
              _ -> "fail"
+
+newtype PostNewSong = PostNewSong String
+
+instance postNewSongEncodeJson :: EncodeJson PostNewSong where
+    encodeJson (PostNewSong song)
+        = "song" := song
+        ~> jsonEmptyObject
+
+postNewSong :: forall eff. PostNewSong -> Aff (ajax :: AJAX | eff) PostResponse
+postNewSong s = do
+    result <- post "/api/song" $ encodeJson s
+    pure case result.status of
+        (StatusCode 204) -> Ok
+        _ -> Ko result.response

@@ -4,13 +4,13 @@ import Prelude (($), (<$>), show, const, (<>))
 
 import Pux.Html (Html, section, div, main, p, text, header, article
                 , h1, h2, h3, h4, h5, h6, span, i, nav, li, ul, form
-                , input, (#), (!), bind)
+                , input, textarea, button, (#), (!), bind)
 import Pux.Html.Events (onSubmit, onChange, onMouseMove)
 import Pux.Html.Attributes (name, placeholder, type_, value, data_, action, method)
 import Pux.Router (link)
 
 import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(ChordAndLyric, OnlyChord, OnlyLyric), SearchResult(SearchResult), Year(Year), serializeSongSectionName)
-import Action (Action(UIAction, PageView), UIAction(SearchChange, SetShowHeader))
+import Action (Action(UIAction, PageView, IOAction), UIAction(SearchChange, SetShowHeader, NewSongChange), IOAction(SubmitNewSong))
 import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage, NewSongPage))
 import App (State(State), AsyncData(Loading, Loaded, Empty, LoadError), UIState(UIState), IOState(IOState), HeaderVisibility(HideHeader))
 
@@ -92,6 +92,13 @@ newSongPage :: State -> Html Action
 newSongPage state =
     div # do
         text "New Song"
+        newSongForm
+
+newSongForm :: Html Action
+newSongForm =
+    form ! action "/new" ! method "POST" ! onSubmit (const $ IOAction SubmitNewSong) # do
+        textarea [ name "song", type_ "text", onChange (\e -> UIAction (NewSongChange e)) ] []
+        button [ type_ "submit" ] [ text "Submit" ]
 
 
 --- Song Views

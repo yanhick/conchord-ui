@@ -2,6 +2,7 @@ module App where
 
 import Prelude (class Eq, class Show)
 
+import Data.Maybe (Maybe(Nothing))
 import Data.Foreign.Class (class IsForeign)
 import Data.Generic (class Generic, gEq, gShow)
 import Data.Foreign.Generic (readGeneric, defaultOptions)
@@ -25,7 +26,8 @@ data HeaderVisibility = ShowHeader | HideHeader | PendingHideHeader
 
 newtype UIState = UIState {
     searchQuery :: String,
-    headerVisibility :: HeaderVisibility
+    headerVisibility :: HeaderVisibility,
+    newSong :: String
 }
 
 type Error = String
@@ -41,7 +43,8 @@ init = State {
     currentPage: HomePage
   , ui: UIState {
       searchQuery: "",
-      headerVisibility: ShowHeader
+      headerVisibility: ShowHeader,
+      newSong: ""
   }
   , io: IOState {
       searchResults: Empty

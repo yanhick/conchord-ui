@@ -4,7 +4,7 @@
   "description": "A UI for the conchord file format",
   "main": "index.js",
   "engines": {
-      "node": "6.0.0"
+    "node": "6.0.0"
   },
   "scripts": {
     "clean": "rm -rf node_modules bower_components app.js server-output output",
@@ -23,6 +23,7 @@
     "purescript": "^0.9.1"
   },
   "dependencies": {
+    "body-parser": "^1.15.2",
     "bower": "^1.7.9",
     "express": "^4.14.0",
     "react": "^15.2.1",

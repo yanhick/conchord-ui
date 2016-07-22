@@ -2,19 +2,20 @@ module Main where
 
 import Prelude
 import Data.Maybe (maybe, Maybe(..))
+import Data.Function.Uncurried (Fn3)
 import Data.Foreign.EasyFFI (unsafeForeignFunction)
 import Data.Foreign.Generic (defaultOptions, toJSONGeneric)
 import Data.Unfoldable (replicate)
-import Data.Either (either)
+import Data.Either (either, Either(Left, Right))
 import Control.Monad.Eff.Console (log, CONSOLE)
 import Control.Monad.Eff (Eff())
 import Control.Monad.Eff.Exception (Error(), message, error, EXCEPTION(), catchException)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Unsafe (unsafePerformEff)
-import Node.Express.App (App(), listenHttp, get, useOnError)
-import Node.Express.Types (EXPRESS)
+import Node.Express.App (App(), listenHttp, get, post, useOnError, useExternal)
+import Node.Express.Types (EXPRESS, ExpressM, Request, Response)
 import Node.Express.Handler (Handler(), nextThrow)
-import Node.Express.Request (getRouteParam, getQueryParam)
+import Node.Express.Request (getRouteParam, getQueryParam, getBodyParam)
 import Node.Express.Response (send, sendJson, sendFile, setStatus)
 import Node.HTTP (Server())
 import Node.FS.Sync (readTextFile)
@@ -31,8 +32,9 @@ import Action (update)
 import View (view)
 import Text.Parsing.StringParser (runParser)
 
-
 import Model (SearchResult(SearchResult), exampleSong, exampleSongMeta, parseSong)
+
+foreign import jsonBodyParser :: forall e. Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit)
 
 main :: Eff (
     console :: CONSOLE,
@@ -59,12 +61,15 @@ getSearchResults = replicate 15 getSearchResult
 appSetup :: forall e. App (console :: CONSOLE | e)
 appSetup = do
     liftEff $ log "Setting up"
-    get "/new"         newSongPageHandler
+    useExternal jsonBodyParser
+    get "/new"         getNewSongPageHandler
+    post "/new"         postNewSongPageHandler
     get "/song/:id"    songPageHandler
     get "/:file"       fileHandler
     get "/"            homePageHandler
     get "/api/search"   searchApiHandler
     get "/api/song/:id" songApiHandler
+    post "/api/song"   postNewSongPageHandler
     useOnError         errorHandler
 
 fileHandler :: forall e. Handler e
@@ -72,13 +77,30 @@ fileHandler = do
     fileName <- getRouteParam "file"
     sendFile $ maybe "index.html" id fileName
 
-newSongPageHandler :: forall e. Handler e
-newSongPageHandler = do
+getNewSongPageHandler :: forall e. Handler e
+getNewSongPageHandler = do
     send $ index (State {
         currentPage: NewSongPage,
         io: IOState { searchResults: Empty, song: Empty },
-        ui: UIState { searchQuery: "", headerVisibility: ShowHeader }
+        ui: UIState { searchQuery: "", headerVisibility: ShowHeader, newSong: "" }
     })
+
+postNewSongPageHandler :: forall e. Handler e
+postNewSongPageHandler = do
+    song <- getBodyParam "song"
+    case song of
+      Just s ->
+        case runParser parseSong s of
+          Left s -> do
+              setStatus 400
+              send s
+          Right _ -> do
+              setStatus 204
+              send ""
+
+      Nothing -> do
+          setStatus 400
+          send "No Song was sent"
 
 searchPageHandler :: forall e. Handler e
 searchPageHandler = do
@@ -86,7 +108,7 @@ searchPageHandler = do
     send $ index (State {
         currentPage: (SearchResultPage $ maybe "" id qParam),
         io: IOState { searchResults: Loaded getSearchResults, song: Empty },
-        ui: UIState { searchQuery: maybe "" id qParam, headerVisibility: ShowHeader }
+        ui: UIState { searchQuery: maybe "" id qParam, headerVisibility: ShowHeader, newSong: "" }
     })
 
 songPageHandler :: forall e. Handler e
@@ -99,7 +121,7 @@ songPageHandler = do
         send $ index (State {
             currentPage: (SongPage 0),
             io: IOState { searchResults: Empty, song: either (LoadError <<< show) Loaded $ runParser parseSong s },
-            ui: UIState { searchQuery: "", headerVisibility: ShowHeader }
+            ui: UIState { searchQuery: "", headerVisibility: ShowHeader, newSong: "" }
         })
 
 homePageHandler :: forall e. Handler e
