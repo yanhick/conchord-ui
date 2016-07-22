@@ -54,10 +54,7 @@ newtype SongSection = SongSection {
     lyrics :: Array SongLyric
 }
 
-newtype SongLyric = SongLyric {
-    lyric :: String,
-    chord :: Maybe SongChord
-}
+data SongLyric = ChordAndLyric SongChord String | OnlyChord SongChord | OnlyLyric String
 
 data SongSectionName = Intro | Chorus | Verse | Outro | Bridge
 
@@ -113,35 +110,44 @@ parseSongSection = do
     parseNewline
     lyrics <- manyTill (parseSongLyric end) parseCarriageReturn
     pure $ SongSection { name, lyrics: fromFoldable lyrics }
-        where end = lookAhead (string "|") <|> lookAhead parseCarriageReturn
+        where end = lookAhead (string "/") <|> lookAhead parseCarriageReturn <|> lookAhead (string "\\")
 
 serializeSongSection :: SongSection -> String
 serializeSongSection (SongSection { name, lyrics }) =
     serializeSongSectionName name <> "\n" <>
-    joinWith "" (serializeSongLyric <$> lyrics)
+    joinWith "" (serializeSongLyric <$> lyrics) <> "\n\n"
 
 parseSongLyric :: forall a. Parser a -> Parser SongLyric
-parseSongLyric end = parseSongChordAndLyric end <|> parseSongLyricWithoutChord end
+parseSongLyric end = parseOnlyLyric end <|> parseOnlyChord end <|> parseChordAndLyric end
 
-parseSongChordAndLyric :: forall a. Parser a -> Parser SongLyric
-parseSongChordAndLyric end = do
-    string "|"
+parseChordAndLyric :: forall a. Parser a -> Parser SongLyric
+parseChordAndLyric end = do
+    string "/"
     chord <- parseChord
-    string "| "
+    string "/"
     lyric <- manyTill anyChar end
-    pure $ SongLyric { chord: Just chord, lyric: parseLyric lyric }
+    pure $ ChordAndLyric chord $ parseLyric lyric
 
-parseSongLyricWithoutChord :: forall a. Parser a -> Parser SongLyric
-parseSongLyricWithoutChord end = do
+parseOnlyLyric :: forall a. Parser a -> Parser SongLyric
+parseOnlyLyric end = do
+    string "//"
     lyric <- manyTill anyChar end
-    pure $ SongLyric { chord: Nothing, lyric: parseLyric lyric }
+    pure $ OnlyLyric $ parseLyric lyric
+
+parseOnlyChord :: forall a. Parser a -> Parser SongLyric
+parseOnlyChord end = do
+    string "\\"
+    chord <- parseChord
+    string "\\"
+    pure $ OnlyChord chord
 
 parseLyric :: List Char -> String
 parseLyric l = fromCharArray <<< fromFoldable $ l
 
 serializeSongLyric :: SongLyric -> String
-serializeSongLyric (SongLyric { chord, lyric }) =
-    maybe "" (\c -> "|" <> show c <> "| ") chord <> lyric
+serializeSongLyric (ChordAndLyric chord lyric) = "/" <> show chord <> "/" <> lyric
+serializeSongLyric (OnlyLyric lyric) = "//" <> lyric
+serializeSongLyric (OnlyChord chord) = "\\" <> show chord <> "\\"
 
 parseSongContent :: Parser SongContent
 parseSongContent = do
@@ -221,6 +227,15 @@ derive instance genericSongSection :: Generic SongSection
 instance isForeignSongSection :: IsForeign SongSection where
     read = readGeneric defaultOptions
 
+instance arbitrarySongSection :: Arbitrary SongSection where
+    arbitrary = gArbitrary
+
+instance eqSongSection :: Eq SongSection where
+    eq = gEq
+
+instance showSongSection :: Show SongSection where
+    show = gShow
+
 derive instance genericSongLyric :: Generic SongLyric
 
 instance arbitrarySongLyric :: Arbitrary SongLyric where
@@ -261,8 +276,5 @@ exampleSongMeta = SongMeta {
 exampleSongContent :: SongContent
 exampleSongContent = SongContent [ SongSection {
     name: Intro,
-    lyrics: [ SongLyric {
-        chord: Just exampleChord,
-        lyric: "test"
-    }]
+    lyrics: [ ChordAndLyric exampleChord "test" ]
 }]

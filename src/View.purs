@@ -11,7 +11,7 @@ import Pux.Html.Events (onSubmit, onChange, onMouseMove)
 import Pux.Html.Attributes (name, placeholder, type_, value, data_, action, method)
 import Pux.Router (link)
 
-import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(SongLyric), SearchResult(SearchResult), Year(Year), serializeSongSectionName)
+import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(ChordAndLyric, OnlyChord, OnlyLyric), SearchResult(SearchResult), Year(Year), serializeSongSectionName)
 import Action (Action(UIAction, PageView), UIAction(SearchChange, SetShowHeader))
 import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage))
 import App (State(State), AsyncData(Loading, Loaded, Empty, LoadError), UIState(UIState), IOState(IOState), HeaderVisibility(HideHeader))
@@ -123,9 +123,13 @@ songSection (SongSection {name, lyrics}) =
         p [] (songLyric <$> lyrics)
 
 songLyric :: SongLyric -> Html Action
-songLyric (SongLyric {lyric, chord}) =
+songLyric (ChordAndLyric chord lyric) =
     span ! data_ "lyrics" lyric # do
-        i ! data_ "chord" c # text ""
+        i ! data_ "chord" (show chord) # text ""
         text lyric
-    where
-        c = maybe "" show chord
+songLyric (OnlyChord chord) =
+    span ! data_ "chord" (show chord) # do
+        i ! data_ "chord" (show chord) # text ""
+songLyric (OnlyLyric lyric) =
+    span ! data_ "lyrics" lyric # do
+        text lyric
