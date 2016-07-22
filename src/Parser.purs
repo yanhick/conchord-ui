@@ -10,7 +10,7 @@ import Data.Generic (class Generic, gEq)
 import Control.Alt ((<|>))
 
 import Text.Parsing.StringParser (Parser, runParser)
-import Text.Parsing.StringParser.String (string, eof)
+import Text.Parsing.StringParser.String (string)
 import Text.Parsing.StringParser.Combinators (optionMaybe)
 
 import Test.StrongCheck.Arbitrary (class Arbitrary)
@@ -92,10 +92,10 @@ parseModifier =  string "#" $> Sharp
 parseChord :: Parser SongChord
 parseChord = do
     r <- parseRoot
-    (mkChord r) <$> optionMaybe parseModifier <*> parseQuality <*> optionMaybe parseInterval <*> eof
+    (mkChord r) <$> optionMaybe parseModifier <*> parseQuality <*> optionMaybe parseInterval
 
-mkChord :: SongChordRoot -> Maybe SongChordRootModifier -> SongChordQuality -> Maybe SongChordInterval -> Unit -> SongChord
-mkChord r m q i _ = SongChord { root: r, rootModifier: m, quality: q, interval: i }
+mkChord :: SongChordRoot -> Maybe SongChordRootModifier -> SongChordQuality -> Maybe SongChordInterval -> SongChord
+mkChord r m q i = SongChord { root: r, rootModifier: m, quality: q, interval: i }
 
 --- Generic boilerplate
 
