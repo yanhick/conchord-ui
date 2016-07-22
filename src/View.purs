@@ -2,8 +2,6 @@ module View where
 
 import Prelude (($), (<$>), show, const, (<>))
 
-import Data.Maybe (maybe, fromMaybe)
-
 import Pux.Html (Html, section, div, main, p, text, header, article
                 , h1, h2, h3, h4, h5, h6, span, i, nav, li, ul, form
                 , input, (#), (!), bind)
@@ -77,7 +75,7 @@ searchResult (SearchResult { meta: SongMeta { title, artist, album, year: Year(y
         link ("/song/" <> show id) # do
             h3 # text title
             h4 # text artist
-            h5 # text (fromMaybe "" album)
+            h5 # text album
             h6 # text (show y)
             i # text desc
 
@@ -111,7 +109,7 @@ songMeta (SongMeta { title, artist, album }) =
     header # do
        h1 # text title
        h2 # text artist
-       maybe (text "") (\a -> h3 # text a) album
+       h3 # text album
 
 songContent :: SongContent -> Html Action
 songContent (SongContent s) = article [] (songSection <$> s)

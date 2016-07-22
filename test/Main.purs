@@ -74,15 +74,11 @@ main = do
             serializeSongContent s <> "\n\nParsed:\n\n" <>
             show (runParser parseSongContent (serializeSongContent s))
 
-    {--quickCheck \(s :: Song) ->--}
-        {--let--}
-            {--res = either (const false) ((==) s) (test s)--}
-            {--test s' = runParser parseSong (serializeSong s)--}
-        {--in--}
-            {--res <?> "Song parsing not idempotent for: " <> show s <> "\n" <> serializeSong s--}
-
-
-
-
-
-
+    quickCheck \(s :: Song) ->
+        let
+            res = either (const false) ((==) s) (test s)
+            test s' = runParser parseSong (serializeSong s)
+        in
+            res <?> "Song parsing not idempotent for:\n---\n" <> show s <> "\n---\n" <>
+            serializeSong s <> "\n---\nParsed:\n" <>
+            show (runParser parseSong (serializeSong s))

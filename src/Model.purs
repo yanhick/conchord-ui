@@ -31,7 +31,6 @@ type SearchResults = Array SearchResult
 --- Song Model
 
 newtype Song = Song {
-    id :: Int,
     meta :: SongMeta,
     content :: SongContent
 }
@@ -39,11 +38,9 @@ newtype Song = Song {
 newtype SongMeta = SongMeta {
     title :: String,
     artist :: String,
-    album :: Maybe String,
+    album :: String,
     year :: Year
 }
-
-newtype Album = Album (Maybe String)
 
 newtype Year = Year Int
 
@@ -72,12 +69,12 @@ parseSongMeta = do
     title <- untilNewline anyChar
     artist <- untilNewline anyChar
     year <- untilNewline anyDigit
-    album <- optionMaybe $ manyTill anyChar parseNewline
+    album <- untilNewline anyChar
     pure $ SongMeta {
         title: charsToString title,
         artist: charsToString artist,
         year: Year $ fromMaybe 0 (fromString $ charsToString year),
-        album: fromCharArray <<< fromFoldable <$> album
+        album: charsToString album
     }
     where charsToString = fromCharArray <<< fromFoldable
           untilNewline p = manyTill p parseNewline
@@ -87,7 +84,7 @@ serializeSongMeta (SongMeta { title, artist, year: Year y, album })
     = title <> "\n" <>
       artist <> "\n" <>
       show y <> "\n" <>
-      maybe "" (\s -> s <> "\n") album
+      album <> "\n"
 
 parseSongSectionName :: Parser SongSectionName
 parseSongSectionName =
@@ -151,7 +148,7 @@ serializeSongLyric (OnlyChord chord) = "\\" <> show chord <> "\\"
 
 parseSongContent :: Parser SongContent
 parseSongContent = do
-    content <- manyTill parseSongSection (lookAhead eof)
+    content <- manyTill parseSongSection eof
     pure $ SongContent $ fromFoldable content
 
 serializeSongContent :: SongContent -> String
@@ -162,12 +159,12 @@ parseSong = do
     meta <- parseSongMeta
     parseNewline
     content <- parseSongContent
-    eof
-    pure $ Song { id: 0, meta, content }
+    pure $ Song { meta, content }
 
 serializeSong :: Song -> String
-serializeSong (Song { id, meta, content }) =
-    serializeSongMeta meta <>
+serializeSong (Song { meta, content }) =
+    serializeSongMeta meta
+    <> "\n" <>
     serializeSongContent content
 
 
@@ -269,7 +266,6 @@ instance isForeignSongSectionName :: IsForeign SongSectionName where
 
 exampleSong :: Song
 exampleSong = Song {
-    id: 1,
     meta: exampleSongMeta,
     content: exampleSongContent
 }
@@ -278,7 +274,7 @@ exampleSongMeta :: SongMeta
 exampleSongMeta = SongMeta {
     title: "Tokyo vampires and wolves",
     artist: "The Wombats",
-    album: Just "This modern glitch",
+    album: "This modern glitch",
     year: Year 2011
 }
 
