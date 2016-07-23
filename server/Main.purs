@@ -16,7 +16,8 @@ import Control.Monad.Eff (Eff())
 import Control.Monad.Eff.Exception (Error(), message, error, EXCEPTION(), catchException)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Unsafe (unsafePerformEff)
-import Database.Postgres (connect, DB, query_, Query(Query))
+import Database.Postgres (connect, DB, query_, Query(Query), execute)
+import Database.Postgres.SqlValue (toSql)
 import Node.Express.App (App(), listenHttp, get, post, useOnError, useExternal)
 import Node.Express.Types (EXPRESS, ExpressM, Request, Response)
 import Node.Express.Handler (Handler(), nextThrow)
@@ -37,7 +38,7 @@ import Action (update)
 import View (view)
 import Text.Parsing.StringParser (runParser)
 
-import Model (SearchResult(SearchResult), exampleSong, exampleSongMeta, parseSong)
+import Model (SearchResult(SearchResult), exampleSong, exampleSongMeta, parseSong, serializeSong, Song(Song), SongMeta(SongMeta), Year(Year))
 
 foreign import jsonBodyParser :: forall e. Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit)
 
@@ -121,16 +122,25 @@ getNewSongPageHandler = do
         ui: UIState { searchQuery: "", headerVisibility: ShowHeader, newSong: "" }
     })
 
-postNewSongPageHandler :: forall e. Handler e
+postNewSongPageHandler :: _
 postNewSongPageHandler = do
     song <- getBodyParam "song"
     case song of
       Just s ->
         case runParser parseSong s of
-          Left s -> do
+          Left e -> do
               setStatus 400
-              send s
-          Right _ -> do
+              send e
+          Right song@(Song { meta: SongMeta m@{ year: Year y } })-> do
+              liftEff $ launchAff $ do
+                  client <- connect connectionInfo
+                  execute (Query "insert into song values(default, $1, $2, $3, $4, $5)") [
+                      toSql m.title,
+                      toSql m.artist,
+                      toSql m.album,
+                      toSql y,
+                      toSql $ serializeSong (song)
+                  ] client
               setStatus 204
               send ""
 
