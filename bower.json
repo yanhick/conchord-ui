@@ -27,7 +27,8 @@
     "purescript-foreign-generic": "^1.0.0",
     "purescript-string-parsers": "^1.0.1",
     "purescript-strongcheck": "^1.1.1",
-    "purescript-strongcheck-generics": "^0.4.0"
+    "purescript-strongcheck-generics": "^0.4.0",
+    "purescript-node-postgres": "https://github.com/yanhick/purescript-node-postgres.git#3d58c0f618f2f202cd685ffc16cc6e98715ea969"
   },
   "devDependencies": {
     "purescript-quickcheck": "^1.0.0",
@@ -36,7 +37,7 @@
   },
   "resolutions": {
     "purescript-console": "^1.0.0",
-    "purescript-prelude": "^1.0.1",
+    "purescript-prelude": "^1.0.0",
     "purescript-eff": "^1.0.0",
     "purescript-either": "^1.0.0",
     "purescript-arrays": "^1.0.0",

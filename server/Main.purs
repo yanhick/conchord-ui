@@ -2,16 +2,21 @@ module Main where
 
 import Prelude
 import Data.Maybe (maybe, Maybe(..))
+import Data.String (joinWith)
 import Data.Function.Uncurried (Fn3)
 import Data.Foreign.EasyFFI (unsafeForeignFunction)
 import Data.Foreign.Generic (defaultOptions, toJSONGeneric)
+import Data.Foreign.Class (class IsForeign, readProp)
 import Data.Unfoldable (replicate)
 import Data.Either (either, Either(Left, Right))
+import Control.Monad.Aff (Aff, launchAff)
+import Control.Monad.Aff.Console (logShow)
 import Control.Monad.Eff.Console (log, CONSOLE)
 import Control.Monad.Eff (Eff())
 import Control.Monad.Eff.Exception (Error(), message, error, EXCEPTION(), catchException)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Unsafe (unsafePerformEff)
+import Database.Postgres (connect, DB, query_, Query(Query))
 import Node.Express.App (App(), listenHttp, get, post, useOnError, useExternal)
 import Node.Express.Types (EXPRESS, ExpressM, Request, Response)
 import Node.Express.Handler (Handler(), nextThrow)
@@ -41,7 +46,8 @@ main :: Eff (
     express :: EXPRESS,
     channel :: CHANNEL,
     ajax :: AJAX,
-    err :: EXCEPTION
+    err :: EXCEPTION,
+    db :: DB
 ) Server
 main = do
     port <- unsafeForeignFunction [""] "process.env.PORT || 8080"
@@ -62,6 +68,7 @@ appSetup :: forall e. App (console :: CONSOLE | e)
 appSetup = do
     liftEff $ log "Setting up"
     useExternal jsonBodyParser
+    get "/testdb"       testDb
     get "/new"         getNewSongPageHandler
     post "/new"         postNewSongPageHandler
     get "/song/:id"    songPageHandler
@@ -71,6 +78,35 @@ appSetup = do
     get "/api/song/:id" songApiHandler
     post "/api/song"   postNewSongPageHandler
     useOnError         errorHandler
+
+data Artist = Artist { name :: String, year :: Int }
+
+instance artistIsForeign :: IsForeign Artist where
+    read obj = do
+        name <- readProp "name" obj
+        year <- readProp "year" obj
+        pure $ Artist { name, year }
+
+instance artistShow :: Show Artist where
+    show (Artist p) = "Artist (" <> p.name <> ", " <> show p.year <> ")"
+
+connectionInfo = {
+    host: "localhost",
+    db: "test",
+    port: 5432,
+    user: "testuser",
+    password: "test"
+}
+
+
+testDb :: _
+testDb = do
+    liftEff $ launchAff $ do
+        client <- connect connectionInfo
+        artists <- query_ (Query "select * from artist" :: Query Artist) client
+        logShow $ joinWith "\n" (show <$> artists)
+        logShow "bim"
+    send "test"
 
 fileHandler :: forall e. Handler e
 fileHandler = do
