@@ -3,24 +3,26 @@ module Main where
 import Prelude
 import Data.Maybe (maybe, Maybe(..))
 import Data.String (joinWith)
+import Data.Int (fromString)
 import Data.Function.Uncurried (Fn3)
 import Data.Foreign.EasyFFI (unsafeForeignFunction)
 import Data.Foreign.Generic (defaultOptions, toJSONGeneric)
 import Data.Foreign.Class (class IsForeign, readProp)
 import Data.Unfoldable (replicate)
 import Data.Either (either, Either(Left, Right))
-import Control.Monad.Aff (Aff, launchAff)
+import Control.Monad.Aff (Aff, launchAff, runAff)
+import Control.Monad.Aff.Class (liftAff)
 import Control.Monad.Aff.Console (logShow)
 import Control.Monad.Eff.Console (log, CONSOLE)
 import Control.Monad.Eff (Eff())
-import Control.Monad.Eff.Exception (Error(), message, error, EXCEPTION(), catchException)
+import Control.Monad.Eff.Exception (Error(), message, error, EXCEPTION(), throwException, catchException, error)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Unsafe (unsafePerformEff)
-import Database.Postgres (connect, DB, query_, Query(Query), execute)
+import Database.Postgres (connect, DB, queryOne, query, query_, queryValue, Query(Query), execute)
 import Database.Postgres.SqlValue (toSql)
 import Node.Express.App (App(), listenHttp, get, post, useOnError, useExternal)
 import Node.Express.Types (EXPRESS, ExpressM, Request, Response)
-import Node.Express.Handler (Handler(), nextThrow)
+import Node.Express.Handler (Handler(), nextThrow, HandlerM)
 import Node.Express.Request (getRouteParam, getQueryParam, getBodyParam)
 import Node.Express.Response (send, sendJson, sendFile, setStatus)
 import Node.HTTP (Server())
@@ -36,7 +38,7 @@ import Route (Route(SearchResultPage, SongPage, NewSongPage))
 import App (init, AsyncData(LoadError, Loaded, Empty), State(State), UIState(UIState), IOState(IOState), HeaderVisibility(ShowHeader))
 import Action (update)
 import View (view)
-import Text.Parsing.StringParser (runParser)
+import Text.Parsing.StringParser (runParser, ParseError(ParseError))
 
 import Model (SearchResult(SearchResult), exampleSong, exampleSongMeta, parseSong, serializeSong, Song(Song), SongMeta(SongMeta), Year(Year))
 
@@ -65,11 +67,10 @@ getSearchResult = SearchResult {
 getSearchResults :: Array SearchResult
 getSearchResults = replicate 15 getSearchResult
 
-appSetup :: forall e. App (console :: CONSOLE | e)
+appSetup :: forall e. App (console :: CONSOLE, db :: DB | e)
 appSetup = do
     liftEff $ log "Setting up"
     useExternal jsonBodyParser
-    get "/testdb"       testDb
     get "/new"         getNewSongPageHandler
     post "/new"         postNewSongPageHandler
     get "/song/:id"    songPageHandler
@@ -80,17 +81,6 @@ appSetup = do
     post "/api/song"   postNewSongPageHandler
     useOnError         errorHandler
 
-data Artist = Artist { name :: String, year :: Int }
-
-instance artistIsForeign :: IsForeign Artist where
-    read obj = do
-        name <- readProp "name" obj
-        year <- readProp "year" obj
-        pure $ Artist { name, year }
-
-instance artistShow :: Show Artist where
-    show (Artist p) = "Artist (" <> p.name <> ", " <> show p.year <> ")"
-
 connectionInfo = {
     host: "localhost",
     db: "test",
@@ -98,16 +88,6 @@ connectionInfo = {
     user: "testuser",
     password: "test"
 }
-
-
-testDb :: _
-testDb = do
-    liftEff $ launchAff $ do
-        client <- connect connectionInfo
-        artists <- query_ (Query "select * from artist" :: Query Artist) client
-        logShow $ joinWith "\n" (show <$> artists)
-        logShow "bim"
-    send "test"
 
 fileHandler :: forall e. Handler e
 fileHandler = do
@@ -157,18 +137,29 @@ searchPageHandler = do
         ui: UIState { searchQuery: maybe "" id qParam, headerVisibility: ShowHeader, newSong: "" }
     })
 
-songPageHandler :: forall e. Handler e
+songPageHandler :: forall e. HandlerM ( express :: EXPRESS, db :: DB, console :: CONSOLE | e ) Unit
 songPageHandler = do
     idParam <- getRouteParam "id"
     case idParam of
       Nothing -> nextThrow $ error "Id is required"
-      Just id -> do
-        let s = unsafePerformEff $ catchException (\_ -> pure "") (readTextFile UTF8 "example-song.con")
-        send $ index (State {
-            currentPage: (SongPage 0),
-            io: IOState { searchResults: Empty, song: either (LoadError <<< show) Loaded $ runParser parseSong s },
-            ui: UIState { searchQuery: "", headerVisibility: ShowHeader, newSong: "" }
-        })
+      Just id ->
+        case fromString id of
+          Just id -> do
+            s <- liftAff $ getSongById id
+            send $ index (State {
+                currentPage: (SongPage id),
+                io: IOState { searchResults: Empty, song: either (LoadError <<< show) Loaded $ runParser parseSong s },
+                ui: UIState { searchQuery: "", headerVisibility: ShowHeader, newSong: "" }
+            })
+          Nothing -> nextThrow $ error "Id is not a valid integer"
+
+getSongById :: forall e. Int -> Aff ( db :: DB, console :: CONSOLE | e ) String
+getSongById id = do
+    client <- connect connectionInfo
+    content <- queryValue (Query "select content from song where id = $1" :: Query String) [toSql id] client
+    pure $ case content of
+          Just s -> s
+          Nothing -> ""
 
 homePageHandler :: forall e. Handler e
 homePageHandler = send $ index init
