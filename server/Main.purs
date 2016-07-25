@@ -169,13 +169,21 @@ searchApiHandler = do
     qParam <- getQueryParam "q"
     send $ toJSONGeneric defaultOptions getSearchResults
 
-songApiHandler :: forall e. Handler e
+songApiHandler :: forall e. HandlerM ( express :: EXPRESS, db :: DB, console :: CONSOLE | e ) Unit
 songApiHandler = do
     idParam <- getRouteParam "id"
     case idParam of
-      Nothing -> nextThrow $ error "Id is required"
+      Nothing -> err "Id is required"
       Just id -> do
-        send $ toJSONGeneric defaultOptions exampleSong
+        case fromString id of
+          Just id -> do
+            s <- liftAff $ getSongById id
+            let s' = runParser parseSong s
+            case s' of
+              Right s'' -> send $ toJSONGeneric defaultOptions s''
+              Left e -> err (show e)
+          Nothing -> err "Id is not a valid integer"
+    where err = nextThrow <<< error
 
 errorHandler :: forall e. Error -> Handler e
 errorHandler err = do
