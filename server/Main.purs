@@ -19,7 +19,7 @@ import Control.Monad.Eff (Eff())
 import Control.Monad.Eff.Exception (Error(), message, error, EXCEPTION(), throwException, catchException, error)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Unsafe (unsafePerformEff)
-import Database.Postgres (connect, DB, queryOne, query, query_, queryValue, Query(Query), execute)
+import Database.Postgres (ConnectionInfo, connect, DB, queryOne, query, query_, queryValue, Query(Query), execute, mkConnectionString)
 import Database.Postgres.SqlValue (toSql)
 import Node.Express.App (App(), listenHttp, get, post, useOnError, useExternal)
 import Node.Express.Types (EXPRESS, ExpressM, Request, Response)
@@ -42,6 +42,7 @@ import View (view)
 import Text.Parsing.StringParser (runParser, ParseError(ParseError))
 
 import Model (SearchResult(SearchResult), exampleSongMeta, parseSong, serializeSong, Song(Song), SongMeta(SongMeta), Year(Year))
+import DB (mkConnection)
 
 foreign import jsonBodyParser :: forall e. Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit)
 
@@ -55,32 +56,29 @@ main :: Eff (
 ) Server
 main = do
     port <- unsafeForeignFunction [""] "process.env.PORT || 8080"
-    listenHttp appSetup port \_ ->
+    databaseUrl <- unsafeForeignFunction [""] "process.env.DATABASE_URL || ''"
+    let connectionInfo = case runParser mkConnection databaseUrl of
+              Right c -> c
+              Left _ -> localConnectionInfo
+    listenHttp (appSetup connectionInfo) port \_ ->
         log $ "listening on " <> show port
 
-getSearchResult :: SearchResult
-getSearchResult = SearchResult {
-    id: 0,
-    meta: exampleSongMeta,
-    desc: "We're self-imploding, under the weight of your advice. I wear a suitcase, under each one of my eyes."
-}
-
-appSetup :: forall e. App (console :: CONSOLE, db :: DB | e)
-appSetup = do
+appSetup :: forall e. ConnectionInfo -> App (console :: CONSOLE, db :: DB | e)
+appSetup c = do
     liftEff $ log "Setting up"
     useExternal jsonBodyParser
-    get "/search"   searchPageHandler
-    get "/api/search"   searchApiHandler
+    get "/search"   (searchPageHandler c)
+    get "/api/search"   (searchApiHandler c)
     get "/new"         getNewSongPageHandler
-    post "/new"         postNewSongPageHandler
-    get "/song/:id"    songPageHandler
+    post "/new"         (postNewSongPageHandler c)
+    get "/song/:id"    (songPageHandler c)
     get "/:file"       fileHandler
     get "/"            homePageHandler
-    get "/api/song/:id" songApiHandler
-    post "/api/song"   postNewSongPageHandler
+    get "/api/song/:id" (songApiHandler c)
+    post "/api/song"   (postNewSongPageHandler c)
     useOnError         errorHandler
 
-connectionInfo = {
+localConnectionInfo = {
     host: "localhost",
     db: "test",
     port: 5432,
@@ -102,7 +100,7 @@ getNewSongPageHandler = do
     })
 
 postNewSongPageHandler :: _
-postNewSongPageHandler = do
+postNewSongPageHandler c = do
     song <- getBodyParam "song"
     case song of
       Just s ->
@@ -112,7 +110,7 @@ postNewSongPageHandler = do
               send e
           Right song@(Song { meta: SongMeta m@{ year: Year y } })-> do
               liftEff $ launchAff $ do
-                  client <- connect connectionInfo
+                  client <- connect c
                   execute (Query "insert into song values(default, $1, $2, $3, $4, $5)") [
                       toSql m.title,
                       toSql m.artist,
@@ -128,11 +126,11 @@ postNewSongPageHandler = do
           send "No Song was sent"
 
 searchPageHandler :: _
-searchPageHandler = do
+searchPageHandler c = do
     q <- getQueryParam "q"
     case q of
       Just q' -> do
-          result <- liftAff $ getSearchResults q'
+          result <- liftAff $ getSearchResults c q'
           send $ index (State {
             currentPage: (SearchResultPage $ maybe "" id q),
              io: IOState { searchResults: Loaded (result), song: Empty },
@@ -140,15 +138,15 @@ searchPageHandler = do
           })
       Nothing -> nextThrow $ error "missing query param"
 
-songPageHandler :: forall e. HandlerM ( express :: EXPRESS, db :: DB, console :: CONSOLE | e ) Unit
-songPageHandler = do
+songPageHandler :: forall e. ConnectionInfo -> HandlerM ( express :: EXPRESS, db :: DB, console :: CONSOLE | e ) Unit
+songPageHandler c = do
     idParam <- getRouteParam "id"
     case idParam of
       Nothing -> nextThrow $ error "Id is required"
       Just id ->
         case fromString id of
           Just id -> do
-            s <- liftAff $ getSongById id
+            s <- liftAff $ getSongById c id
             send $ index (State {
                 currentPage: (SongPage id),
                 io: IOState { searchResults: Empty, song: either (LoadError <<< show) Loaded $ runParser parseSong s },
@@ -156,9 +154,9 @@ songPageHandler = do
             })
           Nothing -> nextThrow $ error "Id is not a valid integer"
 
-getSongById :: forall e. Int -> Aff ( db :: DB, console :: CONSOLE | e ) String
-getSongById id = do
-    client <- connect connectionInfo
+getSongById :: forall e. ConnectionInfo -> Int -> Aff ( db :: DB, console :: CONSOLE | e ) String
+getSongById c id = do
+    client <- connect c
     content <- queryValue (Query "select content from song where id = $1" :: Query String) [toSql id] client
     pure $ case content of
           Just s -> s
@@ -168,11 +166,11 @@ homePageHandler :: forall e. Handler e
 homePageHandler = send $ index init
 
 searchApiHandler :: _
-searchApiHandler = do
+searchApiHandler c = do
     q <- getQueryParam "q"
     case q of
       Just q' -> do
-          result <- liftAff $ getSearchResults q'
+          result <- liftAff $ getSearchResults c q'
           send $ toJSONGeneric defaultOptions $ result
       Nothing -> nextThrow $ error "missing query param"
 
@@ -201,23 +199,23 @@ instance isForeignSongTableRow :: IsForeign SongTableRow where
 instance showSongTableRow :: Show SongTableRow where
     show = gShow
 
-getSearchResults :: forall e. String -> Aff ( db :: DB, console :: CONSOLE | e ) (Array SearchResult)
-getSearchResults q = do
-    client <- connect connectionInfo
+getSearchResults :: forall e. ConnectionInfo -> String -> Aff ( db :: DB, console :: CONSOLE | e ) (Array SearchResult)
+getSearchResults c q = do
+    client <- connect c
     rows <- query (Query ("select * from song where content like '%" <> q <> "%'") :: Query SongTableRow) [] client
     pure $ rowToSearchResult <$> rows
       where
         rowToSearchResult (SongTableRow { id, title, artist, album, year, content }) = SearchResult { id: 1, meta: SongMeta { artist, album, year: Year year, title }, desc: content }
 
-songApiHandler :: forall e. HandlerM ( express :: EXPRESS, db :: DB, console :: CONSOLE | e ) Unit
-songApiHandler = do
+songApiHandler :: forall e. ConnectionInfo -> HandlerM ( express :: EXPRESS, db :: DB, console :: CONSOLE | e ) Unit
+songApiHandler c = do
     idParam <- getRouteParam "id"
     case idParam of
       Nothing -> err "Id is required"
       Just id -> do
         case fromString id of
           Just id -> do
-            s <- liftAff $ getSongById id
+            s <- liftAff $ getSongById c id
             let s' = runParser parseSong s
             case s' of
               Right s'' -> send $ toJSONGeneric defaultOptions s''
