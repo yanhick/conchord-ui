@@ -6,7 +6,8 @@ import Data.String (joinWith)
 import Data.Int (fromString)
 import Data.Function.Uncurried (Fn3)
 import Data.Foreign.EasyFFI (unsafeForeignFunction)
-import Data.Foreign.Generic (defaultOptions, toJSONGeneric)
+import Data.Generic (class Generic, gShow)
+import Data.Foreign.Generic (defaultOptions, toJSONGeneric, readGeneric)
 import Data.Foreign.Class (class IsForeign, readProp)
 import Data.Unfoldable (replicate)
 import Data.Either (either, Either(Left, Right))
@@ -40,7 +41,7 @@ import Action (update)
 import View (view)
 import Text.Parsing.StringParser (runParser, ParseError(ParseError))
 
-import Model (SearchResult(SearchResult), exampleSong, exampleSongMeta, parseSong, serializeSong, Song(Song), SongMeta(SongMeta), Year(Year))
+import Model (SearchResult(SearchResult), exampleSongMeta, parseSong, serializeSong, Song(Song), SongMeta(SongMeta), Year(Year))
 
 foreign import jsonBodyParser :: forall e. Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit)
 
@@ -64,19 +65,17 @@ getSearchResult = SearchResult {
     desc: "We're self-imploding, under the weight of your advice. I wear a suitcase, under each one of my eyes."
 }
 
-getSearchResults :: Array SearchResult
-getSearchResults = replicate 15 getSearchResult
-
 appSetup :: forall e. App (console :: CONSOLE, db :: DB | e)
 appSetup = do
     liftEff $ log "Setting up"
     useExternal jsonBodyParser
+    get "/search"   searchPageHandler
+    get "/api/search"   searchApiHandler
     get "/new"         getNewSongPageHandler
     post "/new"         postNewSongPageHandler
     get "/song/:id"    songPageHandler
     get "/:file"       fileHandler
     get "/"            homePageHandler
-    get "/api/search"   searchApiHandler
     get "/api/song/:id" songApiHandler
     post "/api/song"   postNewSongPageHandler
     useOnError         errorHandler
@@ -128,14 +127,18 @@ postNewSongPageHandler = do
           setStatus 400
           send "No Song was sent"
 
-searchPageHandler :: forall e. Handler e
+searchPageHandler :: _
 searchPageHandler = do
-    qParam <- getQueryParam "q"
-    send $ index (State {
-        currentPage: (SearchResultPage $ maybe "" id qParam),
-        io: IOState { searchResults: Loaded getSearchResults, song: Empty },
-        ui: UIState { searchQuery: maybe "" id qParam, headerVisibility: ShowHeader, newSong: "" }
-    })
+    q <- getQueryParam "q"
+    case q of
+      Just q' -> do
+          result <- liftAff $ getSearchResults q'
+          send $ index (State {
+            currentPage: (SearchResultPage $ maybe "" id q),
+             io: IOState { searchResults: Loaded (result), song: Empty },
+             ui: UIState { searchQuery: maybe "" id q, headerVisibility: ShowHeader, newSong: "" }
+          })
+      Nothing -> nextThrow $ error "missing query param"
 
 songPageHandler :: forall e. HandlerM ( express :: EXPRESS, db :: DB, console :: CONSOLE | e ) Unit
 songPageHandler = do
@@ -164,10 +167,47 @@ getSongById id = do
 homePageHandler :: forall e. Handler e
 homePageHandler = send $ index init
 
-searchApiHandler :: forall e. Handler e
+searchApiHandler :: _
 searchApiHandler = do
-    qParam <- getQueryParam "q"
-    send $ toJSONGeneric defaultOptions getSearchResults
+    q <- getQueryParam "q"
+    case q of
+      Just q' -> do
+          result <- liftAff $ getSearchResults q'
+          send $ toJSONGeneric defaultOptions $ result
+      Nothing -> nextThrow $ error "missing query param"
+
+newtype SongTableRow = SongTableRow {
+    id :: String,
+    title :: String,
+    artist :: String,
+    album :: String,
+    year :: Int,
+    content :: String
+}
+
+derive instance genericSongTableRow :: Generic SongTableRow
+
+instance isForeignSongTableRow :: IsForeign SongTableRow where
+    read value = do
+        id <- readProp "id" value
+        title <- readProp "title" value
+        artist <- readProp "artist" value
+        album <- readProp "album" value
+        year <- readProp "year" value
+        content <- readProp "content" value
+        pure $ SongTableRow { id, title, artist, album, year, content }
+
+
+instance showSongTableRow :: Show SongTableRow where
+    show = gShow
+
+getSearchResults :: forall e. String -> Aff ( db :: DB, console :: CONSOLE | e ) (Array SearchResult)
+getSearchResults q = do
+    client <- connect connectionInfo
+    rows <- query (Query ("select * from song where content like '%" <> q <> "%'") :: Query SongTableRow) [] client
+    pure $ rowToSearchResult <$> rows
+      where
+        rowToSearchResult (SongTableRow { id, title, artist, album, year, content }) = SearchResult { id: 1, meta: SongMeta { artist, album, year: Year year, title }, desc: content }
 
 songApiHandler :: forall e. HandlerM ( express :: EXPRESS, db :: DB, console :: CONSOLE | e ) Unit
 songApiHandler = do

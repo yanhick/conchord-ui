@@ -175,6 +175,9 @@ derive instance genericSearchResult :: Generic SearchResult
 instance isForeignSearchResult :: IsForeign SearchResult where
     read = readGeneric defaultOptions
 
+instance showSearchResult :: Show SearchResult where
+    show = gShow
+
 derive instance genericSong :: Generic Song
 
 instance showSong :: Show Song where
