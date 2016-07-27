@@ -11,6 +11,7 @@ import Data.Either (Either(Left, Right))
 import Data.Maybe (maybe, Maybe(Nothing, Just))
 import Data.Generic (class Generic, gShow)
 import Data.Foreign.Class (class IsForeign, readProp)
+import Data.Foreign.Generic (defaultOptions, readGeneric)
 
 import Text.Parsing.StringParser (Parser, fail)
 import Text.Parsing.StringParser.String (string, eof, anyChar, anyDigit)
@@ -99,18 +100,12 @@ newtype SongTableRow = SongTableRow {
     content :: String
 }
 
+--- Generic boilerplate
+
 derive instance genericSongTableRow :: Generic SongTableRow
 
 instance isForeignSongTableRow :: IsForeign SongTableRow where
-    read value = do
-        id <- readProp "id" value
-        title <- readProp "title" value
-        artist <- readProp "artist" value
-        album <- readProp "album" value
-        year <- readProp "year" value
-        content <- readProp "content" value
-        pure $ SongTableRow { id, title, artist, album, year, content }
-
+    read = readGeneric defaultOptions
 
 instance showSongTableRow :: Show SongTableRow where
     show = gShow
