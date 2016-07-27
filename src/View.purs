@@ -21,7 +21,7 @@ view state@(State { currentPage } ) = div [] [ page currentPage state ]
 --- App Routing
 
 page :: Route -> State -> Html Action
-page (SongPage _) (State { ui, io }) = songPage io ui
+page (SongPage _) (State { ui, io, currentPage }) = songPage currentPage io ui
 page (SearchResultPage _) state = searchResultPage state
 page HomePage state = homePage state
 page NewSongPage state = newSongPage state
@@ -37,9 +37,17 @@ header_ (IOState { searchResults }) (UIState { searchQuery }) =
     header # do
         nav # do
             searchForm searchQuery
+            link "/new" # do
+                text "new"
 
-songPageHeader :: UIState -> Html Action
-songPageHeader (UIState { searchQuery }) =
+songPageHeader :: Route -> UIState -> Html Action
+songPageHeader (SongPage id) (UIState { searchQuery }) =
+    header # do
+        nav # do
+            searchForm searchQuery
+            link ("/update/" <> show id) # do
+                text "update"
+songPageHeader _ (UIState { searchQuery }) =
     header # do
         nav # do
             searchForm searchQuery
@@ -118,13 +126,13 @@ updateSongForm (State { ui: UIState { newSong } }) =
 
 --- Song Views
 
-songPage :: IOState -> UIState -> Html Action
-songPage io ui@(UIState { headerVisibility: HideHeader }) =
+songPage :: Route -> IOState -> UIState -> Html Action
+songPage _ io ui@(UIState { headerVisibility: HideHeader }) =
     div ! onMouseMove (const $ UIAction SetShowHeader) # do
         songPageContent io ui
-songPage io ui =
+songPage r io ui =
     div ! onMouseMove (const $ UIAction SetShowHeader) # do
-        songPageHeader ui
+        songPageHeader r ui
         songPageContent io ui
 
 songPageContent :: IOState -> UIState -> Html Action
