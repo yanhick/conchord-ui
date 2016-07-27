@@ -55,23 +55,49 @@ mkConnection = do
 getSongById :: forall e. ConnectionInfo -> Int -> Aff ( db :: DB | e ) String
 getSongById c id = do
     client <- connect c
-    content <- queryValue (Query "select content from song where id = $1" :: Query String) [toSql id] client
+    content <- queryValue getSongByIdQuery [toSql id] client
     pure $ case content of
           Just s -> s
           Nothing -> ""
 
+getSongByIdQuery :: Query String
+getSongByIdQuery = Query ("""
+
+    SELECT content
+    FROM song
+    WHERE id = $1
+
+""")
+
 getSearchResults :: forall e. ConnectionInfo -> String -> Aff ( db :: DB | e ) (Array SearchResult)
 getSearchResults c q = do
     client <- connect c
-    rows <- query (Query ("select id, title, artist, album, year, content from (select song.id as id, song.title as title, song.artist as artist, song.album as album, song.year as year, song.content as content, to_tsvector(song.content) as document from song) as doc where document @@ to_tsquery($1)") :: Query SongTableRow) [toSql q] client
+    rows <- query getSearchResultsQuery [toSql q] client
     pure $ rowToSearchResult <$> rows
       where
         rowToSearchResult (SongTableRow { id, title, artist, album, year, content }) = SearchResult { id: 1, meta: SongMeta { artist, album, year: Year year, title }, desc: content }
 
+getSearchResultsQuery :: Query SongTableRow
+getSearchResultsQuery = Query ("""
+
+    SELECT id, title, artist, album, year, content
+    FROM
+    (SELECT song.id as id,
+            song.title as title,
+            song.artist as artist,
+            song.album as album,
+            song.year as year,
+            song.content as content,
+            to_tsvector(song.content) as document
+            FROM song) as doc
+    WHERE document @@ to_tsquery($1)
+
+""")
+
 createSong :: forall e. ConnectionInfo -> Song -> Aff ( db :: DB | e ) Unit
 createSong c s@(Song { meta: SongMeta m@{ year: Year y } }) = do
     client <- connect c
-    execute (Query "insert into song values(default, $1, $2, $3, $4, $5)") [
+    execute createSongQuery [
       toSql m.title,
       toSql m.artist,
       toSql m.album,
@@ -79,10 +105,18 @@ createSong c s@(Song { meta: SongMeta m@{ year: Year y } }) = do
       toSql $ serializeSong s
     ] client
 
+createSongQuery :: Query String
+createSongQuery = Query ("""
+
+    INSERT into song
+    VALUES(default, $1, $2, $3, $4, $5)
+
+""")
+
 updateSong :: forall e. ConnectionInfo -> Int -> Song -> Aff ( db :: DB | e ) Unit
 updateSong c id s@(Song { meta: SongMeta m@{ year: Year y } }) = do
     client <- connect c
-    execute (Query "update song set title = $1, artist = $2, album = $3, year = $4, content = $5 where id = $6") [
+    execute updateSongQuery [
       toSql m.title,
       toSql m.artist,
       toSql m.album,
@@ -90,6 +124,19 @@ updateSong c id s@(Song { meta: SongMeta m@{ year: Year y } }) = do
       toSql $ serializeSong s,
       toSql id
     ] client
+
+updateSongQuery :: Query String
+updateSongQuery = Query ("""
+
+    UPDATE song
+    SET title = $1,
+        artist = $2,
+        album = $3,
+        year = $4,
+        content = $5
+    WHERE id = $6
+
+""")
 
 newtype SongTableRow = SongTableRow {
     id :: String,
@@ -105,7 +152,14 @@ newtype SongTableRow = SongTableRow {
 derive instance genericSongTableRow :: Generic SongTableRow
 
 instance isForeignSongTableRow :: IsForeign SongTableRow where
-    read = readGeneric defaultOptions
+    read value = do
+        id <- readProp "id" value
+        title <- readProp "title" value
+        artist <- readProp "artist" value
+        album <- readProp "album" value
+        year <- readProp "year" value
+        content <- readProp "content" value
+        pure $ SongTableRow { id, title, artist, album, year, content }
 
 instance showSongTableRow :: Show SongTableRow where
     show = gShow
