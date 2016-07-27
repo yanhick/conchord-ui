@@ -6,7 +6,6 @@ import Data.String (joinWith)
 import Data.Int (fromString)
 import Data.Function.Uncurried (Fn3)
 import Data.Foreign.EasyFFI (unsafeForeignFunction)
-import Data.Generic (class Generic, gShow)
 import Data.Foreign.Generic (defaultOptions, toJSONGeneric, readGeneric)
 import Data.Foreign.Class (class IsForeign, readProp)
 import Data.Unfoldable (replicate)
@@ -42,7 +41,7 @@ import View (view)
 import Text.Parsing.StringParser (runParser, ParseError(ParseError))
 
 import Model (SearchResult(SearchResult), exampleSongMeta, parseSong, serializeSong, Song(Song), SongMeta(SongMeta), Year(Year))
-import DB (mkConnection)
+import DB (mkConnection, localConnectionInfo, getSongById, getSearchResults, createSong, updateSong, SongTableRow)
 
 foreign import jsonBodyParser :: forall e. Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit)
 
@@ -67,7 +66,6 @@ appSetup :: forall e. ConnectionInfo -> App (console :: CONSOLE, db :: DB | e)
 appSetup c = do
     liftEff $ log "Setting up"
     useExternal jsonBodyParser
-    put "/api/song/:id" (putUpdateSongPageHandler c)
     get "/search"   (searchPageHandler c)
     get "/api/search"   (searchApiHandler c)
     get "/new"         getNewSongPageHandler
@@ -78,16 +76,10 @@ appSetup c = do
     get "/:file"       fileHandler
     get "/"            homePageHandler
     get "/api/song/:id" (songApiHandler c)
+    put "/api/song/:id" (putUpdateSongPageHandler c)
     post "/api/song"   (postNewSongPageHandler c)
     useOnError         errorHandler
 
-localConnectionInfo = {
-    host: "localhost",
-    db: "test",
-    port: 5432,
-    user: "testuser",
-    password: "test"
-}
 
 fileHandler :: forall e. Handler e
 fileHandler = do
@@ -125,17 +117,8 @@ putUpdateSongPageHandler c = do
                       Left e -> do
                           setStatus 400
                           send e
-                      Right song@(Song { meta: SongMeta m@{ year: Year y } })-> do
-                          liftEff $ launchAff $ do
-                              client <- connect c
-                              execute (Query "update song set title = $1, artist = $2, album = $3, year = $4, content = $5 where id = $6") [
-                                  toSql m.title,
-                                  toSql m.artist,
-                                  toSql m.album,
-                                  toSql y,
-                                  toSql $ serializeSong (song),
-                                  toSql id'
-                              ] client
+                      Right s -> do
+                          liftEff $ launchAff $ updateSong c id' s
                           setStatus 204
                           send ""
                   Nothing -> do
@@ -161,16 +144,8 @@ postNewSongPageHandler c = do
           Left e -> do
               setStatus 400
               send e
-          Right song@(Song { meta: SongMeta m@{ year: Year y } })-> do
-              liftEff $ launchAff $ do
-                  client <- connect c
-                  execute (Query "insert into song values(default, $1, $2, $3, $4, $5)") [
-                      toSql m.title,
-                      toSql m.artist,
-                      toSql m.album,
-                      toSql y,
-                      toSql $ serializeSong (song)
-                  ] client
+          Right s -> do
+              liftEff $ launchAff $ createSong c s
               setStatus 204
               send ""
 
@@ -207,13 +182,6 @@ songPageHandler c = do
             })
           Nothing -> nextThrow $ error "Id is not a valid integer"
 
-getSongById :: forall e. ConnectionInfo -> Int -> Aff ( db :: DB, console :: CONSOLE | e ) String
-getSongById c id = do
-    client <- connect c
-    content <- queryValue (Query "select content from song where id = $1" :: Query String) [toSql id] client
-    pure $ case content of
-          Just s -> s
-          Nothing -> ""
 
 homePageHandler :: forall e. Handler e
 homePageHandler = send $ index init
@@ -227,38 +195,6 @@ searchApiHandler c = do
           send $ toJSONGeneric defaultOptions $ result
       Nothing -> nextThrow $ error "missing query param"
 
-newtype SongTableRow = SongTableRow {
-    id :: String,
-    title :: String,
-    artist :: String,
-    album :: String,
-    year :: Int,
-    content :: String
-}
-
-derive instance genericSongTableRow :: Generic SongTableRow
-
-instance isForeignSongTableRow :: IsForeign SongTableRow where
-    read value = do
-        id <- readProp "id" value
-        title <- readProp "title" value
-        artist <- readProp "artist" value
-        album <- readProp "album" value
-        year <- readProp "year" value
-        content <- readProp "content" value
-        pure $ SongTableRow { id, title, artist, album, year, content }
-
-
-instance showSongTableRow :: Show SongTableRow where
-    show = gShow
-
-getSearchResults :: forall e. ConnectionInfo -> String -> Aff ( db :: DB, console :: CONSOLE | e ) (Array SearchResult)
-getSearchResults c q = do
-    client <- connect c
-    rows <- query (Query ("select id, title, artist, album, year, content from (select song.id as id, song.title as title, song.artist as artist, song.album as album, song.year as year, song.content as content, to_tsvector(song.content) as document from song) as doc where document @@ to_tsquery($1)") :: Query SongTableRow) [toSql q] client
-    pure $ rowToSearchResult <$> rows
-      where
-        rowToSearchResult (SongTableRow { id, title, artist, album, year, content }) = SearchResult { id: 1, meta: SongMeta { artist, album, year: Year year, title }, desc: content }
 
 songApiHandler :: forall e. ConnectionInfo -> HandlerM ( express :: EXPRESS, db :: DB, console :: CONSOLE | e ) Unit
 songApiHandler c = do
