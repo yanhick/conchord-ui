@@ -21,7 +21,7 @@ import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Unsafe (unsafePerformEff)
 import Database.Postgres (ConnectionInfo, connect, DB, queryOne, query, query_, queryValue, Query(Query), execute, mkConnectionString)
 import Database.Postgres.SqlValue (toSql)
-import Node.Express.App (App(), listenHttp, get, post, useOnError, useExternal)
+import Node.Express.App (App(), listenHttp, get, post, put, useOnError, useExternal)
 import Node.Express.Types (EXPRESS, ExpressM, Request, Response)
 import Node.Express.Handler (Handler(), nextThrow, HandlerM)
 import Node.Express.Request (getRouteParam, getQueryParam, getBodyParam)
@@ -67,11 +67,13 @@ appSetup :: forall e. ConnectionInfo -> App (console :: CONSOLE, db :: DB | e)
 appSetup c = do
     liftEff $ log "Setting up"
     useExternal jsonBodyParser
+    put "/api/song/:id" (putUpdateSongPageHandler c)
     get "/search"   (searchPageHandler c)
     get "/api/search"   (searchApiHandler c)
     get "/new"         getNewSongPageHandler
     post "/new"         (postNewSongPageHandler c)
     get "/update/:id"      (getUpdateSongPageHandler c)
+    put "/update/:id"      (putUpdateSongPageHandler c)
     get "/song/:id"    (songPageHandler c)
     get "/:file"       fileHandler
     get "/"            homePageHandler
@@ -107,6 +109,40 @@ getUpdateSongPageHandler c = do
                     ui: UIState { searchQuery: "", headerVisibility: ShowHeader, newSong: either (\_ -> "") serializeSong $ runParser parseSong s }
                 })
             Nothing -> nextThrow $ error "Id is not a valid integer"
+
+putUpdateSongPageHandler :: _
+putUpdateSongPageHandler c = do
+    idParam <- getRouteParam "id"
+    case idParam of
+      Nothing -> nextThrow $ error "Id is required"
+      Just id ->
+        case fromString id of
+            Just id' -> do
+                song <- getBodyParam "song"
+                case song of
+                  Just s ->
+                    case runParser parseSong s of
+                      Left e -> do
+                          setStatus 400
+                          send e
+                      Right song@(Song { meta: SongMeta m@{ year: Year y } })-> do
+                          liftEff $ launchAff $ do
+                              client <- connect c
+                              execute (Query "update song set title = $1, artist = $2, album = $3, year = $4, content = $5 where id = $6") [
+                                  toSql m.title,
+                                  toSql m.artist,
+                                  toSql m.album,
+                                  toSql y,
+                                  toSql $ serializeSong (song),
+                                  toSql id'
+                              ] client
+                          setStatus 204
+                          send ""
+                  Nothing -> do
+                      setStatus 400
+                      send "No Song was sent"
+            Nothing -> nextThrow $ error "Id is not a valid integer"
+
 
 getNewSongPageHandler :: forall e. Handler e
 getNewSongPageHandler = do

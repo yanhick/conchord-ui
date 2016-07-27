@@ -18,7 +18,7 @@ import Pux (EffModel, noEffects)
 import Pux.Html.Events (FormEvent)
 import Pux.Router (navigateTo)
 
-import Route (Route(SongPage, SearchResultPage))
+import Route (Route(SongPage, SearchResultPage, UpdateSongPage))
 import Model (SearchResults, Song)
 import App (State(State), UIState(UIState), IOState(IOState), AsyncData(Loading, Loaded, LoadError), HeaderVisibility(PendingHideHeader, HideHeader, ShowHeader))
 
@@ -161,13 +161,16 @@ updateIO SubmitNewSong state@(State { ui: UIState { newSong } })= {
     ]
 }
 
-updateIO SubmitUpdateSong state@(State { ui: UIState { newSong } })= {
+updateIO SubmitUpdateSong state@(State { currentPage: (UpdateSongPage id) , ui: UIState { newSong } })= {
     state: state,
     effects: [ do
-        res <- updateSong (PostSong newSong)
+        res <- updateSong id (PostSong newSong)
         pure $ IOAction $ ReceiveSubmitUpdateSong res
     ]
 }
+
+updateIO SubmitUpdateSong state = noEffects state
+
 
 updateIO (ReceiveSubmitNewSong Ok) state = noEffects state
 updateIO (ReceiveSubmitNewSong (Ko e)) (State state@{ ui: UIState { headerVisibility, searchQuery} }) =
@@ -207,9 +210,9 @@ postSong s = do
         (StatusCode 204) -> Ok
         _ -> Ko result.response
 
-updateSong :: forall eff. PostSong -> Aff (ajax :: AJAX | eff) PostResponse
-updateSong s = do
-    result <- put "/api/song" $ encodeJson s
+updateSong :: forall eff. Int -> PostSong -> Aff (ajax :: AJAX | eff) PostResponse
+updateSong id s = do
+    result <- put ("/api/song/" <> show id )  $ encodeJson s
     pure case result.status of
         (StatusCode 204) -> Ok
         _ -> Ko result.response
