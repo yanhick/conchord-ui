@@ -202,7 +202,7 @@ instance showSongTableRow :: Show SongTableRow where
 getSearchResults :: forall e. ConnectionInfo -> String -> Aff ( db :: DB, console :: CONSOLE | e ) (Array SearchResult)
 getSearchResults c q = do
     client <- connect c
-    rows <- query (Query ("select * from song where content like '%" <> q <> "%'") :: Query SongTableRow) [] client
+    rows <- query (Query ("select id, title, artist, album, year, content from (select song.id as id, song.title as title, song.artist as artist, song.album as album, song.year as year, song.content as content, to_tsvector(song.content) as document from song) as doc where document @@ to_tsquery($1)") :: Query SongTableRow) [toSql q] client
     pure $ rowToSearchResult <$> rows
       where
         rowToSearchResult (SongTableRow { id, title, artist, album, year, content }) = SearchResult { id: 1, meta: SongMeta { artist, album, year: Year year, title }, desc: content }
