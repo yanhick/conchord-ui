@@ -10,7 +10,7 @@
     "clean": "rm -rf node_modules bower_components app.js server-output output",
     "start": "node index.js",
     "test": "pulp test",
-    "build": "pulp browserify -t app.js -I src --src-path client && pulp build -o server-output --src-path server -I src",
+    "build": "webpack --config ./webpack.production.config --progress --profile --colors && pulp build -o server-output --src-path server -I src",
     "dev-client": "pulp -w browserify -t app.js -I src --src-path client",
     "dev-server": "pulp -w --then \"node index\" build -o server-output --src-path server -I src",
     "release": "npm test && npm run build && git add app.js -f && git add server-output -f && git commit -m'release' && git push heroku HEAD:master -f && git reset --hard HEAD^",
@@ -20,7 +20,9 @@
   "license": "MIT",
   "devDependencies": {
     "pulp": "^9.0.1",
-    "purescript": "^0.9.1"
+    "purescript": "^0.9.1",
+    "source-map-loader": "^0.1.5",
+    "webpack": "^1.13.1"
   },
   "dependencies": {
     "body-parser": "^1.15.2",
