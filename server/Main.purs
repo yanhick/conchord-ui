@@ -35,7 +35,7 @@ import Signal.Channel (CHANNEL())
 
 import Pux (renderToString, start)
 import Signal ((~>))
-import Route (Route(SearchResultPage, SongPage, NewSongPage))
+import Route (Route(SearchResultPage, SongPage, NewSongPage, UpdateSongPage))
 import App (init, AsyncData(LoadError, Loaded, Empty), State(State), UIState(UIState), IOState(IOState), HeaderVisibility(ShowHeader))
 import Action (update)
 import View (view)
@@ -71,6 +71,7 @@ appSetup c = do
     get "/api/search"   (searchApiHandler c)
     get "/new"         getNewSongPageHandler
     post "/new"         (postNewSongPageHandler c)
+    get "/update/:id"      (getUpdateSongPageHandler c)
     get "/song/:id"    (songPageHandler c)
     get "/:file"       fileHandler
     get "/"            homePageHandler
@@ -90,6 +91,22 @@ fileHandler :: forall e. Handler e
 fileHandler = do
     fileName <- getRouteParam "file"
     sendFile $ maybe "index.html" id fileName
+
+getUpdateSongPageHandler :: _
+getUpdateSongPageHandler c = do
+    idParam <- getRouteParam "id"
+    case idParam of
+      Nothing -> nextThrow $ error "Id is required"
+      Just id ->
+        case fromString id of
+            Just id' -> do
+                s <- liftAff $ getSongById c id'
+                send $ index (State {
+                    currentPage: UpdateSongPage id',
+                    io: IOState { searchResults: Empty, song: either (LoadError <<< show) Loaded $ runParser parseSong s },
+                    ui: UIState { searchQuery: "", headerVisibility: ShowHeader, newSong: either (\_ -> "") serializeSong $ runParser parseSong s }
+                })
+            Nothing -> nextThrow $ error "Id is not a valid integer"
 
 getNewSongPageHandler :: forall e. Handler e
 getNewSongPageHandler = do

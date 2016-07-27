@@ -10,8 +10,8 @@ import Pux.Html.Attributes (name, placeholder, type_, value, data_, action, meth
 import Pux.Router (link)
 
 import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(ChordAndLyric, OnlyChord, OnlyLyric), SearchResult(SearchResult), Year(Year), serializeSongSectionName)
-import Action (Action(UIAction, PageView, IOAction), UIAction(SearchChange, SetShowHeader, NewSongChange), IOAction(SubmitNewSong))
-import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage, NewSongPage))
+import Action (Action(UIAction, PageView, IOAction), UIAction(SearchChange, SetShowHeader, NewSongChange, UpdateSongChange), IOAction(SubmitNewSong, SubmitUpdateSong))
+import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage, NewSongPage, UpdateSongPage))
 import App (State(State), AsyncData(Loading, Loaded, Empty, LoadError), UIState(UIState), IOState(IOState), HeaderVisibility(HideHeader))
 
 
@@ -25,6 +25,7 @@ page (SongPage _) (State { ui, io }) = songPage io ui
 page (SearchResultPage _) state = searchResultPage state
 page HomePage state = homePage state
 page NewSongPage state = newSongPage state
+page (UpdateSongPage _) state = updateSongPage state
 page NotFoundPage _ = notFoundPage
 
 --- Common
@@ -98,6 +99,20 @@ newSongForm :: Html Action
 newSongForm =
     form ! action "/new" ! method "POST" ! onSubmit (const $ IOAction SubmitNewSong) # do
         textarea [ name "song", type_ "text", onChange (\e -> UIAction (NewSongChange e)) ] []
+        button [ type_ "submit" ] [ text "Submit" ]
+
+--- Update Song views
+
+updateSongPage :: State -> Html Action
+updateSongPage state =
+    div # do
+        text "Update Song"
+        updateSongForm state
+
+updateSongForm :: State -> Html Action
+updateSongForm (State { ui: UIState { newSong } }) =
+    form ! action "/update" ! method "PUT" ! onSubmit (const $ IOAction SubmitUpdateSong) # do
+        textarea [ name "song", type_ "text", onChange (\e -> UIAction (UpdateSongChange e)), value newSong ] []
         button [ type_ "submit" ] [ text "Submit" ]
 
 

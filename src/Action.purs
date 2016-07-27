@@ -2,7 +2,6 @@ module Action where
 
 import Prelude (($), bind, (<>), pure, show, (+), (-), (==))
 
-import Data.Maybe (Maybe (Just))
 import Data.Argonaut (class EncodeJson, (~>), (:=), jsonEmptyObject, encodeJson)
 import Data.Either (Either (Left, Right))
 import Data.Foreign (F)
@@ -10,7 +9,7 @@ import Data.Foreign.Class (readJSON)
 import Control.Monad.Aff (Aff(), later')
 import Control.Monad.Aff.Console (logShow)
 import Control.Monad.Eff.Console (CONSOLE)
-import Network.HTTP.Affjax (AJAX(), get, post)
+import Network.HTTP.Affjax (AJAX(), get, post, put)
 import Network.HTTP.StatusCode (StatusCode(..))
 import Control.Monad.Eff.Class (liftEff)
 import DOM (DOM())
@@ -34,6 +33,7 @@ data UIAction =
     SearchChange FormEvent |
     UpdateHeaderVisibility |
     NewSongChange FormEvent |
+    UpdateSongChange FormEvent |
     SetHideHeaderTimeout |
     SetShowHeader
 
@@ -43,7 +43,9 @@ data IOAction =
     RequestSearch String |
     ReceiveSearch (F SearchResults) |
     SubmitNewSong |
-    ReceiveSubmitNewSong PostResponse
+    SubmitUpdateSong |
+    ReceiveSubmitNewSong PostResponse |
+    ReceiveSubmitUpdateSong PostResponse
 
 data PostResponse = Ok | Ko String
 
@@ -106,6 +108,9 @@ updateUI SetHideHeaderTimeout (State state@{ ui: UIState { searchQuery, newSong 
 updateUI (NewSongChange { target: { value } }) (State state@{ ui: UIState { headerVisibility, searchQuery} }) =
     noEffects $ State state { ui = UIState { searchQuery, headerVisibility, newSong: value } }
 
+updateUI (UpdateSongChange { target: { value } }) (State state@{ ui: UIState { headerVisibility, searchQuery} }) =
+    noEffects $ State state { ui = UIState { searchQuery, headerVisibility, newSong: value } }
+
 --- IO Actions
 
 updateIO :: IOAction -> State -> Affction
@@ -151,13 +156,25 @@ updateIO (ReceiveSong (Left e)) (State state@{ io: IOState { searchResults } }) 
 updateIO SubmitNewSong state@(State { ui: UIState { newSong } })= {
     state: state,
     effects: [ do
-        res <- postNewSong (PostNewSong newSong)
+        res <- postSong (PostSong newSong)
         pure $ IOAction $ ReceiveSubmitNewSong res
+    ]
+}
+
+updateIO SubmitUpdateSong state@(State { ui: UIState { newSong } })= {
+    state: state,
+    effects: [ do
+        res <- updateSong (PostSong newSong)
+        pure $ IOAction $ ReceiveSubmitUpdateSong res
     ]
 }
 
 updateIO (ReceiveSubmitNewSong Ok) state = noEffects state
 updateIO (ReceiveSubmitNewSong (Ko e)) (State state@{ ui: UIState { headerVisibility, searchQuery} }) =
+    noEffects $ State state { ui = UIState { searchQuery, headerVisibility, newSong: e } }
+
+updateIO (ReceiveSubmitUpdateSong Ok) state = noEffects state
+updateIO (ReceiveSubmitUpdateSong (Ko e)) (State state@{ ui: UIState { headerVisibility, searchQuery} }) =
     noEffects $ State state { ui = UIState { searchQuery, headerVisibility, newSong: e } }
 
 --- AJAX Requests
@@ -176,16 +193,23 @@ fetchSong id = do
              (StatusCode 200) -> result.response
              _ -> "fail"
 
-newtype PostNewSong = PostNewSong String
+newtype PostSong = PostSong String
 
-instance postNewSongEncodeJson :: EncodeJson PostNewSong where
-    encodeJson (PostNewSong song)
+instance postSongEncodeJson :: EncodeJson PostSong where
+    encodeJson (PostSong song)
         = "song" := song
         ~> jsonEmptyObject
 
-postNewSong :: forall eff. PostNewSong -> Aff (ajax :: AJAX | eff) PostResponse
-postNewSong s = do
+postSong :: forall eff. PostSong -> Aff (ajax :: AJAX | eff) PostResponse
+postSong s = do
     result <- post "/api/song" $ encodeJson s
+    pure case result.status of
+        (StatusCode 204) -> Ok
+        _ -> Ko result.response
+
+updateSong :: forall eff. PostSong -> Aff (ajax :: AJAX | eff) PostResponse
+updateSong s = do
+    result <- put "/api/song" $ encodeJson s
     pure case result.status of
         (StatusCode 204) -> Ok
         _ -> Ko result.response
