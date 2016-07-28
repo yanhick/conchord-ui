@@ -10,18 +10,19 @@ import Control.Monad.Eff.Console (CONSOLE)
 import Network.HTTP.Affjax (AJAX())
 import Data.Foreign.Class (readJSON)
 import Data.Either (Either (Left, Right))
+import Data.Maybe (Maybe(Just, Nothing))
 
 import Pux (renderToDOM, start)
 import Pux.Devtool (start) as Pux.Devtool
 import Pux.Router (sampleUrl)
 import Signal ((~>))
 import Route (match)
-import App (State)
+import App (State, init)
 import Action (update, Action(PageView))
 import View (view)
 
 
-main :: State -> Eff (
+main :: String -> Eff (
     dom :: DOM,
     channel :: CHANNEL,
     ajax :: AJAX,
@@ -32,8 +33,12 @@ main state = do
     urlSignal <- sampleUrl
     let routeSignal = urlSignal ~> (PageView <<< match)
 
+    let s = case readJSON state of
+              Right state' -> state'
+              Left _ -> init
+
     app <- start {
-      initialState: state
+      initialState: s
     , update: update
     , view: view
     , inputs: [routeSignal]
@@ -41,7 +46,7 @@ main state = do
 
     renderToDOM "#app" app.html
 
-debug :: State -> Eff (
+debug :: String -> Eff (
     dom :: DOM,
     channel :: CHANNEL,
     ajax :: AJAX,
@@ -52,8 +57,12 @@ debug state = do
     urlSignal <- sampleUrl
     let routeSignal = urlSignal ~> (PageView <<< match)
 
+    let s = case readJSON state of
+              Right state' -> state'
+              Left _ -> init
+
     app <- Pux.Devtool.start {
-      initialState: state
+      initialState: s
     , update: update
     , view: view
     , inputs: [routeSignal]
