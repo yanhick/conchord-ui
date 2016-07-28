@@ -12,6 +12,7 @@ import Data.Foreign.Class (readJSON)
 import Data.Either (Either (Left, Right))
 
 import Pux (renderToDOM, start)
+import Pux.Devtool (start) as Pux.Devtool
 import Pux.Router (sampleUrl)
 import Signal ((~>))
 import Route (match)
@@ -32,6 +33,26 @@ main state = do
     let routeSignal = urlSignal ~> (PageView <<< match)
 
     app <- start {
+      initialState: state
+    , update: update
+    , view: view
+    , inputs: [routeSignal]
+    }
+
+    renderToDOM "#app" app.html
+
+debug :: State -> Eff (
+    dom :: DOM,
+    channel :: CHANNEL,
+    ajax :: AJAX,
+    err :: EXCEPTION,
+    console :: CONSOLE
+) Unit
+debug state = do
+    urlSignal <- sampleUrl
+    let routeSignal = urlSignal ~> (PageView <<< match)
+
+    app <- Pux.Devtool.start {
       initialState: state
     , update: update
     , view: view
