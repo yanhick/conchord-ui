@@ -15,29 +15,24 @@ import Pux (renderToDOM, start)
 import Pux.Router (sampleUrl)
 import Signal ((~>))
 import Route (match)
-import App (init)
+import App (State)
 import Action (update, Action(PageView))
 import View (view)
 
-foreign import getPuxLastState :: forall a. a
 
-main :: Eff (
+main :: State -> Eff (
     dom :: DOM,
     channel :: CHANNEL,
     ajax :: AJAX,
     err :: EXCEPTION,
     console :: CONSOLE
 ) Unit
-main = do
+main state = do
     urlSignal <- sampleUrl
     let routeSignal = urlSignal ~> (PageView <<< match)
 
-    state <- getPuxLastState
-
     app <- start {
-      initialState: case readJSON state of
-                      Left (_) -> init
-                      Right s -> s
+      initialState: state
     , update: update
     , view: view
     , inputs: [routeSignal]

@@ -11,7 +11,7 @@
     "start": "node index.js",
     "test": "pulp test",
     "build": "webpack --config ./webpack.production.config --progress --profile --colors && pulp build -o server-output --src-path server -I src",
-    "dev-client": "pulp -w browserify -t app.js -I src --src-path client",
+    "dev-client": "webpack --config ./webpack.config --watch",
     "dev-server": "pulp -w --then \"node index\" build -o server-output --src-path server -I src",
     "release": "npm test && npm run build && git add app.js -f && git add server-output -f && git commit -m'release' && git push heroku HEAD:master -f && git reset --hard HEAD^",
     "postinstall": "bower install"
@@ -29,6 +29,8 @@
     "bower": "^1.7.9",
     "express": "^4.14.0",
     "pg": "^6.0.3",
+    "purescript-psa": "^0.3.9",
+    "purs-loader": "^2.0.0-rc.1",
     "react": "^15.2.1",
     "react-dom": "^15.2.1"
   }

@@ -16,7 +16,8 @@ module.exports = {
         query: {
           psc: 'psa',
           bundle: true,
-          warnings: false
+          warnings: false,
+          src: ['bower_components/purescript-*/src/**/*.purs', 'src/**/*.purs', 'client/**/*' ]
         }
       }
     ],
