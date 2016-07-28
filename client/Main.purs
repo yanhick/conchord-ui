@@ -13,7 +13,6 @@ import Data.Either (Either (Left, Right))
 import Data.Maybe (Maybe(Just, Nothing))
 
 import Pux (renderToDOM, start)
-import Pux.Devtool (start) as Pux.Devtool
 import Pux.Router (sampleUrl)
 import Signal ((~>))
 import Route (match)
@@ -38,30 +37,6 @@ main state = do
               Left _ -> init
 
     app <- start {
-      initialState: s
-    , update: update
-    , view: view
-    , inputs: [routeSignal]
-    }
-
-    renderToDOM "#app" app.html
-
-debug :: String -> Eff (
-    dom :: DOM,
-    channel :: CHANNEL,
-    ajax :: AJAX,
-    err :: EXCEPTION,
-    console :: CONSOLE
-) Unit
-debug state = do
-    urlSignal <- sampleUrl
-    let routeSignal = urlSignal ~> (PageView <<< match)
-
-    let s = case readJSON state of
-              Right state' -> state'
-              Left _ -> init
-
-    app <- Pux.Devtool.start {
       initialState: s
     , update: update
     , view: view
