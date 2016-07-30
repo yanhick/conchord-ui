@@ -38,7 +38,7 @@ header_ (IOState { searchResults }) (UIState { searchQuery }) =
         nav # do
             searchForm searchQuery
             link "/new" # do
-                text "Create a new song"
+                text "add a new song"
 
 songPageHeader :: Route -> UIState -> Html Action
 songPageHeader (SongPage id) (UIState { searchQuery }) =
@@ -46,7 +46,9 @@ songPageHeader (SongPage id) (UIState { searchQuery }) =
         nav # do
             searchForm searchQuery
             link ("/update/" <> show id) # do
-                text "update"
+                text "edit this song"
+            link ("/new") # do
+                text "add a new song"
             deleteSongForm id
 
 songPageHeader _ (UIState { searchQuery }) =
@@ -94,7 +96,7 @@ searchResult (SearchResult { meta: SongMeta { title, artist, album, year: Year(y
 searchForm :: String -> Html Action
 searchForm q =
     form ! action "/search" ! method "GET" ! onSubmit (const $ PageView (SearchResultPage q)) # do
-        input [ name "q", type_ "search", placeholder "Search", value q, onChange (\f -> UIAction (SearchChange f))] []
+        input [ name "q", type_ "search", placeholder "Search a song, artist or album", value q, onChange (\f -> UIAction (SearchChange f))] []
 
 
 --- New Song views
@@ -109,7 +111,7 @@ newSongForm :: Html Action
 newSongForm =
     form ! action "/new" ! method "POST" ! onSubmit (const $ IOAction SubmitNewSong) # do
         textarea [ name "song", type_ "text", onChange (\e -> UIAction (NewSongChange e)) ] []
-        input [ type_ "submit", value "Submit" ] []
+        input [ type_ "submit", value "add this new song" ] []
 
 --- Update Song views
 
@@ -123,14 +125,14 @@ updateSongForm :: State -> Html Action
 updateSongForm (State { ui: UIState { newSong } }) =
     form ! action "/update" ! method "PUT" ! onSubmit (const $ IOAction SubmitUpdateSong) # do
         textarea [ name "song", type_ "text", onChange (\e -> UIAction (UpdateSongChange e)), value newSong ] []
-        input [ type_ "submit", value "Submit" ] []
+        input [ type_ "submit", value "edit this song" ] []
 
 --- Delete Song views
 
 deleteSongForm :: Int -> Html Action
 deleteSongForm id =
     form ! action "/song/api" ! method "DELETE" ! onSubmit (const $ IOAction (SubmitDeleteSong id)) # do
-        input [ type_ "submit", value "Delete" ] []
+        input [ type_ "submit", value "delete this song" ] []
 
 --- Song Views
 
