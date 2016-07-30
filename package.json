@@ -10,7 +10,7 @@
     "clean": "rm -rf node_modules bower_components app.js server-output output",
     "start": "node index.js",
     "test": "pulp test",
-    "build": "webpack --config ./webpack.production.config --progress --profile --colors && pulp build -o server-output --src-path server -I src",
+    "build": "npm run clean && webpack --config ./webpack.production.config --progress --profile --colors && pulp build -o server-output --src-path server -I src",
     "dev-client": "webpack --config ./webpack.config --watch",
     "dev-server": "pulp -w --then \"node index\" build -o server-output --src-path server -I src",
     "release": "npm test && npm run build && git add app.js -f && git add server-output -f && git commit -m'release' && git push heroku HEAD:master -f && git reset --hard HEAD^",
