@@ -23,12 +23,12 @@ nav {
 }
 
 nav form {
-    /*background: #222222;*/
     padding-right: 1rem;
 }
 
 nav a, input[type=submit] {
     background: none;
+    display: block;
     height: 2.5rem;
     font-size: 1rem;
     border: none;
@@ -41,10 +41,16 @@ nav a, input[type=submit] {
     box-shadow: 0 0.25em 0 #222222;
     padding: 1rem;
     padding-top: 0.5rem;
+    outline: none;
 }
 
-nav a:hover {
+nav a:hover, input[type=submit]:hover, nav a:focus, input[type=submit]:focus {
     background: #1c5d99;
+    color: white;
+}
+
+nav a:active, input[type=submit]:active {
+    background: #bbcde5;
     color: white;
 }
 
@@ -69,10 +75,15 @@ ul li a {
     margin: 1rem;
     padding: 0.5rem;
     color: #222;
+    outline: none;
 }
 
-ul li a:hover {
+ul li a:hover, ul li a:focus {
     box-shadow: -0.25em -0.25em 0 #222222;
+}
+
+ul li a:active {
+    color: #1c5d99;
 }
 
 input[type="search"] {
