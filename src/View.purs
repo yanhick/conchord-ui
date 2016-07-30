@@ -38,7 +38,7 @@ header_ (IOState { searchResults }) (UIState { searchQuery }) =
         nav # do
             searchForm searchQuery
             link "/new" # do
-                text "new"
+                text "Create a new song"
 
 songPageHeader :: Route -> UIState -> Html Action
 songPageHeader (SongPage id) (UIState { searchQuery }) =
@@ -109,7 +109,7 @@ newSongForm :: Html Action
 newSongForm =
     form ! action "/new" ! method "POST" ! onSubmit (const $ IOAction SubmitNewSong) # do
         textarea [ name "song", type_ "text", onChange (\e -> UIAction (NewSongChange e)) ] []
-        button [ type_ "submit" ] [ text "Submit" ]
+        input [ type_ "submit", value "Submit" ] []
 
 --- Update Song views
 
@@ -123,14 +123,14 @@ updateSongForm :: State -> Html Action
 updateSongForm (State { ui: UIState { newSong } }) =
     form ! action "/update" ! method "PUT" ! onSubmit (const $ IOAction SubmitUpdateSong) # do
         textarea [ name "song", type_ "text", onChange (\e -> UIAction (UpdateSongChange e)), value newSong ] []
-        button [ type_ "submit" ] [ text "Submit" ]
+        input [ type_ "submit", value "Submit" ] []
 
 --- Delete Song views
 
 deleteSongForm :: Int -> Html Action
 deleteSongForm id =
     form ! action "/song/api" ! method "DELETE" ! onSubmit (const $ IOAction (SubmitDeleteSong id)) # do
-        button [ type_ "submit" ] [ text "Delete" ]
+        input [ type_ "submit", value "Delete" ] []
 
 --- Song Views
 
