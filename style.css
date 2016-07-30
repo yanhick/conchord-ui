@@ -109,6 +109,7 @@ main header {
 }
 
 main article {
+    padding: 1rem;
     margin: 1rem;
     column-count: 3;
     -moz-column-count: 3;
@@ -119,12 +120,18 @@ main article {
     line-height: 2.5;
 }
 
+main article section {
+    -webkit-column-break-inside: avoid;
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+
 main article section h4 {
     text-transform: uppercase;
 }
 
 main article section p {
-    white-space: pre-line;
     margin-left: 1rem;
     text-align: justify;
 }
