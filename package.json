@@ -12,10 +12,10 @@
     "test": "pulp test",
     "build-server": "pulp build -o server-output --src-path server -I src",
     "build-client": "webpack --config ./webpack.production.config --progress --profile --colors",
-    "build": "npm run clean && npm install && npm run build-client && npm run build-server",
+    "build": "npm run clean && npm install && npm test && npm run build-client && npm run build-server",
     "dev-client": "webpack --config ./webpack.config --watch",
     "dev-server": "pulp -w --then \"node index\" build -o server-output --src-path server -I src",
-    "release": "npm test && npm run build && git add app.js -f && git add server-output -f && git commit -m'release' && git push heroku HEAD:master -f && git reset --hard HEAD^",
+    "release": "npm run build && git add app.js -f && git add server-output -f && git commit -m'release' && git push heroku HEAD:master -f && git reset --hard HEAD^",
     "postinstall": "bower install"
   },
   "author": "Yannick Dominguez",
