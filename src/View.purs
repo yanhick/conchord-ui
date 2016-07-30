@@ -4,7 +4,7 @@ import Prelude (($), (<$>), show, const, (<>))
 
 import Pux.Html (Html, section, div, main, p, text, header, article
                 , h1, h2, h3, h4, h5, h6, span, i, nav, li, ul, form
-                , input, textarea, button, (#), (!), bind)
+                , input, textarea, button, aside, (#), (!), bind)
 import Pux.Html.Events (onSubmit, onChange, onMouseMove)
 import Pux.Html.Attributes (name, placeholder, type_, value, data_, action, method)
 import Pux.Router (link)
@@ -101,11 +101,17 @@ searchForm q =
 
 --- New Song views
 
+newSongPageHeader :: Html Action
+newSongPageHeader = do
+    nav # do
+        h1 # text "Add a new song"
+
 newSongPage :: State -> Html Action
-newSongPage state =
+newSongPage (State { io, ui }) =
     div # do
-        text "New Song"
-        newSongForm
+        main # do
+            aside # do
+                newSongForm
 
 newSongForm :: Html Action
 newSongForm =

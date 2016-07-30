@@ -156,3 +156,24 @@ main article section span:after {
 main article section span[data-lyrics$="."]:after {
     content: '\A';
 }
+
+main aside {
+    display: flex;
+    height: 100vh;
+    width: 50vw;
+}
+
+main aside form {
+    display: flex;
+    flex-direction: column;
+}
+
+main aside textarea {
+    flex-grow: 1;
+    padding: 1rem;
+    font-size: 1rem;
+    background: #222222;
+    color: white;
+    border: none;
+    width: 50vw;
+}

@@ -266,7 +266,7 @@ index s =
         </head>
         <body>
             <div id="app">""" <> renderAppHandler s <> """</div>
-                     <script>window.puxLastState =  JSON.stringify(""" <> (toJSONGeneric defaultOptions s) <> """);</script>
+            <script>window.puxLastState =  JSON.stringify(""" <> (toJSONGeneric defaultOptions s) <> """);</script>
             <script src="/app.js"></script>
         </body>
     </html>
