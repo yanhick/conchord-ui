@@ -9,7 +9,7 @@ import Data.Foreign.Class (readJSON)
 import Control.Monad.Aff (Aff(), later')
 import Control.Monad.Aff.Console (logShow)
 import Control.Monad.Eff.Console (CONSOLE)
-import Network.HTTP.Affjax (AJAX(), get, post, put)
+import Network.HTTP.Affjax (AJAX(), get, post, put, delete)
 import Network.HTTP.StatusCode (StatusCode(..))
 import Control.Monad.Eff.Class (liftEff)
 import DOM (DOM())
@@ -44,8 +44,10 @@ data IOAction =
     ReceiveSearch (F SearchResults) |
     SubmitNewSong |
     SubmitUpdateSong |
+    SubmitDeleteSong Int |
     ReceiveSubmitNewSong PostResponse |
-    ReceiveSubmitUpdateSong PostResponse
+    ReceiveSubmitUpdateSong PostResponse |
+    ReceiveSubmitDeleteSong PostResponse
 
 data PostResponse = Ok | Ko String
 
@@ -171,6 +173,14 @@ updateIO SubmitUpdateSong state@(State { currentPage: (UpdateSongPage id) , ui: 
 
 updateIO SubmitUpdateSong state = noEffects state
 
+updateIO (SubmitDeleteSong id) state = {
+    state: state,
+    effects: [ do
+        res <- deleteSong id
+        pure $ IOAction $ ReceiveSubmitDeleteSong res
+    ]
+}
+
 
 updateIO (ReceiveSubmitNewSong Ok) state = noEffects state
 updateIO (ReceiveSubmitNewSong (Ko e)) (State state@{ ui: UIState { headerVisibility, searchQuery} }) =
@@ -178,6 +188,10 @@ updateIO (ReceiveSubmitNewSong (Ko e)) (State state@{ ui: UIState { headerVisibi
 
 updateIO (ReceiveSubmitUpdateSong Ok) state = noEffects state
 updateIO (ReceiveSubmitUpdateSong (Ko e)) (State state@{ ui: UIState { headerVisibility, searchQuery} }) =
+    noEffects $ State state { ui = UIState { searchQuery, headerVisibility, newSong: e } }
+
+updateIO (ReceiveSubmitDeleteSong Ok) state = noEffects state
+updateIO (ReceiveSubmitDeleteSong (Ko e)) (State state@{ ui: UIState { headerVisibility, searchQuery} }) =
     noEffects $ State state { ui = UIState { searchQuery, headerVisibility, newSong: e } }
 
 --- AJAX Requests
@@ -213,6 +227,13 @@ postSong s = do
 updateSong :: forall eff. Int -> PostSong -> Aff (ajax :: AJAX | eff) PostResponse
 updateSong id s = do
     result <- put ("/api/song/" <> show id )  $ encodeJson s
+    pure case result.status of
+        (StatusCode 204) -> Ok
+        _ -> Ko result.response
+
+deleteSong :: forall eff. Int -> Aff (ajax :: AJAX | eff) PostResponse
+deleteSong id = do
+    result <- delete ("/api/song/" <> show id)
     pure case result.status of
         (StatusCode 204) -> Ok
         _ -> Ko result.response

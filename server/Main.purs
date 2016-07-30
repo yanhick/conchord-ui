@@ -20,7 +20,7 @@ import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Unsafe (unsafePerformEff)
 import Database.Postgres (ConnectionInfo, connect, DB, queryOne, query, query_, queryValue, Query(Query), execute, mkConnectionString)
 import Database.Postgres.SqlValue (toSql)
-import Node.Express.App (App(), listenHttp, get, post, put, useOnError, useExternal)
+import Node.Express.App (App(), listenHttp, get, post, put, delete, useOnError, useExternal)
 import Node.Express.Types (EXPRESS, ExpressM, Request, Response)
 import Node.Express.Handler (Handler(), nextThrow, HandlerM)
 import Node.Express.Request (getRouteParam, getQueryParam, getBodyParam)
@@ -41,7 +41,7 @@ import View (view)
 import Text.Parsing.StringParser (runParser, ParseError(ParseError))
 
 import Model (SearchResult(SearchResult), exampleSongMeta, parseSong, serializeSong, Song(Song), SongMeta(SongMeta), Year(Year))
-import DB (mkConnection, localConnectionInfo, getSongById, getSearchResults, createSong, updateSong, SongTableRow)
+import DB (mkConnection, localConnectionInfo, getSongById, getSearchResults, createSong, updateSong, deleteSong, SongTableRow)
 
 foreign import jsonBodyParser :: forall e. Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit)
 
@@ -71,12 +71,14 @@ appSetup c = do
     get "/new"         getNewSongPageHandler
     post "/new"         (postNewSongPageHandler c)
     get "/update/:id"      (getUpdateSongPageHandler c)
-    put "/update/:id"      (putUpdateSongPageHandler c)
+    post "/update/:id"      (putUpdateSongPageHandler c)
+    delete "/api/song/:id" (deleteSongPageHandler c)
     get "/song/:id"    (songPageHandler c)
     get "/:file"       fileHandler
     get "/"            homePageHandler
     get "/api/song/:id" (songApiHandler c)
     put "/api/song/:id" (putUpdateSongPageHandler c)
+    delete "/api/song/:id" (deleteSongPageHandler c)
     post "/api/song"   (postNewSongPageHandler c)
     useOnError         errorHandler
 
@@ -101,6 +103,20 @@ getUpdateSongPageHandler c = do
                     ui: UIState { searchQuery: "", headerVisibility: ShowHeader, newSong: either (\_ -> "") serializeSong $ runParser parseSong s }
                 })
             Nothing -> nextThrow $ error "Id is not a valid integer"
+
+deleteSongPageHandler :: _
+deleteSongPageHandler c = do
+    idParam <- getRouteParam "id"
+    case idParam of
+      Nothing -> nextThrow $ error "Id is required"
+      Just id ->
+        case fromString id of
+          Just id' -> do
+              liftEff $ launchAff $ deleteSong c id'
+              setStatus 204
+              send ""
+          Nothing -> nextThrow $ error "Id is not a valid integer"
+
 
 putUpdateSongPageHandler :: _
 putUpdateSongPageHandler c = do

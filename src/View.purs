@@ -10,7 +10,7 @@ import Pux.Html.Attributes (name, placeholder, type_, value, data_, action, meth
 import Pux.Router (link)
 
 import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(ChordAndLyric, OnlyChord, OnlyLyric), SearchResult(SearchResult), Year(Year), serializeSongSectionName)
-import Action (Action(UIAction, PageView, IOAction), UIAction(SearchChange, SetShowHeader, NewSongChange, UpdateSongChange), IOAction(SubmitNewSong, SubmitUpdateSong))
+import Action (Action(UIAction, PageView, IOAction), UIAction(SearchChange, SetShowHeader, NewSongChange, UpdateSongChange), IOAction(SubmitNewSong, SubmitUpdateSong, SubmitDeleteSong))
 import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage, NewSongPage, UpdateSongPage))
 import App (State(State), AsyncData(Loading, Loaded, Empty, LoadError), UIState(UIState), IOState(IOState), HeaderVisibility(HideHeader))
 
@@ -47,6 +47,8 @@ songPageHeader (SongPage id) (UIState { searchQuery }) =
             searchForm searchQuery
             link ("/update/" <> show id) # do
                 text "update"
+            deleteSongForm id
+
 songPageHeader _ (UIState { searchQuery }) =
     header # do
         nav # do
@@ -123,6 +125,12 @@ updateSongForm (State { ui: UIState { newSong } }) =
         textarea [ name "song", type_ "text", onChange (\e -> UIAction (UpdateSongChange e)), value newSong ] []
         button [ type_ "submit" ] [ text "Submit" ]
 
+--- Delete Song views
+
+deleteSongForm :: Int -> Html Action
+deleteSongForm id =
+    form ! action "/song/api" ! method "DELETE" ! onSubmit (const $ IOAction (SubmitDeleteSong id)) # do
+        button [ type_ "submit" ] [ text "Delete" ]
 
 --- Song Views
 

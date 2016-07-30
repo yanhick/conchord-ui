@@ -113,6 +113,21 @@ createSongQuery = Query ("""
 
 """)
 
+deleteSong :: forall e. ConnectionInfo -> Int -> Aff ( db :: DB | e ) Unit
+deleteSong c id = do
+    client <- connect c
+    execute deleteSongQuery [
+        toSql id
+    ] client
+
+deleteSongQuery :: Query String
+deleteSongQuery = Query ("""
+
+    DELETE FROM song
+    WHERE id = $1
+
+""")
+
 updateSong :: forall e. ConnectionInfo -> Int -> Song -> Aff ( db :: DB | e ) Unit
 updateSong c id s@(Song { meta: SongMeta m@{ year: Year y } }) = do
     client <- connect c
