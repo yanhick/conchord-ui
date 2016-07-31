@@ -130,7 +130,7 @@ updateIO SubmitNewSong state@(State { io: IOState { newSong: Tuple s (Right _) }
 
 updateIO SubmitNewSong state = noEffects state
 
-updateIO SubmitUpdateSong state@(State { currentPage: (UpdateSongPage id) , io: IOState { newSong: Tuple s (Right _) } }) = {
+updateIO SubmitUpdateSong state@(State { currentPage: (UpdateSongPage id) , io: IOState { updateSong: Tuple s (Right _) } }) = {
     state: state,
     effects: [ do
         res <- updateSong id (PostSong s)

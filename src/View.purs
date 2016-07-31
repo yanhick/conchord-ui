@@ -131,12 +131,12 @@ newSongForm song =
 --- Update Song views
 
 updateSongPage :: State -> Html Action
-updateSongPage (State { io: IOState { newSong } }) =
+updateSongPage (State { io: IOState { updateSong } }) =
     div ! className "editor" # do
         aside # do
-            updateSongForm $ fst newSong
+            updateSongForm $ fst updateSong
         main # do
-            render $ snd newSong
+            render $ snd updateSong
     where
         render (Right (Song { meta, content })) = do
             songMeta meta
