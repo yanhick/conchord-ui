@@ -19,7 +19,7 @@ import Pux (EffModel, noEffects)
 import Pux.Html.Events (FormEvent)
 import Pux.Router (navigateTo)
 
-import Route (Route(SongPage, SearchResultPage, UpdateSongPage))
+import Route (Route(SongPage, SearchResultPage, UpdateSongPage, HomePage, NewSongPage, NotFoundPage, UpdateSongPage))
 import Model (SearchResults, Song, serializeSong, parseSong)
 import App (State(State), UIState(UIState), IOState(IOState), AsyncData(Loading, Loaded, LoadError), HeaderVisibility(PendingHideHeader, HideHeader, ShowHeader))
 import Text.Parsing.StringParser (runParser)
@@ -71,6 +71,8 @@ updatePage p@(SongPage s) (State state) =
     updateIO (RequestSong s) (State (state { currentPage = p }))
 updatePage p@(SearchResultPage q) (State state@{ ui: UIState { headerVisibility } }) =
     updateIO (RequestSearch q) (State state { currentPage = p, ui = UIState { searchQuery: q, headerVisibility } })
+updatePage p@(UpdateSongPage _) (State state@{ io: IOState { song: song@Loaded(song'), searchResults  } }) =
+    noEffects $ State state { currentPage = p, io = IOState { newSong: Tuple (serializeSong song') (Right song'), song, searchResults } }
 updatePage p (State state) = noEffects $ State state { currentPage = p }
 
 

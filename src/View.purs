@@ -131,15 +131,22 @@ newSongForm song =
 --- Update Song views
 
 updateSongPage :: State -> Html Action
-updateSongPage state =
-    div # do
-        text "Update Song"
-        updateSongForm state
+updateSongPage (State { io: IOState { newSong } }) =
+    div ! className "editor" # do
+        aside # do
+            updateSongForm $ fst newSong
+        main # do
+            render $ snd newSong
+    where
+        render (Right (Song { meta, content })) = do
+            songMeta meta
+            songContent content
+        render (Left e) = text e
 
-updateSongForm :: State -> Html Action
-updateSongForm (State { io: IOState { newSong } }) =
+updateSongForm :: String -> Html Action
+updateSongForm song =
     form ! action "/update" ! method "PUT" ! onSubmit (const $ IOAction SubmitUpdateSong) # do
-        textarea [ name "song", type_ "text", onChange (\e -> UIAction (UpdateSongChange e)), value $ fst newSong ] []
+        textarea [ name "song", type_ "text", onChange (\e -> UIAction (UpdateSongChange e)), value song ] []
         input [ type_ "submit", value "edit this song" ] []
 
 --- Delete Song views

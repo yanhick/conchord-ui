@@ -98,9 +98,16 @@ getUpdateSongPageHandler c = do
         case fromString id of
             Just id' -> do
                 s <- liftAff $ getSongById c id'
+                let s' = case runParser parseSong s of
+                            Left e -> Tuple "" (Left $ show e)
+                            Right song -> Tuple (serializeSong song) (Right song)
                 send $ index (State {
                     currentPage: UpdateSongPage id',
-                    io: IOState { searchResults: Empty, song: either (LoadError <<< show) Loaded $ runParser parseSong s, newSong: Tuple (serializeSong exampleSong) (Right exampleSong) },
+                    io: IOState {
+                        searchResults: Empty,
+                        song: either (LoadError <<< show) Loaded $ runParser parseSong s,
+                        newSong: s'
+                    },
                     ui: UIState { searchQuery: "", headerVisibility: ShowHeader }
                 })
             Nothing -> nextThrow $ error "Id is not a valid integer"
