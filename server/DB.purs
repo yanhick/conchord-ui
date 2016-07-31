@@ -17,7 +17,7 @@ import Text.Parsing.StringParser (Parser, fail)
 import Text.Parsing.StringParser.String (string, eof, anyChar, anyDigit)
 import Text.Parsing.StringParser.Combinators (manyTill, lookAhead)
 
-import Database.Postgres (ConnectionInfo(), DB, connect, query, queryValue, execute, Query(Query))
+import Database.Postgres (ConnectionInfo(), DB, connect, query, queryOne, queryValue, execute, Query(Query))
 import Database.Postgres.SqlValue (toSql)
 
 import Model (SearchResult(SearchResult), SongMeta(SongMeta), Year(Year), Song(Song), serializeSong)
@@ -94,10 +94,10 @@ getSearchResultsQuery = Query ("""
 
 """)
 
-createSong :: forall e. ConnectionInfo -> Song -> Aff ( db :: DB | e ) Unit
+createSong :: forall e. ConnectionInfo -> Song -> Aff ( db :: DB | e ) (Maybe SongTableRow)
 createSong c s@(Song { meta: SongMeta m@{ year: Year y } }) = do
     client <- connect c
-    execute createSongQuery [
+    queryOne createSongQuery [
       toSql m.title,
       toSql m.artist,
       toSql m.album,
@@ -105,11 +105,12 @@ createSong c s@(Song { meta: SongMeta m@{ year: Year y } }) = do
       toSql $ serializeSong s
     ] client
 
-createSongQuery :: Query String
+createSongQuery :: Query SongTableRow
 createSongQuery = Query ("""
 
     INSERT into song
     VALUES(default, $1, $2, $3, $4, $5)
+    RETURNING *
 
 """)
 

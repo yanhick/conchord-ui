@@ -45,7 +45,7 @@ data IOAction =
     SubmitUpdateSong |
     SubmitDeleteSong Int |
     ReceiveSubmitNewSong PostResponse |
-    ReceiveSubmitUpdateSong PostResponse |
+    ReceiveSubmitUpdateSong Int PostResponse |
     ReceiveSubmitDeleteSong PostResponse
 
 data PostResponse = Ok | Ko String
@@ -134,7 +134,7 @@ updateIO SubmitUpdateSong state@(State { currentPage: (UpdateSongPage id) , io: 
     state: state,
     effects: [ do
         res <- updateSong id (PostSong s)
-        pure $ IOAction $ ReceiveSubmitUpdateSong res
+        pure $ IOAction $ ReceiveSubmitUpdateSong id res
     ]
 }
 
@@ -153,11 +153,23 @@ updateIO (ReceiveSubmitNewSong Ok) state = noEffects state
 updateIO (ReceiveSubmitNewSong (Ko e)) (State state@{ io: IOState { searchResults, song, newSong: Tuple s _, updateSong } }) =
     noEffects $ State state { io = IOState { searchResults, song, newSong: Tuple s (Left e), updateSong } }
 
-updateIO (ReceiveSubmitUpdateSong Ok) state = noEffects state
-updateIO (ReceiveSubmitUpdateSong (Ko e)) (State state@{ io: IOState { searchResults, song, updateSong: Tuple s _, newSong } }) =
+updateIO (ReceiveSubmitUpdateSong id Ok) state = {
+    state: state,
+    effects: [ do
+        liftEff $ navigateTo $ "/song/" <> show id
+        pure Noop
+    ]
+}
+updateIO (ReceiveSubmitUpdateSong _ (Ko e)) (State state@{ io: IOState { searchResults, song, updateSong: Tuple s _, newSong } }) =
     noEffects $ State state { io = IOState { searchResults, song, updateSong: Tuple s (Left e), newSong } }
 
-updateIO (ReceiveSubmitDeleteSong Ok) state = noEffects state
+updateIO (ReceiveSubmitDeleteSong Ok) state = {
+    state: state,
+    effects: [ do
+        liftEff $ navigateTo "/"
+        pure Noop
+    ]
+}
 updateIO (ReceiveSubmitDeleteSong (Ko e)) (State state@{ io: IOState { searchResults, song, newSong: Tuple s _, updateSong } }) =
     noEffects $ State state { io = IOState { searchResults, song, newSong: Tuple s (Left e), updateSong } }
 
@@ -188,7 +200,7 @@ postSong :: forall eff. PostSong -> Aff (ajax :: AJAX | eff) PostResponse
 postSong s = do
     result <- post "/api/song" $ encodeJson s
     pure case result.status of
-        (StatusCode 204) -> Ok
+        (StatusCode 200) -> Ok
         _ -> Ko result.response
 
 updateSong :: forall eff. Int -> PostSong -> Aff (ajax :: AJAX | eff) PostResponse

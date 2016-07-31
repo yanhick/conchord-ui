@@ -175,9 +175,8 @@ postNewSongPageHandler c = do
               setStatus 400
               send e
           Right s -> do
-              liftEff $ launchAff $ createSong c s
-              setStatus 204
-              send ""
+              song' <- liftAff $ createSong c s
+              send song'
 
       Nothing -> do
           setStatus 400
