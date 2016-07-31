@@ -24,11 +24,8 @@ newtype State = State {
   , io :: IOState
 }
 
-data HeaderVisibility = ShowHeader | HideHeader | PendingHideHeader
-
 newtype UIState = UIState {
-    searchQuery :: String,
-    headerVisibility :: HeaderVisibility
+    searchQuery :: String
 }
 
 type Error = String
@@ -47,8 +44,7 @@ init :: State
 init = State {
     currentPage: HomePage
   , ui: UIState {
-      searchQuery: "",
-      headerVisibility: ShowHeader
+      searchQuery: ""
   }
   , io: IOState {
       searchResults: Empty
@@ -73,11 +69,6 @@ instance eqState :: Eq State where
 
 instance showState :: Show State where
     show = gShow
-
-derive instance genericHeaderVisibility :: Generic HeaderVisibility
-
-instance isForeignHeaderVisibility :: IsForeign HeaderVisibility where
-    read = readGeneric defaultOptions
 
 derive instance genericUIState :: Generic UIState
 

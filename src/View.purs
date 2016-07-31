@@ -12,9 +12,9 @@ import Pux.Html.Attributes (name, placeholder, type_, value, data_, action, meth
 import Pux.Router (link)
 
 import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(ChordAndLyric, OnlyChord, OnlyLyric), SearchResult(SearchResult), Year(Year), serializeSongSectionName, serializeSong)
-import Action (Action(UIAction, PageView, IOAction), UIAction(SearchChange, SetShowHeader, NewSongChange, UpdateSongChange), IOAction(SubmitNewSong, SubmitUpdateSong, SubmitDeleteSong))
+import Action (Action(UIAction, PageView, IOAction), UIAction(SearchChange, NewSongChange, UpdateSongChange), IOAction(SubmitNewSong, SubmitUpdateSong, SubmitDeleteSong))
 import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage, NewSongPage, UpdateSongPage))
-import App (State(State), AsyncData(Loading, Loaded, Empty, LoadError), UIState(UIState), IOState(IOState), HeaderVisibility(HideHeader), ValidatedSong)
+import App (State(State), AsyncData(Loading, Loaded, Empty, LoadError), UIState(UIState), IOState(IOState), ValidatedSong)
 
 
 view :: State -> Html Action
@@ -159,11 +159,8 @@ deleteSongForm id =
 --- Song Views
 
 songPage :: Route -> IOState -> UIState -> Html Action
-songPage _ io ui@(UIState { headerVisibility: HideHeader }) =
-    div ! onMouseMove (const $ UIAction SetShowHeader) # do
-        songPageContent io ui
 songPage r io ui =
-    div ! onMouseMove (const $ UIAction SetShowHeader) # do
+    div # do
         songPageHeader r ui
         songPageContent io ui
 

@@ -36,7 +36,7 @@ import Signal.Channel (CHANNEL())
 import Pux (renderToString, start)
 import Signal ((~>))
 import Route (Route(SearchResultPage, SongPage, NewSongPage, UpdateSongPage))
-import App (init, AsyncData(LoadError, Loaded, Empty), State(State), UIState(UIState), IOState(IOState), HeaderVisibility(ShowHeader))
+import App (init, AsyncData(LoadError, Loaded, Empty), State(State), UIState(UIState), IOState(IOState))
 import Action (update)
 import View (view)
 import Text.Parsing.StringParser (runParser, ParseError(ParseError))
@@ -109,7 +109,7 @@ getUpdateSongPageHandler c = do
                         newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
                         updateSong: s'
                     },
-                    ui: UIState { searchQuery: "", headerVisibility: ShowHeader }
+                    ui: UIState { searchQuery: "" }
                 })
             Nothing -> nextThrow $ error "Id is not a valid integer"
 
@@ -162,7 +162,7 @@ getNewSongPageHandler = do
             newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
             updateSong: Tuple (serializeSong exampleSong) (Right exampleSong)
         },
-        ui: UIState { searchQuery: "", headerVisibility: ShowHeader }
+        ui: UIState { searchQuery: "" }
     })
 
 postNewSongPageHandler :: _
@@ -197,7 +197,7 @@ searchPageHandler c = do
                  newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
                  updateSong: Tuple (serializeSong exampleSong) (Right exampleSong)
              },
-             ui: UIState { searchQuery: maybe "" id q, headerVisibility: ShowHeader }
+             ui: UIState { searchQuery: maybe "" id q }
           })
       Nothing -> nextThrow $ error "missing query param"
 
@@ -218,7 +218,7 @@ songPageHandler c = do
                     newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
                     updateSong: Tuple (serializeSong exampleSong) (Right exampleSong)
                 },
-                ui: UIState { searchQuery: "", headerVisibility: ShowHeader }
+                ui: UIState { searchQuery: "" }
             })
           Nothing -> nextThrow $ error "Id is not a valid integer"
 
