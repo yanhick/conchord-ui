@@ -17,7 +17,7 @@ import Text.Parsing.StringParser (Parser, fail)
 import Text.Parsing.StringParser.String (string, eof, anyChar, anyDigit)
 import Text.Parsing.StringParser.Combinators (manyTill, lookAhead)
 
-import Database.Postgres (ConnectionInfo(), DB, connect, query, queryOne, queryValue, execute, Query(Query))
+import Database.Postgres (ConnectionInfo(), DB, connect, query, queryOne, queryValue, execute, withConnection, Query(Query))
 import Database.Postgres.SqlValue (toSql)
 
 import Model (SearchResult(SearchResult), SongMeta(SongMeta), Year(Year), Song(Song), serializeSong)
@@ -53,12 +53,12 @@ mkConnection = do
           charsToInt = fromString <<< charsToString
 
 getSongById :: forall e. ConnectionInfo -> Int -> Aff ( db :: DB | e ) String
-getSongById c id = do
-    client <- connect c
-    content <- queryValue getSongByIdQuery [toSql id] client
-    pure $ case content of
-          Just s -> s
-          Nothing -> ""
+getSongById c id =
+    withConnection c \client -> do
+        content <- queryValue getSongByIdQuery [toSql id] client
+        pure $ case content of
+              Just s -> s
+              Nothing -> ""
 
 getSongByIdQuery :: Query String
 getSongByIdQuery = Query ("""
@@ -70,12 +70,12 @@ getSongByIdQuery = Query ("""
 """)
 
 getSearchResults :: forall e. ConnectionInfo -> String -> Aff ( db :: DB | e ) (Array SearchResult)
-getSearchResults c q = do
-    client <- connect c
-    rows <- query getSearchResultsQuery [toSql q] client
-    pure $ rowToSearchResult <$> rows
-      where
-        rowToSearchResult (SongTableRow { id, title, artist, album, year, content }) = SearchResult { id: 1, meta: SongMeta { artist, album, year: Year year, title }, desc: content }
+getSearchResults c q =
+    withConnection c \client -> do
+        rows <- query getSearchResultsQuery [toSql q] client
+        pure $ rowToSearchResult <$> rows
+          where
+            rowToSearchResult (SongTableRow { id, title, artist, album, year, content }) = SearchResult { id: 1, meta: SongMeta { artist, album, year: Year year, title }, desc: content }
 
 getSearchResultsQuery :: Query SongTableRow
 getSearchResultsQuery = Query ("""
@@ -95,15 +95,15 @@ getSearchResultsQuery = Query ("""
 """)
 
 createSong :: forall e. ConnectionInfo -> Song -> Aff ( db :: DB | e ) (Maybe SongTableRow)
-createSong c s@(Song { meta: SongMeta m@{ year: Year y } }) = do
-    client <- connect c
-    queryOne createSongQuery [
-      toSql m.title,
-      toSql m.artist,
-      toSql m.album,
-      toSql y,
-      toSql $ serializeSong s
-    ] client
+createSong c s@(Song { meta: SongMeta m@{ year: Year y } }) =
+    withConnection c \client -> do
+        queryOne createSongQuery [
+          toSql m.title,
+          toSql m.artist,
+          toSql m.album,
+          toSql y,
+          toSql $ serializeSong s
+        ] client
 
 createSongQuery :: Query SongTableRow
 createSongQuery = Query ("""
@@ -115,11 +115,11 @@ createSongQuery = Query ("""
 """)
 
 deleteSong :: forall e. ConnectionInfo -> Int -> Aff ( db :: DB | e ) Unit
-deleteSong c id = do
-    client <- connect c
-    execute deleteSongQuery [
-        toSql id
-    ] client
+deleteSong c id =
+    withConnection c \client -> do
+        execute deleteSongQuery [
+            toSql id
+        ] client
 
 deleteSongQuery :: Query String
 deleteSongQuery = Query ("""
@@ -130,16 +130,16 @@ deleteSongQuery = Query ("""
 """)
 
 updateSong :: forall e. ConnectionInfo -> Int -> Song -> Aff ( db :: DB | e ) Unit
-updateSong c id s@(Song { meta: SongMeta m@{ year: Year y } }) = do
-    client <- connect c
-    execute updateSongQuery [
-      toSql m.title,
-      toSql m.artist,
-      toSql m.album,
-      toSql y,
-      toSql $ serializeSong s,
-      toSql id
-    ] client
+updateSong c id s@(Song { meta: SongMeta m@{ year: Year y } }) =
+    withConnection c \client -> do
+        execute updateSongQuery [
+          toSql m.title,
+          toSql m.artist,
+          toSql m.album,
+          toSql y,
+          toSql $ serializeSong s,
+          toSql id
+        ] client
 
 updateSongQuery :: Query String
 updateSongQuery = Query ("""
