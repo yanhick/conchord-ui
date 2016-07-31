@@ -3,11 +3,13 @@ module App where
 import Prelude (class Eq, class Show)
 
 import Data.Maybe (Maybe(Nothing))
+import Data.Tuple (Tuple(Tuple))
+import Data.Either (Either(Right))
 import Data.Foreign.Class (class IsForeign)
 import Data.Generic (class Generic, gEq, gShow)
 import Data.Foreign.Generic (readGeneric, defaultOptions)
 
-import Model (SearchResults, SearchResult, Song)
+import Model (SearchResults, SearchResult, Song, serializeSong, exampleSong)
 import Route (Route(HomePage))
 
 import Test.StrongCheck.Arbitrary (class Arbitrary)
@@ -26,16 +28,18 @@ data HeaderVisibility = ShowHeader | HideHeader | PendingHideHeader
 
 newtype UIState = UIState {
     searchQuery :: String,
-    headerVisibility :: HeaderVisibility,
-    newSong :: String
+    headerVisibility :: HeaderVisibility
 }
 
 type Error = String
 data AsyncData a = Loaded a | Loading | Empty | LoadError Error
 
+type ValidatedSong = Tuple String (Either Error Song)
+
 newtype IOState = IOState {
     searchResults :: AsyncData SearchResults
   , song :: AsyncData Song
+  , newSong :: ValidatedSong
 }
 
 init :: State
@@ -43,12 +47,12 @@ init = State {
     currentPage: HomePage
   , ui: UIState {
       searchQuery: "",
-      headerVisibility: ShowHeader,
-      newSong: ""
+      headerVisibility: ShowHeader
   }
   , io: IOState {
       searchResults: Empty
     , song: Empty
+    , newSong: Tuple (serializeSong exampleSong) (Right exampleSong)
   }
 }
 

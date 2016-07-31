@@ -1,18 +1,20 @@
 module View where
 
 import Prelude (($), (<$>), show, const, (<>))
+import Data.Tuple (fst, snd)
+import Data.Either (Either(Left, Right))
 
 import Pux.Html (Html, section, div, main, p, text, header, article
                 , h1, h2, h3, h4, h5, h6, span, i, nav, li, ul, form
                 , input, textarea, button, aside, (#), (!), bind)
 import Pux.Html.Events (onSubmit, onChange, onMouseMove)
-import Pux.Html.Attributes (name, placeholder, type_, value, data_, action, method)
+import Pux.Html.Attributes (name, placeholder, type_, value, data_, action, method, className)
 import Pux.Router (link)
 
-import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(ChordAndLyric, OnlyChord, OnlyLyric), SearchResult(SearchResult), Year(Year), serializeSongSectionName)
+import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(ChordAndLyric, OnlyChord, OnlyLyric), SearchResult(SearchResult), Year(Year), serializeSongSectionName, serializeSong)
 import Action (Action(UIAction, PageView, IOAction), UIAction(SearchChange, SetShowHeader, NewSongChange, UpdateSongChange), IOAction(SubmitNewSong, SubmitUpdateSong, SubmitDeleteSong))
 import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage, NewSongPage, UpdateSongPage))
-import App (State(State), AsyncData(Loading, Loaded, Empty, LoadError), UIState(UIState), IOState(IOState), HeaderVisibility(HideHeader))
+import App (State(State), AsyncData(Loading, Loaded, Empty, LoadError), UIState(UIState), IOState(IOState), HeaderVisibility(HideHeader), ValidatedSong)
 
 
 view :: State -> Html Action
@@ -107,17 +109,24 @@ newSongPageHeader = do
         h1 # text "Add a new song"
 
 newSongPage :: State -> Html Action
-newSongPage (State { io, ui }) =
-    div # do
+newSongPage (State { io: IOState { newSong }, ui }) =
+    div ! className "editor" # do
+        aside # do
+            newSongForm $ fst newSong
         main # do
-            aside # do
-                newSongForm
+            render $ snd newSong
+    where
+        render (Right (Song { meta, content })) = do
+            songMeta meta
+            songContent content
+        render (Left e) = text e
 
-newSongForm :: Html Action
-newSongForm =
+newSongForm :: String -> Html Action
+newSongForm song =
     form ! action "/new" ! method "POST" ! onSubmit (const $ IOAction SubmitNewSong) # do
-        textarea [ name "song", type_ "text", onChange (\e -> UIAction (NewSongChange e)) ] []
+        textarea [ name "song", type_ "text", value song, onChange (\e -> UIAction (NewSongChange e)) ] []
         input [ type_ "submit", value "add this new song" ] []
+
 
 --- Update Song views
 
@@ -128,9 +137,9 @@ updateSongPage state =
         updateSongForm state
 
 updateSongForm :: State -> Html Action
-updateSongForm (State { ui: UIState { newSong } }) =
+updateSongForm (State { io: IOState { newSong } }) =
     form ! action "/update" ! method "PUT" ! onSubmit (const $ IOAction SubmitUpdateSong) # do
-        textarea [ name "song", type_ "text", onChange (\e -> UIAction (UpdateSongChange e)), value newSong ] []
+        textarea [ name "song", type_ "text", onChange (\e -> UIAction (UpdateSongChange e)), value $ fst newSong ] []
         input [ type_ "submit", value "edit this song" ] []
 
 --- Delete Song views

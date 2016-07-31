@@ -5,6 +5,7 @@ import Data.Maybe (maybe, Maybe(..))
 import Data.String (joinWith)
 import Data.Int (fromString)
 import Data.Function.Uncurried (Fn3)
+import Data.Tuple (Tuple(Tuple))
 import Data.Foreign.EasyFFI (unsafeForeignFunction)
 import Data.Foreign.Generic (defaultOptions, toJSONGeneric, readGeneric)
 import Data.Foreign.Class (class IsForeign, readProp)
@@ -40,7 +41,7 @@ import Action (update)
 import View (view)
 import Text.Parsing.StringParser (runParser, ParseError(ParseError))
 
-import Model (SearchResult(SearchResult), exampleSongMeta, parseSong, serializeSong, Song(Song), SongMeta(SongMeta), Year(Year))
+import Model (SearchResult(SearchResult), exampleSongMeta, parseSong, serializeSong, Song(Song), SongMeta(SongMeta), Year(Year), exampleSong)
 import DB (mkConnection, localConnectionInfo, getSongById, getSearchResults, createSong, updateSong, deleteSong, SongTableRow)
 
 foreign import jsonBodyParser :: forall e. Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit)
@@ -99,8 +100,8 @@ getUpdateSongPageHandler c = do
                 s <- liftAff $ getSongById c id'
                 send $ index (State {
                     currentPage: UpdateSongPage id',
-                    io: IOState { searchResults: Empty, song: either (LoadError <<< show) Loaded $ runParser parseSong s },
-                    ui: UIState { searchQuery: "", headerVisibility: ShowHeader, newSong: either (\_ -> "") serializeSong $ runParser parseSong s }
+                    io: IOState { searchResults: Empty, song: either (LoadError <<< show) Loaded $ runParser parseSong s, newSong: Tuple (serializeSong exampleSong) (Right exampleSong) },
+                    ui: UIState { searchQuery: "", headerVisibility: ShowHeader }
                 })
             Nothing -> nextThrow $ error "Id is not a valid integer"
 
@@ -147,8 +148,8 @@ getNewSongPageHandler :: forall e. Handler e
 getNewSongPageHandler = do
     send $ index (State {
         currentPage: NewSongPage,
-        io: IOState { searchResults: Empty, song: Empty },
-        ui: UIState { searchQuery: "", headerVisibility: ShowHeader, newSong: "" }
+        io: IOState { searchResults: Empty, song: Empty, newSong: Tuple (serializeSong exampleSong) (Right exampleSong) },
+        ui: UIState { searchQuery: "", headerVisibility: ShowHeader }
     })
 
 postNewSongPageHandler :: _
@@ -177,8 +178,8 @@ searchPageHandler c = do
           result <- liftAff $ getSearchResults c q'
           send $ index (State {
             currentPage: (SearchResultPage $ maybe "" id q),
-             io: IOState { searchResults: Loaded (result), song: Empty },
-             ui: UIState { searchQuery: maybe "" id q, headerVisibility: ShowHeader, newSong: "" }
+             io: IOState { searchResults: Loaded (result), song: Empty, newSong: Tuple (serializeSong exampleSong) (Right exampleSong) },
+             ui: UIState { searchQuery: maybe "" id q, headerVisibility: ShowHeader }
           })
       Nothing -> nextThrow $ error "missing query param"
 
@@ -193,8 +194,8 @@ songPageHandler c = do
             s <- liftAff $ getSongById c id
             send $ index (State {
                 currentPage: (SongPage id),
-                io: IOState { searchResults: Empty, song: either (LoadError <<< show) Loaded $ runParser parseSong s },
-                ui: UIState { searchQuery: "", headerVisibility: ShowHeader, newSong: "" }
+                io: IOState { searchResults: Empty, song: either (LoadError <<< show) Loaded $ runParser parseSong s, newSong: Tuple (serializeSong exampleSong) (Right exampleSong) },
+                ui: UIState { searchQuery: "", headerVisibility: ShowHeader }
             })
           Nothing -> nextThrow $ error "Id is not a valid integer"
 
