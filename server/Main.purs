@@ -106,7 +106,8 @@ getUpdateSongPageHandler c = do
                     io: IOState {
                         searchResults: Empty,
                         song: either (LoadError <<< show) Loaded $ runParser parseSong s,
-                        newSong: s'
+                        newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
+                        updateSong: s'
                     },
                     ui: UIState { searchQuery: "", headerVisibility: ShowHeader }
                 })
@@ -155,7 +156,12 @@ getNewSongPageHandler :: forall e. Handler e
 getNewSongPageHandler = do
     send $ index (State {
         currentPage: NewSongPage,
-        io: IOState { searchResults: Empty, song: Empty, newSong: Tuple (serializeSong exampleSong) (Right exampleSong) },
+        io: IOState {
+            searchResults: Empty,
+            song: Empty,
+            newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
+            updateSong: Tuple (serializeSong exampleSong) (Right exampleSong)
+        },
         ui: UIState { searchQuery: "", headerVisibility: ShowHeader }
     })
 
@@ -185,7 +191,12 @@ searchPageHandler c = do
           result <- liftAff $ getSearchResults c q'
           send $ index (State {
             currentPage: (SearchResultPage $ maybe "" id q),
-             io: IOState { searchResults: Loaded (result), song: Empty, newSong: Tuple (serializeSong exampleSong) (Right exampleSong) },
+             io: IOState {
+                 searchResults: Loaded (result),
+                 song: Empty,
+                 newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
+                 updateSong: Tuple (serializeSong exampleSong) (Right exampleSong)
+             },
              ui: UIState { searchQuery: maybe "" id q, headerVisibility: ShowHeader }
           })
       Nothing -> nextThrow $ error "missing query param"
@@ -201,7 +212,12 @@ songPageHandler c = do
             s <- liftAff $ getSongById c id
             send $ index (State {
                 currentPage: (SongPage id),
-                io: IOState { searchResults: Empty, song: either (LoadError <<< show) Loaded $ runParser parseSong s, newSong: Tuple (serializeSong exampleSong) (Right exampleSong) },
+                io: IOState {
+                    searchResults: Empty,
+                    song: either (LoadError <<< show) Loaded $ runParser parseSong s,
+                    newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
+                    updateSong: Tuple (serializeSong exampleSong) (Right exampleSong)
+                },
                 ui: UIState { searchQuery: "", headerVisibility: ShowHeader }
             })
           Nothing -> nextThrow $ error "Id is not a valid integer"

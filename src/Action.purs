@@ -71,8 +71,8 @@ updatePage p@(SongPage s) (State state) =
     updateIO (RequestSong s) (State (state { currentPage = p }))
 updatePage p@(SearchResultPage q) (State state@{ ui: UIState { headerVisibility } }) =
     updateIO (RequestSearch q) (State state { currentPage = p, ui = UIState { searchQuery: q, headerVisibility } })
-updatePage p@(UpdateSongPage _) (State state@{ io: IOState { song: song@Loaded(song'), searchResults  } }) =
-    noEffects $ State state { currentPage = p, io = IOState { newSong: Tuple (serializeSong song') (Right song'), song, searchResults } }
+updatePage p@(UpdateSongPage _) (State state@{ io: IOState { song: song@Loaded(song'), searchResults, newSong  } }) =
+    noEffects $ State state { currentPage = p, io = IOState { updateSong: Tuple (serializeSong song') (Right song'), song, searchResults, newSong } }
 updatePage p (State state) = noEffects $ State state { currentPage = p }
 
 
@@ -111,8 +111,8 @@ updateUI SetHideHeaderTimeout (State state@{ ui: UIState { searchQuery } }) = {
     ]
 }
 
-updateUI (NewSongChange { target: { value } }) (State state@{ io: IOState { searchResults, song } }) =
-    noEffects $ State state { io = IOState { song, searchResults, newSong: Tuple value (either (Left <<< show) Right $ runParser parseSong value) } }
+updateUI (NewSongChange { target: { value } }) (State state@{ io: IOState { searchResults, song, updateSong } }) =
+    noEffects $ State state { io = IOState { song, searchResults, updateSong, newSong: Tuple value (either (Left <<< show) Right $ runParser parseSong value) } }
 
 updateUI (UpdateSongChange { target: { value } }) (State state@{ ui: UIState { headerVisibility, searchQuery} }) =
     noEffects $ State state { ui = UIState { searchQuery, headerVisibility } }
@@ -120,8 +120,8 @@ updateUI (UpdateSongChange { target: { value } }) (State state@{ ui: UIState { h
 --- IO Actions
 
 updateIO :: IOAction -> State -> Affction
-updateIO (RequestSearch q) (State state@{ ui: UIState { searchQuery }, io: IOState { song, newSong }}) = {
-    state: State $ state { io = IOState { searchResults: Loading, song, newSong } }
+updateIO (RequestSearch q) (State state@{ ui: UIState { searchQuery }, io: IOState { song, newSong, updateSong }}) = {
+    state: State $ state { io = IOState { searchResults: Loading, song, newSong, updateSong } }
   , effects: [ do
         liftEff $ navigateTo $ "/search?q=" <> q
         res <- fetchSearch searchQuery
@@ -130,14 +130,14 @@ updateIO (RequestSearch q) (State state@{ ui: UIState { searchQuery }, io: IOSta
     ]
 }
 
-updateIO (ReceiveSearch (Right r)) (State state@{ io: IOState { song, newSong } }) =
-    noEffects $ State $ state { io = IOState { searchResults: Loaded r, song, newSong } }
+updateIO (ReceiveSearch (Right r)) (State state@{ io: IOState { song, newSong, updateSong } }) =
+    noEffects $ State $ state { io = IOState { searchResults: Loaded r, song, newSong, updateSong } }
 
-updateIO (ReceiveSearch (Left e)) (State state@{ io: IOState { song, newSong } }) =
-    noEffects $ State $ state { io = IOState { searchResults: LoadError (show e), song, newSong } }
+updateIO (ReceiveSearch (Left e)) (State state@{ io: IOState { song, newSong, updateSong } }) =
+    noEffects $ State $ state { io = IOState { searchResults: LoadError (show e), song, newSong, updateSong } }
 
-updateIO (RequestSong id) (State state@{ io: IOState { searchResults, newSong } }) = {
-    state: State $ state { io = IOState { song: Loading, searchResults, newSong } }
+updateIO (RequestSong id) (State state@{ io: IOState { searchResults, newSong, updateSong } }) = {
+    state: State $ state { io = IOState { song: Loading, searchResults, newSong, updateSong } }
   , effects: [ do
         res <- fetchSong id
         let song = (readJSON res) :: F Song
@@ -145,15 +145,15 @@ updateIO (RequestSong id) (State state@{ io: IOState { searchResults, newSong } 
     ]
 }
 
-updateIO (ReceiveSong (Right s)) (State state@{ io: IOState { searchResults, newSong } }) = {
-    state: State $ state { io = IOState { song: Loaded s, searchResults, newSong } },
+updateIO (ReceiveSong (Right s)) (State state@{ io: IOState { searchResults, newSong, updateSong } }) = {
+    state: State $ state { io = IOState { song: Loaded s, searchResults, newSong, updateSong } },
     effects: [ do
         pure $ UIAction SetHideHeaderTimeout
     ]
 }
 
-updateIO (ReceiveSong (Left e)) (State state@{ io: IOState { searchResults, newSong } }) = {
-    state: State $ state { io = IOState { song: LoadError (show e), searchResults, newSong } },
+updateIO (ReceiveSong (Left e)) (State state@{ io: IOState { searchResults, newSong, updateSong } }) = {
+    state: State $ state { io = IOState { song: LoadError (show e), searchResults, newSong, updateSong } },
     effects: [ do
         pure $ UIAction SetHideHeaderTimeout
     ]
@@ -189,16 +189,16 @@ updateIO (SubmitDeleteSong id) state = {
 
 
 updateIO (ReceiveSubmitNewSong Ok) state = noEffects state
-updateIO (ReceiveSubmitNewSong (Ko e)) (State state@{ io: IOState { searchResults, song, newSong: Tuple s _ } }) =
-    noEffects $ State state { io = IOState { searchResults, song, newSong: Tuple s (Left e) } }
+updateIO (ReceiveSubmitNewSong (Ko e)) (State state@{ io: IOState { searchResults, song, newSong: Tuple s _, updateSong } }) =
+    noEffects $ State state { io = IOState { searchResults, song, newSong: Tuple s (Left e), updateSong } }
 
 updateIO (ReceiveSubmitUpdateSong Ok) state = noEffects state
-updateIO (ReceiveSubmitUpdateSong (Ko e)) (State state@{ io: IOState { searchResults, song, newSong: Tuple s _ } }) =
-    noEffects $ State state { io = IOState { searchResults, song, newSong: Tuple s (Left e) } }
+updateIO (ReceiveSubmitUpdateSong (Ko e)) (State state@{ io: IOState { searchResults, song, updateSong: Tuple s _, newSong } }) =
+    noEffects $ State state { io = IOState { searchResults, song, updateSong: Tuple s (Left e), newSong } }
 
 updateIO (ReceiveSubmitDeleteSong Ok) state = noEffects state
-updateIO (ReceiveSubmitDeleteSong (Ko e)) (State state@{ io: IOState { searchResults, song, newSong: Tuple s _ } }) =
-    noEffects $ State state { io = IOState { searchResults, song, newSong: Tuple s (Left e) } }
+updateIO (ReceiveSubmitDeleteSong (Ko e)) (State state@{ io: IOState { searchResults, song, newSong: Tuple s _, updateSong } }) =
+    noEffects $ State state { io = IOState { searchResults, song, newSong: Tuple s (Left e), updateSong } }
 
 --- AJAX Requests
 

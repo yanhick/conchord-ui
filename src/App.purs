@@ -40,6 +40,7 @@ newtype IOState = IOState {
     searchResults :: AsyncData SearchResults
   , song :: AsyncData Song
   , newSong :: ValidatedSong
+  , updateSong :: ValidatedSong
 }
 
 init :: State
@@ -53,6 +54,7 @@ init = State {
       searchResults: Empty
     , song: Empty
     , newSong: Tuple (serializeSong exampleSong) (Right exampleSong)
+    , updateSong: Tuple (serializeSong exampleSong) (Right exampleSong)
   }
 }
 
