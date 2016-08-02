@@ -11,7 +11,7 @@ import Pux.Html.Events (onSubmit, onChange, onMouseMove)
 import Pux.Html.Attributes (name, placeholder, type_, value, data_, action, method, className)
 import Pux.Router (link)
 
-import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(ChordAndLyric, OnlyChord, OnlyLyric), SearchResult(SearchResult), Year(Year), serializeSongSectionName, serializeSong)
+import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(ChordAndLyric, OnlyChord, OnlyLyric), SearchResult(SearchResult), Year(Year), serializeSongSectionName, serializeSong, ChordPlacement(InsideWord, BetweenWord))
 import Action (Action(UIAction, PageView, IOAction), UIAction(SearchChange, NewSongChange, UpdateSongChange), IOAction(SubmitNewSong, SubmitUpdateSong, SubmitDeleteSong))
 import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage, NewSongPage, UpdateSongPage))
 import App (State(State), AsyncData(Loading, Loaded, Empty, LoadError), UIState(UIState), IOState(IOState), ValidatedSong)
@@ -191,9 +191,17 @@ songSection (SongSection {name, lyrics}) =
 
 songLyric :: SongLyric -> Html Action
 songLyric (ChordAndLyric chord lyric) =
-    span ! data_ "lyrics" lyric # do
-        i ! data_ "chord" (show chord) # text ""
+    span ! data_ "lyrics" lyric ! data_ "chord-placement" (chordPlacement chord) # do
+        i ! data_ "chord" (showChord chord) # text ""
         text lyric
+    where
+        showChord (InsideWord c) = show c
+        showChord (BetweenWord c) = show c
+
+        chordPlacement (InsideWord _) = "inside"
+        chordPlacement (BetweenWord _) = "between"
+
+
 songLyric (OnlyChord chord) =
     span ! data_ "chord" (show chord) # do
         i ! data_ "chord" (show chord) # text ""

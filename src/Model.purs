@@ -16,9 +16,9 @@ import Data.Foreign.Generic (readGeneric, defaultOptions)
 import Test.StrongCheck.Arbitrary (class Arbitrary)
 import Test.StrongCheck.Generic (gArbitrary)
 
-import Text.Parsing.StringParser (Parser)
+import Text.Parsing.StringParser (Parser, try)
 import Text.Parsing.StringParser.String (string, eof, anyChar, anyDigit)
-import Text.Parsing.StringParser.Combinators (manyTill, lookAhead)
+import Text.Parsing.StringParser.Combinators (manyTill, lookAhead, choice)
 
 import Parser (SongChord, exampleChord, parseChord)
 
@@ -51,7 +51,9 @@ newtype SongSection = SongSection {
     lyrics :: Array SongLyric
 }
 
-data SongLyric = ChordAndLyric SongChord String | OnlyChord SongChord | OnlyLyric String
+data SongLyric = ChordAndLyric ChordPlacement String | OnlyChord SongChord | OnlyLyric String
+
+data ChordPlacement = InsideWord SongChord | BetweenWord SongChord
 
 data SongSectionName = Intro | Chorus | Verse | Outro | Bridge
 
@@ -119,11 +121,25 @@ parseSongLyric end = parseOnlyLyric end <|> parseOnlyChord end <|> parseChordAnd
 
 parseChordAndLyric :: forall a. Parser a -> Parser SongLyric
 parseChordAndLyric end = do
-    string "/"
-    chord <- parseChord
-    string "/ "
+    cp <- parseChordPlacement
     lyric <- manyTill anyChar end
-    pure $ ChordAndLyric chord $ parseLyric lyric
+    pure $ ChordAndLyric cp $ parseLyric lyric
+
+parseChordPlacement :: Parser ChordPlacement
+parseChordPlacement = try parseBetweenWord <|> parseInsideWord
+    where
+        parseBetweenWord = do
+            string "/"
+            chord <- parseChord
+            string "/ "
+            pure $ BetweenWord chord
+
+        parseInsideWord = do
+            string "/"
+            chord <- parseChord
+            string "\\"
+            pure $ InsideWord chord
+
 
 parseOnlyLyric :: forall a. Parser a -> Parser SongLyric
 parseOnlyLyric end = do
@@ -142,9 +158,14 @@ parseLyric :: List Char -> String
 parseLyric l = fromCharArray <<< fromFoldable $ l
 
 serializeSongLyric :: SongLyric -> String
-serializeSongLyric (ChordAndLyric chord lyric) = "/" <> show chord <> "/ " <> lyric
+serializeSongLyric (ChordAndLyric cp lyric) = serializeChordPlacement cp <> lyric
 serializeSongLyric (OnlyLyric lyric) = "| " <> lyric
 serializeSongLyric (OnlyChord chord) = "\\" <> show chord <> "\\ "
+
+serializeChordPlacement :: ChordPlacement -> String
+serializeChordPlacement (BetweenWord chord) = "/" <> show chord <> "/ "
+serializeChordPlacement (InsideWord chord) = "/" <> show chord <> "\\"
+
 
 parseSongContent :: Parser SongContent
 parseSongContent = do
@@ -264,6 +285,11 @@ derive instance genericSongSectionName :: Generic SongSectionName
 instance isForeignSongSectionName :: IsForeign SongSectionName where
     read = readGeneric defaultOptions
 
+derive instance genericChordPlacment :: Generic ChordPlacement
+
+instance showChordPlacment :: Show ChordPlacement where
+    show = gShow
+
 
 --- Test data
 
@@ -284,5 +310,5 @@ exampleSongMeta = SongMeta {
 exampleSongContent :: SongContent
 exampleSongContent = SongContent [ SongSection {
     name: Intro,
-    lyrics: [ ChordAndLyric exampleChord "test" ]
+    lyrics: [ ChordAndLyric (BetweenWord exampleChord) "test" ]
 }]
