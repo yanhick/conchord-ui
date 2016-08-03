@@ -149,8 +149,16 @@ main article section span:not([data-lyrics]) i:after {
     display: inline;
 }
 
-main article section span:after {
+main article section span:before {
     content: ' ';
+}
+
+main article section span[data-chord-placement=inside]:before {
+    content: '';
+}
+
+main article section span[data-chord-placement=inside] {
+    white-space: nowrap;
 }
 
 main article section span[data-lyrics$="."]:after {
