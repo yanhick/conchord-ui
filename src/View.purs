@@ -2,13 +2,13 @@ module View where
 
 import Prelude (($), (<$>), show, const, (<>))
 import Data.Tuple (fst, snd)
-import Data.Either (Either(Left, Right))
+import Data.Either (Either(Left, Right), isLeft)
 
 import Pux.Html (Html, section, div, main, p, text, header, article
                 , h1, h2, h3, h4, h5, h6, span, i, nav, li, ul, form
                 , input, textarea, button, aside, (#), (!), bind)
 import Pux.Html.Events (onSubmit, onChange, onMouseMove)
-import Pux.Html.Attributes (name, placeholder, type_, value, data_, action, method, className)
+import Pux.Html.Attributes (name, placeholder, type_, value, data_, action, method, className, disabled)
 import Pux.Router (link)
 
 import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(ChordAndLyric, OnlyChord, OnlyLyric), SearchResult(SearchResult), Year(Year), serializeSongSectionName, serializeSong, ChordPlacement(InsideWord, BetweenWord))
@@ -112,7 +112,7 @@ newSongPage :: State -> Html Action
 newSongPage (State { io: IOState { newSong }, ui }) =
     div ! className "editor" # do
         aside # do
-            newSongForm $ fst newSong
+            newSongForm (isLeft (snd newSong)) (fst newSong)
         main # do
             render $ snd newSong
     where
@@ -121,11 +121,11 @@ newSongPage (State { io: IOState { newSong }, ui }) =
             songContent content
         render (Left e) = text e
 
-newSongForm :: String -> Html Action
-newSongForm song =
+newSongForm :: Boolean -> String -> Html Action
+newSongForm disable song =
     form ! action "/new" ! method "POST" ! onSubmit (const $ IOAction SubmitNewSong) # do
         textarea [ name "song", type_ "text", value song, onChange (\e -> UIAction (NewSongChange e)) ] []
-        input [ type_ "submit", value "add this new song" ] []
+        input [ type_ "submit", value "add this new song", disabled disable ] []
 
 
 --- Update Song views
@@ -134,7 +134,7 @@ updateSongPage :: State -> Html Action
 updateSongPage (State { io: IOState { updateSong } }) =
     div ! className "editor" # do
         aside # do
-            updateSongForm $ fst updateSong
+            updateSongForm (isLeft (snd updateSong)) (fst updateSong)
         main # do
             render $ snd updateSong
     where
@@ -143,11 +143,11 @@ updateSongPage (State { io: IOState { updateSong } }) =
             songContent content
         render (Left e) = text e
 
-updateSongForm :: String -> Html Action
-updateSongForm song =
+updateSongForm :: Boolean -> String -> Html Action
+updateSongForm disable song =
     form ! action "/update" ! method "PUT" ! onSubmit (const $ IOAction SubmitUpdateSong) # do
         textarea [ name "song", type_ "text", onChange (\e -> UIAction (UpdateSongChange e)), value song ] []
-        input [ type_ "submit", value "edit this song" ] []
+        input [ type_ "submit", value "edit this song", disabled disable ] []
 
 --- Delete Song views
 
