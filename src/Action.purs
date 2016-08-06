@@ -22,6 +22,7 @@ import Route (Route(SongPage, SearchResultPage, UpdateSongPage))
 import Model (SearchResults, Song, serializeSong, parseSong)
 import App (State(State), UIState(UIState), IOState(IOState), AsyncData(Loading, Loaded, LoadError))
 import Text.Parsing.StringParser (runParser)
+import Fullscreen (mkSongFullscreen)
 
 
 data Action =
@@ -33,7 +34,8 @@ data Action =
 data UIAction =
     SearchChange FormEvent |
     NewSongChange FormEvent |
-    UpdateSongChange FormEvent
+    UpdateSongChange FormEvent |
+    MkSongFullscreen
 
 data IOAction =
     RequestSong Int |
@@ -84,6 +86,14 @@ updateUI (NewSongChange { target: { value } }) (State state@{ io: IOState { sear
 
 updateUI (UpdateSongChange { target: { value } }) (State state@{ io: IOState { newSong, song, searchResults } }) =
     noEffects $ State state { io = IOState { song, searchResults, newSong, updateSong: Tuple value (either (Left <<< show) Right $ runParser parseSong value) } }
+
+updateUI MkSongFullscreen state = {
+    state: state,
+    effects: [ do
+        liftEff $ mkSongFullscreen
+        pure Noop
+    ]
+}
 
 --- IO Actions
 

@@ -26,7 +26,7 @@ nav form {
     padding-right: 1rem;
 }
 
-nav a, input[type=submit] {
+nav a, input[type=submit], input[type=button] {
     background: none;
     display: block;
     height: 2.5rem;
@@ -45,22 +45,23 @@ nav a, input[type=submit] {
     cursor: pointer;
 }
 
-nav a:hover, input[type=submit]:hover, nav a:focus, input[type=submit]:focus {
+nav a:hover, input[type=submit]:hover, input[type=button]:hover,
+nav a:focus, input[type=submit]:focus, input[type=button]:focus {
     background: #1c5d99;
     color: white;
 }
 
-nav a:active, input[type=submit]:active {
+nav a:active, input[type=submit]:active, input[type=button]:active {
     background: #bbcde5;
     color: white;
 }
 
-input[type=submit] {
+input[type=submit], input[type=button] {
     padding-top: 0;
     padding-bottom: 0;
 }
 
-input[type=submit]:disabled {
+input[type=submit]:disabled, input[type=button]:disabled {
     color: #222222;
     background: none;
     cursor: default;

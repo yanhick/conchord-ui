@@ -7,12 +7,12 @@ import Data.Either (Either(Left, Right), isLeft)
 import Pux.Html (Html, section, div, main, p, text, header, article
                 , h1, h2, h3, h4, h5, h6, span, i, nav, li, ul, form
                 , input, textarea, aside, (#), (!), bind)
-import Pux.Html.Events (onSubmit, onChange)
+import Pux.Html.Events (onSubmit, onChange, onClick)
 import Pux.Html.Attributes (name, placeholder, type_, value, data_, action, method, className, disabled)
 import Pux.Router (link)
 
 import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(ChordAndLyric, OnlyChord, OnlyLyric), SearchResult(SearchResult), Year(Year), serializeSongSectionName, ChordPlacement(InsideWord, BetweenWord))
-import Action (Action(UIAction, PageView, IOAction), UIAction(SearchChange, NewSongChange, UpdateSongChange), IOAction(SubmitNewSong, SubmitUpdateSong, SubmitDeleteSong))
+import Action (Action(UIAction, PageView, IOAction), UIAction(MkSongFullscreen, SearchChange, NewSongChange, UpdateSongChange), IOAction(SubmitNewSong, SubmitUpdateSong, SubmitDeleteSong))
 import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage, NewSongPage, UpdateSongPage))
 import App (State(State), AsyncData(Loading, Loaded, Empty, LoadError), UIState(UIState), IOState(IOState))
 
@@ -52,6 +52,7 @@ songPageHeader (SongPage id) (UIState { searchQuery }) =
             link ("/new") # do
                 text "add a new song"
             deleteSongForm id
+            input [ type_ "button", value "fullscreen", onClick (\_ -> UIAction MkSongFullscreen) ] []
 
 songPageHeader _ (UIState { searchQuery }) =
     header # do
