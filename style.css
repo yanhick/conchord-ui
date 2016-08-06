@@ -60,6 +60,12 @@ input[type=submit] {
     padding-bottom: 0;
 }
 
+input[type=submit]:disabled {
+    color: #222222;
+    background: none;
+    cursor: default;
+}
+
 ul {
     list-style: none;
     padding: 1rem;
