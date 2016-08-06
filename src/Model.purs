@@ -18,7 +18,7 @@ import Test.StrongCheck.Generic (gArbitrary)
 
 import Text.Parsing.StringParser (Parser, try)
 import Text.Parsing.StringParser.String (string, eof, anyChar, anyDigit)
-import Text.Parsing.StringParser.Combinators (manyTill, lookAhead, choice)
+import Text.Parsing.StringParser.Combinators (manyTill, lookAhead)
 
 import Parser (SongChord, exampleChord, parseChord)
 

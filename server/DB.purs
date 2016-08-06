@@ -1,23 +1,21 @@
 module DB where
 
-import Prelude (bind, ($), pure, (<<<), const, class Show, (<$>), Unit)
+import Prelude (bind, ($), pure, (<<<), class Show, (<$>), Unit)
 
 import Control.Monad.Aff (Aff)
 
 import Data.String (fromCharArray)
 import Data.Array (fromFoldable)
 import Data.Int (fromString)
-import Data.Either (Either(Left, Right))
-import Data.Maybe (maybe, Maybe(Nothing, Just))
+import Data.Maybe (Maybe(Nothing, Just))
 import Data.Generic (class Generic, gShow)
 import Data.Foreign.Class (class IsForeign, readProp)
-import Data.Foreign.Generic (defaultOptions, readGeneric)
 
 import Text.Parsing.StringParser (Parser, fail)
 import Text.Parsing.StringParser.String (string, eof, anyChar, anyDigit)
-import Text.Parsing.StringParser.Combinators (manyTill, lookAhead)
+import Text.Parsing.StringParser.Combinators (manyTill)
 
-import Database.Postgres (ConnectionInfo(), DB, connect, query, queryOne, queryValue, execute, withConnection, Query(Query))
+import Database.Postgres (ConnectionInfo(), DB, query, queryOne, queryValue, execute, withConnection, Query(Query))
 import Database.Postgres.SqlValue (toSql)
 
 import Model (SearchResult(SearchResult), SongMeta(SongMeta), Year(Year), Song(Song), serializeSong)

@@ -1,34 +1,27 @@
 module Main where
 
-import Prelude
+import Prelude ((<>), ($), bind, pure, Unit, id, show, (<<<))
 import Data.Maybe (maybe, Maybe(..))
-import Data.String (joinWith)
 import Data.Int (fromString)
 import Data.Function.Uncurried (Fn3)
 import Data.Tuple (Tuple(Tuple))
 import Data.Foreign.EasyFFI (unsafeForeignFunction)
-import Data.Foreign.Generic (defaultOptions, toJSONGeneric, readGeneric)
-import Data.Foreign.Class (class IsForeign, readProp)
-import Data.Unfoldable (replicate)
+import Data.Foreign.Generic (defaultOptions, toJSONGeneric)
 import Data.Either (either, Either(Left, Right))
-import Control.Monad.Aff (Aff, launchAff, runAff)
+import Control.Monad.Aff (launchAff)
 import Control.Monad.Aff.Class (liftAff)
-import Control.Monad.Aff.Console (logShow)
 import Control.Monad.Eff.Console (log, CONSOLE)
 import Control.Monad.Eff (Eff())
-import Control.Monad.Eff.Exception (Error(), message, error, EXCEPTION(), throwException, catchException, error)
+import Control.Monad.Eff.Exception (Error(), message, error, EXCEPTION(), catchException)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Unsafe (unsafePerformEff)
-import Database.Postgres (ConnectionInfo, connect, DB, queryOne, query, query_, queryValue, Query(Query), execute, mkConnectionString)
-import Database.Postgres.SqlValue (toSql)
+import Database.Postgres (ConnectionInfo, DB)
 import Node.Express.App (App(), listenHttp, get, post, put, delete, useOnError, useExternal)
 import Node.Express.Types (EXPRESS, ExpressM, Request, Response)
 import Node.Express.Handler (Handler(), nextThrow, HandlerM)
 import Node.Express.Request (getRouteParam, getQueryParam, getBodyParam)
 import Node.Express.Response (send, sendJson, sendFile, setStatus)
 import Node.HTTP (Server())
-import Node.FS.Sync (readTextFile)
-import Node.Encoding (Encoding(UTF8))
 import Network.HTTP.Affjax (AJAX())
 import DOM (DOM())
 import Signal.Channel (CHANNEL())
@@ -39,10 +32,10 @@ import Route (Route(SearchResultPage, SongPage, NewSongPage, UpdateSongPage))
 import App (init, AsyncData(LoadError, Loaded, Empty), State(State), UIState(UIState), IOState(IOState))
 import Action (update)
 import View (view)
-import Text.Parsing.StringParser (runParser, ParseError(ParseError))
+import Text.Parsing.StringParser (runParser)
 
-import Model (SearchResult(SearchResult), exampleSongMeta, parseSong, serializeSong, Song(Song), SongMeta(SongMeta), Year(Year), exampleSong)
-import DB (mkConnection, localConnectionInfo, getSongById, getSearchResults, createSong, updateSong, deleteSong, SongTableRow)
+import Model (parseSong, serializeSong, exampleSong)
+import DB (mkConnection, localConnectionInfo, getSongById, getSearchResults, createSong, updateSong, deleteSong)
 
 foreign import jsonBodyParser :: forall e. Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit)
 
@@ -63,7 +56,7 @@ main = do
     listenHttp (appSetup connectionInfo) port \_ ->
         log $ "listening on " <> show port
 
-appSetup :: forall e. ConnectionInfo -> App (console :: CONSOLE, db :: DB | e)
+appSetup :: forall e. ConnectionInfo -> App (console :: CONSOLE, db :: DB, err :: EXCEPTION | e)
 appSetup c = do
     liftEff $ log "Setting up"
     useExternal jsonBodyParser
@@ -89,7 +82,7 @@ fileHandler = do
     fileName <- getRouteParam "file"
     sendFile $ maybe "index.html" id fileName
 
-getUpdateSongPageHandler :: _
+getUpdateSongPageHandler :: forall e. ConnectionInfo -> HandlerM ( express :: EXPRESS, db :: DB, console :: CONSOLE, err :: EXCEPTION | e ) Unit
 getUpdateSongPageHandler c = do
     idParam <- getRouteParam "id"
     case idParam of
@@ -113,7 +106,7 @@ getUpdateSongPageHandler c = do
                 })
             Nothing -> nextThrow $ error "Id is not a valid integer"
 
-deleteSongPageHandler :: _
+deleteSongPageHandler :: forall e. ConnectionInfo -> HandlerM ( express :: EXPRESS, db :: DB, console :: CONSOLE, err :: EXCEPTION | e ) Unit
 deleteSongPageHandler c = do
     idParam <- getRouteParam "id"
     case idParam of
@@ -127,7 +120,7 @@ deleteSongPageHandler c = do
           Nothing -> nextThrow $ error "Id is not a valid integer"
 
 
-putUpdateSongPageHandler :: _
+putUpdateSongPageHandler :: forall e. ConnectionInfo -> HandlerM ( express :: EXPRESS, db :: DB, console :: CONSOLE, err :: EXCEPTION | e ) Unit
 putUpdateSongPageHandler c = do
     idParam <- getRouteParam "id"
     case idParam of
@@ -142,8 +135,8 @@ putUpdateSongPageHandler c = do
                       Left e -> do
                           setStatus 400
                           send e
-                      Right s -> do
-                          liftEff $ launchAff $ updateSong c id' s
+                      Right s' -> do
+                          liftEff $ launchAff $ updateSong c id' s'
                           setStatus 204
                           send ""
                   Nothing -> do
@@ -165,7 +158,7 @@ getNewSongPageHandler = do
         ui: UIState { searchQuery: "" }
     })
 
-postNewSongPageHandler :: _
+postNewSongPageHandler :: forall e. ConnectionInfo -> HandlerM ( express :: EXPRESS, db :: DB, console :: CONSOLE | e ) Unit
 postNewSongPageHandler c = do
     song <- getBodyParam "song"
     case song of
@@ -174,15 +167,15 @@ postNewSongPageHandler c = do
           Left e -> do
               setStatus 400
               send e
-          Right s -> do
-              song' <- liftAff $ createSong c s
+          Right s' -> do
+              song' <- liftAff $ createSong c s'
               send song'
 
       Nothing -> do
           setStatus 400
           send "No Song was sent"
 
-searchPageHandler :: _
+searchPageHandler :: forall e. ConnectionInfo -> HandlerM ( express :: EXPRESS, db :: DB, console :: CONSOLE | e ) Unit
 searchPageHandler c = do
     q <- getQueryParam "q"
     case q of
@@ -207,10 +200,10 @@ songPageHandler c = do
       Nothing -> nextThrow $ error "Id is required"
       Just id ->
         case fromString id of
-          Just id -> do
-            s <- liftAff $ getSongById c id
+          Just validId -> do
+            s <- liftAff $ getSongById c validId
             send $ index (State {
-                currentPage: (SongPage id),
+                currentPage: (SongPage validId),
                 io: IOState {
                     searchResults: Empty,
                     song: either (LoadError <<< show) Loaded $ runParser parseSong s,
@@ -225,7 +218,7 @@ songPageHandler c = do
 homePageHandler :: forall e. Handler e
 homePageHandler = send $ index init
 
-searchApiHandler :: _
+searchApiHandler :: forall e. ConnectionInfo -> HandlerM ( express :: EXPRESS, db :: DB, console :: CONSOLE | e ) Unit
 searchApiHandler c = do
     q <- getQueryParam "q"
     case q of
@@ -242,8 +235,8 @@ songApiHandler c = do
       Nothing -> err "Id is required"
       Just id -> do
         case fromString id of
-          Just id -> do
-            s <- liftAff $ getSongById c id
+          Just validId -> do
+            s <- liftAff $ getSongById c validId
             let s' = runParser parseSong s
             case s' of
               Right s'' -> send $ toJSONGeneric defaultOptions s''

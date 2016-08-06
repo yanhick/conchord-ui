@@ -7,8 +7,7 @@ import Data.Either (Either (Left, Right), either)
 import Data.Foreign (F)
 import Data.Tuple (Tuple(Tuple))
 import Data.Foreign.Class (readJSON)
-import Control.Monad.Aff (Aff(), later')
-import Control.Monad.Aff.Console (logShow)
+import Control.Monad.Aff (Aff())
 import Control.Monad.Eff.Console (CONSOLE)
 import Network.HTTP.Affjax (AJAX(), get, post, put, delete)
 import Network.HTTP.StatusCode (StatusCode(..))
@@ -19,7 +18,7 @@ import Pux (EffModel, noEffects)
 import Pux.Html.Events (FormEvent)
 import Pux.Router (navigateTo)
 
-import Route (Route(SongPage, SearchResultPage, UpdateSongPage, HomePage, NewSongPage, NotFoundPage, UpdateSongPage))
+import Route (Route(SongPage, SearchResultPage, UpdateSongPage))
 import Model (SearchResults, Song, serializeSong, parseSong)
 import App (State(State), UIState(UIState), IOState(IOState), AsyncData(Loading, Loaded, LoadError))
 import Text.Parsing.StringParser (runParser)
@@ -133,7 +132,7 @@ updateIO SubmitNewSong state = noEffects state
 updateIO SubmitUpdateSong state@(State { currentPage: (UpdateSongPage id) , io: IOState { updateSong: Tuple s (Right _) } }) = {
     state: state,
     effects: [ do
-        res <- updateSong id (PostSong s)
+        res <- updateSong' id (PostSong s)
         pure $ IOAction $ ReceiveSubmitUpdateSong id res
     ]
 }
@@ -203,8 +202,8 @@ postSong s = do
         (StatusCode 200) -> Ok
         _ -> Ko result.response
 
-updateSong :: forall eff. Int -> PostSong -> Aff (ajax :: AJAX | eff) PostResponse
-updateSong id s = do
+updateSong' :: forall eff. Int -> PostSong -> Aff (ajax :: AJAX | eff) PostResponse
+updateSong' id s = do
     result <- put ("/api/song/" <> show id )  $ encodeJson s
     pure case result.status of
         (StatusCode 204) -> Ok

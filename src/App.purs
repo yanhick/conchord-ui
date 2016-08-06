@@ -2,7 +2,6 @@ module App where
 
 import Prelude (class Eq, class Show)
 
-import Data.Maybe (Maybe(Nothing))
 import Data.Tuple (Tuple(Tuple))
 import Data.Either (Either(Right))
 import Data.Foreign.Class (class IsForeign)
