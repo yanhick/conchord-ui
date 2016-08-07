@@ -8,7 +8,7 @@ import Pux.Html (Html, section, div, main, p, text, header, article
                 , h1, h2, h3, h4, h5, h6, span, i, nav, li, ul, form
                 , input, textarea, aside, (#), (!), bind, label)
 import Pux.Html.Events (onSubmit, onChange, onClick)
-import Pux.Html.Attributes (checked, name, placeholder, type_, value, data_, action, method, className, disabled)
+import Pux.Html.Attributes (id_, htmlFor, checked, name, placeholder, type_, value, data_, action, method, className, disabled)
 import Pux.Router (link)
 
 import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(ChordAndLyric, OnlyChord, OnlyLyric), SearchResult(SearchResult), Year(Year), serializeSongSectionName, ChordPlacement(InsideWord, BetweenWord))
@@ -54,8 +54,8 @@ songPageHeader (SongPage id) (UIState { searchQuery, showSongMeta }) =
             deleteSongForm id
             input [ type_ "button", value "fullscreen", onClick (\_ -> UIAction MkSongFullscreen) ] []
             div # do
-                input [ type_ "checkbox", checked showSongMeta, onChange (\_ -> UIAction ToggleShowSongMeta) ] []
-                label [] [ text "show song meta" ]
+                input [ type_ "checkbox", id_ "c1", checked showSongMeta, onChange (\_ -> UIAction ToggleShowSongMeta) ] []
+                label [ htmlFor "c1" ] [ text "show song meta" ]
 
 songPageHeader _ (UIState { searchQuery }) =
     header # do
