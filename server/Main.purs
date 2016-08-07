@@ -102,7 +102,7 @@ getUpdateSongPageHandler c = do
                         newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
                         updateSong: s'
                     },
-                    ui: UIState { searchQuery: "" }
+                    ui: UIState { searchQuery: "", showSongMeta: true }
                 })
             Nothing -> nextThrow $ error "Id is not a valid integer"
 
@@ -155,7 +155,7 @@ getNewSongPageHandler = do
             newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
             updateSong: Tuple (serializeSong exampleSong) (Right exampleSong)
         },
-        ui: UIState { searchQuery: "" }
+        ui: UIState { searchQuery: "", showSongMeta: true }
     })
 
 postNewSongPageHandler :: forall e. ConnectionInfo -> HandlerM ( express :: EXPRESS, db :: DB, console :: CONSOLE | e ) Unit
@@ -189,7 +189,7 @@ searchPageHandler c = do
                  newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
                  updateSong: Tuple (serializeSong exampleSong) (Right exampleSong)
              },
-             ui: UIState { searchQuery: maybe "" id q }
+             ui: UIState { searchQuery: maybe "" id q, showSongMeta: true }
           })
       Nothing -> nextThrow $ error "missing query param"
 
@@ -210,7 +210,7 @@ songPageHandler c = do
                     newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
                     updateSong: Tuple (serializeSong exampleSong) (Right exampleSong)
                 },
-                ui: UIState { searchQuery: "" }
+                ui: UIState { searchQuery: "", showSongMeta: true }
             })
           Nothing -> nextThrow $ error "Id is not a valid integer"
 

@@ -1,6 +1,6 @@
 module Action where
 
-import Prelude (($), bind, (<>), pure, show, (+), (-), (==), (<<<))
+import Prelude (($), bind, (<>), pure, show, (+), (-), (==), (<<<), not)
 
 import Data.Argonaut (class EncodeJson, (~>), (:=), jsonEmptyObject, encodeJson)
 import Data.Either (Either (Left, Right), either)
@@ -35,7 +35,8 @@ data UIAction =
     SearchChange FormEvent |
     NewSongChange FormEvent |
     UpdateSongChange FormEvent |
-    MkSongFullscreen
+    MkSongFullscreen |
+    ToggleShowSongMeta
 
 data IOAction =
     RequestSong Int |
@@ -67,8 +68,8 @@ updatePage r (State state@{ currentPage: r' })
     | r == r' = noEffects $ State state
 updatePage p@(SongPage s) (State state) =
     updateIO (RequestSong s) (State (state { currentPage = p }))
-updatePage p@(SearchResultPage q) (State state) =
-    updateIO (RequestSearch q) (State state { currentPage = p, ui = UIState { searchQuery: q } })
+updatePage p@(SearchResultPage q) (State state@{ ui: UIState ui }) =
+    updateIO (RequestSearch q) (State state { currentPage = p, ui = UIState ui { searchQuery = q } })
 updatePage p@(UpdateSongPage _) (State state@{ io: IOState { song: song@Loaded(song'), searchResults, newSong  } }) =
     noEffects $ State state { currentPage = p, io = IOState { updateSong: Tuple (serializeSong song') (Right song'), song, searchResults, newSong } }
 updatePage p (State state) = noEffects $ State state { currentPage = p }
@@ -78,8 +79,8 @@ updatePage p (State state) = noEffects $ State state { currentPage = p }
 
 updateUI :: UIAction -> State -> Affction
 
-updateUI (SearchChange { target: { value } }) (State state) =
-    noEffects $ State state { ui = UIState { searchQuery: value } }
+updateUI (SearchChange { target: { value } }) (State state@{ ui: UIState ui }) =
+    noEffects $ State state { ui = UIState ui { searchQuery = value } }
 
 updateUI (NewSongChange { target: { value } }) (State state@{ io: IOState { searchResults, song, updateSong } }) =
     noEffects $ State state { io = IOState { song, searchResults, updateSong, newSong: Tuple value (either (Left <<< show) Right $ runParser parseSong value) } }
@@ -94,6 +95,9 @@ updateUI MkSongFullscreen state = {
         pure Noop
     ]
 }
+
+updateUI ToggleShowSongMeta (State state@{ ui: UIState ui@{ showSongMeta } }) =
+    noEffects $ State state { ui = UIState ui { showSongMeta = not showSongMeta } }
 
 --- IO Actions
 

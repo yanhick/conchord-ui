@@ -6,13 +6,13 @@ import Data.Either (Either(Left, Right), isLeft)
 
 import Pux.Html (Html, section, div, main, p, text, header, article
                 , h1, h2, h3, h4, h5, h6, span, i, nav, li, ul, form
-                , input, textarea, aside, (#), (!), bind)
+                , input, textarea, aside, (#), (!), bind, label)
 import Pux.Html.Events (onSubmit, onChange, onClick)
-import Pux.Html.Attributes (name, placeholder, type_, value, data_, action, method, className, disabled)
+import Pux.Html.Attributes (checked, name, placeholder, type_, value, data_, action, method, className, disabled)
 import Pux.Router (link)
 
 import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(ChordAndLyric, OnlyChord, OnlyLyric), SearchResult(SearchResult), Year(Year), serializeSongSectionName, ChordPlacement(InsideWord, BetweenWord))
-import Action (Action(UIAction, PageView, IOAction), UIAction(MkSongFullscreen, SearchChange, NewSongChange, UpdateSongChange), IOAction(SubmitNewSong, SubmitUpdateSong, SubmitDeleteSong))
+import Action (Action(UIAction, PageView, IOAction), UIAction(ToggleShowSongMeta, MkSongFullscreen, SearchChange, NewSongChange, UpdateSongChange), IOAction(SubmitNewSong, SubmitUpdateSong, SubmitDeleteSong))
 import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage, NewSongPage, UpdateSongPage))
 import App (State(State), AsyncData(Loading, Loaded, Empty, LoadError), UIState(UIState), IOState(IOState))
 
@@ -43,7 +43,7 @@ header_ (IOState { searchResults }) (UIState { searchQuery }) =
                 text "add a new song"
 
 songPageHeader :: Route -> UIState -> Html Action
-songPageHeader (SongPage id) (UIState { searchQuery }) =
+songPageHeader (SongPage id) (UIState { searchQuery, showSongMeta }) =
     header # do
         nav # do
             searchForm searchQuery
@@ -53,6 +53,9 @@ songPageHeader (SongPage id) (UIState { searchQuery }) =
                 text "add a new song"
             deleteSongForm id
             input [ type_ "button", value "fullscreen", onClick (\_ -> UIAction MkSongFullscreen) ] []
+            div # do
+                input [ type_ "checkbox", checked showSongMeta, onChange (\_ -> UIAction ToggleShowSongMeta) ] []
+                label [] [ text "show song meta" ]
 
 songPageHeader _ (UIState { searchQuery }) =
     header # do
@@ -169,10 +172,15 @@ songPageContent :: IOState -> UIState -> Html Action
 songPageContent (IOState { song: Empty }) _ = main # text ""
 songPageContent (IOState { song: Loading }) _ = main # text "Loading Song"
 songPageContent (IOState { song: (LoadError e) }) _ = main # text e
-songPageContent (IOState { song: Loaded (Song { meta, content }), searchResults }) (UIState { searchQuery }) =
+songPageContent (IOState { song: Loaded (Song { meta, content })}) (UIState { searchQuery, showSongMeta }) =
     main # do
-        songMeta meta
-        songContent content
+        content' showSongMeta
+    where
+        content' true = do
+            songMeta meta
+            songContent content
+        content' false = do
+            songContent content
 
 songMeta :: SongMeta -> Html Action
 songMeta (SongMeta { title, artist, album }) =

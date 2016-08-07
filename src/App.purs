@@ -24,7 +24,8 @@ newtype State = State {
 }
 
 newtype UIState = UIState {
-    searchQuery :: String
+    searchQuery :: String,
+    showSongMeta :: Boolean
 }
 
 type Error = String
@@ -43,7 +44,8 @@ init :: State
 init = State {
     currentPage: HomePage
   , ui: UIState {
-      searchQuery: ""
+      searchQuery: "",
+      showSongMeta: true
   }
   , io: IOState {
       searchResults: Empty
