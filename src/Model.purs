@@ -30,6 +30,11 @@ type SearchResults = Array SearchResult
 
 --- Song Model
 
+newtype DBSong = DBSong {
+    id :: String,
+    song :: Song
+}
+
 newtype Song = Song {
     meta :: SongMeta,
     content :: SongContent

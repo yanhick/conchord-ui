@@ -7,18 +7,19 @@ import Control.Monad.Aff (Aff)
 import Data.String (fromCharArray)
 import Data.Array (fromFoldable)
 import Data.Int (fromString)
-import Data.Maybe (Maybe(Nothing, Just))
+import Data.Maybe (Maybe(Nothing, Just), maybe)
+import Data.Either (Either())
 import Data.Generic (class Generic, gShow)
 import Data.Foreign.Class (class IsForeign, readProp)
 
-import Text.Parsing.StringParser (Parser, fail)
+import Text.Parsing.StringParser (Parser, fail, runParser, ParseError)
 import Text.Parsing.StringParser.String (string, eof, anyChar, anyDigit)
 import Text.Parsing.StringParser.Combinators (manyTill)
 
 import Database.Postgres (ConnectionInfo(), DB, query, queryOne, queryValue, execute, withConnection, Query(Query))
 import Database.Postgres.SqlValue (toSql)
 
-import Model (SearchResult(SearchResult), SongMeta(SongMeta), Year(Year), Song(Song), serializeSong)
+import Model (SearchResult(SearchResult), SongMeta(SongMeta), Year(Year), Song(Song), serializeSong, parseSong, DBSong(DBSong))
 
 localConnectionInfo :: ConnectionInfo
 localConnectionInfo = {
@@ -92,16 +93,22 @@ getSearchResultsQuery = Query ("""
 
 """)
 
-createSong :: forall e. ConnectionInfo -> Song -> Aff ( db :: DB | e ) (Maybe SongTableRow)
+createSong :: forall e. ConnectionInfo -> Song -> Aff ( db :: DB | e ) (Maybe (Either ParseError DBSong))
 createSong c s@(Song { meta: SongMeta m@{ year: Year y } }) =
     withConnection c \client -> do
-        queryOne createSongQuery [
+        songTableRow <- queryOne createSongQuery [
           toSql m.title,
           toSql m.artist,
           toSql m.album,
           toSql y,
           toSql $ serializeSong s
         ] client
+        pure $ maybe Nothing (Just <<< songTableRowToDBSong) songTableRow
+
+songTableRowToDBSong :: SongTableRow -> Either ParseError DBSong
+songTableRowToDBSong (SongTableRow { id, content }) = do
+    song <- runParser parseSong content
+    pure $ DBSong { id, song }
 
 createSongQuery :: Query SongTableRow
 createSongQuery = Query ("""
