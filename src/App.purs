@@ -25,7 +25,8 @@ newtype State = State {
 
 newtype UIState = UIState {
     searchQuery :: String,
-    showSongMeta :: Boolean
+    showSongMeta :: Boolean,
+    showDuplicatedChorus :: Boolean
 }
 
 type Error = String
@@ -45,7 +46,8 @@ init = State {
     currentPage: HomePage
   , ui: UIState {
       searchQuery: "",
-      showSongMeta: true
+      showSongMeta: true,
+      showDuplicatedChorus: true
   }
   , io: IOState {
       searchResults: Empty

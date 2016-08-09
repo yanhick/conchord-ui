@@ -1,6 +1,6 @@
 module View where
 
-import Prelude (($), (<$>), show, const, (<>))
+import Prelude (($), (<$>), show, const, (<>), not)
 import Data.Tuple (fst, snd)
 import Data.Either (Either(Left, Right), isLeft)
 
@@ -12,7 +12,7 @@ import Pux.Html.Attributes (id_, htmlFor, checked, name, placeholder, type_, val
 import Pux.Router (link)
 
 import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(ChordAndLyric, OnlyChord, OnlyLyric), SearchResult(SearchResult), Year(Year), serializeSongSectionName, ChordPlacement(InsideWord, BetweenWord))
-import Action (Action(UIAction, PageView, IOAction), UIAction(ToggleShowSongMeta, MkSongFullscreen, SearchChange, NewSongChange, UpdateSongChange), IOAction(SubmitNewSong, SubmitUpdateSong, SubmitDeleteSong))
+import Action (Action(UIAction, PageView, IOAction), UIAction(ToggleShowDuplicatedChorus, ToggleShowSongMeta, MkSongFullscreen, SearchChange, NewSongChange, UpdateSongChange), IOAction(SubmitNewSong, SubmitUpdateSong, SubmitDeleteSong))
 import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage, NewSongPage, UpdateSongPage))
 import App (State(State), AsyncData(Loading, Loaded, Empty, LoadError), UIState(UIState), IOState(IOState))
 
@@ -43,7 +43,7 @@ header_ (IOState { searchResults }) (UIState { searchQuery }) =
                 text "add a new song"
 
 songPageHeader :: Route -> UIState -> Html Action
-songPageHeader (SongPage id) (UIState { searchQuery, showSongMeta }) =
+songPageHeader (SongPage id) (UIState { searchQuery, showSongMeta, showDuplicatedChorus }) =
     header # do
         nav # do
             searchForm searchQuery
@@ -54,8 +54,10 @@ songPageHeader (SongPage id) (UIState { searchQuery, showSongMeta }) =
             deleteSongForm id
             input [ type_ "button", value "fullscreen", onClick (\_ -> UIAction MkSongFullscreen) ] []
             div # do
-                input [ type_ "checkbox", id_ "c1", checked showSongMeta, onChange (\_ -> UIAction ToggleShowSongMeta) ] []
-                label [ htmlFor "c1" ] [ text "show song meta" ]
+                input [ type_ "checkbox", id_ "song-meta-toggle", checked showSongMeta, onChange (\_ -> UIAction ToggleShowSongMeta) ] []
+                label [ htmlFor "song-meta-toggle" ] [ text "show song meta" ]
+                input [ type_ "checkbox", id_ "duplicated-chords-toggle", checked showDuplicatedChorus, onChange (\_ -> UIAction ToggleShowDuplicatedChorus) ] []
+                label [ htmlFor "duplicated-chords-toggle" ] [ text "show song duplicated chorus" ]
 
 songPageHeader _ (UIState { searchQuery }) =
     header # do
@@ -172,15 +174,16 @@ songPageContent :: IOState -> UIState -> Html Action
 songPageContent (IOState { song: Empty }) _ = main # text ""
 songPageContent (IOState { song: Loading }) _ = main # text "Loading Song"
 songPageContent (IOState { song: (LoadError e) }) _ = main # text e
-songPageContent (IOState { song: Loaded (Song { meta, content })}) (UIState { searchQuery, showSongMeta }) =
-    main # do
-        content' showSongMeta
+songPageContent (IOState { song: Loaded (Song { meta, content })}) (UIState { searchQuery, showSongMeta, showDuplicatedChorus }) =
+    main (hideDuplicatedChorusClass (not showDuplicatedChorus)) [content' showSongMeta]
     where
         content' true = do
             songMeta meta
             songContent content
         content' false = do
             songContent content
+        hideDuplicatedChorusClass true = [ className "hide-duplicated-chorus" ]
+        hideDuplicatedChorusClass false = []
 
 songMeta :: SongMeta -> Html Action
 songMeta (SongMeta { title, artist, album }) =
@@ -194,7 +197,7 @@ songContent (SongContent s) = article [] (songSection <$> s)
 
 songSection :: SongSection -> Html Action
 songSection (SongSection {name, lyrics}) =
-    section # do
+    section ! data_ "section" (serializeSongSectionName name) # do
         h4 # text (serializeSongSectionName name)
         p [] (songLyric <$> lyrics)
 

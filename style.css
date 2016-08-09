@@ -127,6 +127,10 @@ main header {
     text-align: center;
 }
 
+main.hide-duplicated-chorus section[data-section=Chorus] ~ section[data-section=Chorus] p {
+    display: none;
+}
+
 main article {
     padding: 1rem;
     margin: 1rem;
