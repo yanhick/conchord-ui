@@ -5,6 +5,7 @@ import Prelude (($), bind, (<>), pure, show, (+), (-), (==), (<<<), not)
 import Data.Argonaut (class EncodeJson, (~>), (:=), jsonEmptyObject, encodeJson)
 import Data.Either (Either (Left, Right), either)
 import Data.Foreign (F)
+import Data.Foreign.Generic (toJSONGeneric, defaultOptions)
 import Data.Tuple (Tuple(Tuple))
 import Data.Foreign.Class (readJSON)
 import Control.Monad.Aff (Aff())
@@ -19,7 +20,7 @@ import Pux.Html.Events (FormEvent)
 import Pux.Router (navigateTo)
 
 import Route (Route(SongPage, SearchResultPage, UpdateSongPage))
-import Model (SearchResults, Song, serializeSong, parseSong)
+import Model (SearchResults, Song, serializeSong, parseSong, DBSong(DBSong))
 import App (State(State), UIState(UIState), IOState(IOState), AsyncData(Loading, Loaded, LoadError))
 import Text.Parsing.StringParser (runParser)
 import Fullscreen (mkSongFullscreen)
@@ -47,11 +48,12 @@ data IOAction =
     SubmitNewSong |
     SubmitUpdateSong |
     SubmitDeleteSong Int |
-    ReceiveSubmitNewSong PostResponse |
+    ReceiveSubmitNewSong PostNewSongResponse |
     ReceiveSubmitUpdateSong Int PostResponse |
     ReceiveSubmitDeleteSong PostResponse
 
 data PostResponse = Ok | Ko String
+type PostNewSongResponse = Either String DBSong
 
 type Affction = EffModel State Action (ajax :: AJAX, dom :: DOM, console :: CONSOLE)
 
@@ -166,8 +168,15 @@ updateIO (SubmitDeleteSong id) state = {
 }
 
 
-updateIO (ReceiveSubmitNewSong Ok) state = noEffects state
-updateIO (ReceiveSubmitNewSong (Ko e)) (State state@{ io: IOState { searchResults, song, newSong: Tuple s _, updateSong } }) =
+updateIO (ReceiveSubmitNewSong (Right (DBSong { id, song }))) (State state@{ io: IOState io }) = {
+    state: State state { io = IOState io { song = Loaded song } }
+  , effects: [ do
+        liftEff $ navigateTo $ "/song/" <> show id
+        pure Noop
+    ]
+}
+
+updateIO (ReceiveSubmitNewSong (Left e)) (State state@{ io: IOState { searchResults, song, newSong: Tuple s _, updateSong } }) =
     noEffects $ State state { io = IOState { searchResults, song, newSong: Tuple s (Left e), updateSong } }
 
 updateIO (ReceiveSubmitUpdateSong id Ok) state = {
@@ -213,12 +222,14 @@ instance postSongEncodeJson :: EncodeJson PostSong where
         = "song" := song
         ~> jsonEmptyObject
 
-postSong :: forall eff. PostSong -> Aff (ajax :: AJAX | eff) PostResponse
-postSong s = do
+postSong :: forall eff. PostSong -> Aff (ajax :: AJAX | eff) PostNewSongResponse
+postSong s@(PostSong s') = do
     result <- post "/api/song" $ encodeJson s
     pure case result.status of
-        (StatusCode 200) -> Ok
-        _ -> Ko result.response
+        (StatusCode 200) -> case readJSON result.response of
+                              Right s -> Right s
+                              Left e -> Left $ show e <> "\n" <> result.response <> "\n" <> s'
+        _ -> Left result.response
 
 updateSong' :: forall eff. Int -> PostSong -> Aff (ajax :: AJAX | eff) PostResponse
 updateSong' id s = do

@@ -169,7 +169,15 @@ postNewSongPageHandler c = do
               send e
           Right s' -> do
               song' <- liftAff $ createSong c s'
-              send song'
+              case song' of
+                Nothing -> do
+                    setStatus 400
+                    send "No song"
+                Just song'' -> case song'' of
+                                Left e' -> do
+                                    setStatus 400
+                                    send e'
+                                Right song''' -> send $ toJSONGeneric defaultOptions song'''
 
       Nothing -> do
           setStatus 400

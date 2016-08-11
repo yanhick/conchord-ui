@@ -196,6 +196,11 @@ serializeSong (Song { meta, content }) =
 
 --- Generic boilerplate
 
+derive instance genericDBSong :: Generic DBSong
+
+instance isForeignDBSong :: IsForeign DBSong where
+    read = readGeneric defaultOptions
+
 derive instance genericSearchResult :: Generic SearchResult
 
 instance isForeignSearchResult :: IsForeign SearchResult where
