@@ -171,7 +171,7 @@ updateIO (SubmitDeleteSong id) state = {
 updateIO (ReceiveSubmitNewSong (Right (DBSong { id, song }))) (State state@{ io: IOState io }) = {
     state: State state { io = IOState io { song = Loaded song } }
   , effects: [ do
-        liftEff $ navigateTo $ "/song/" <> show id
+        liftEff $ navigateTo $ "/song/" <> id
         pure Noop
     ]
 }
@@ -228,7 +228,7 @@ postSong s@(PostSong s') = do
     pure case result.status of
         (StatusCode 200) -> case readJSON result.response of
                               Right s -> Right s
-                              Left e -> Left $ show e <> "\n" <> result.response <> "\n" <> s'
+                              Left e -> Left $ show e
         _ -> Left result.response
 
 updateSong' :: forall eff. Int -> PostSong -> Aff (ajax :: AJAX | eff) PostResponse
