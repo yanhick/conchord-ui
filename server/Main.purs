@@ -189,16 +189,21 @@ searchPageHandler c = do
     case q of
       Just q' -> do
           result <- liftAff $ getSearchResults c q'
-          send $ index (State {
-            currentPage: (SearchResultPage $ maybe "" id q),
-             io: IOState {
-                 searchResults: Loaded (result),
-                 song: Empty,
-                 newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
-                 updateSong: Tuple (serializeSong exampleSong) (Right exampleSong)
-             },
-             ui: UIState { searchQuery: maybe "" id q, showSongMeta: true, showDuplicatedChorus: true }
-          })
+          case result of
+            Left e -> do
+                setStatus 400
+                send e
+            Right sr ->
+                  send $ index (State {
+                    currentPage: (SearchResultPage $ maybe "" id q),
+                     io: IOState {
+                         searchResults: Loaded (sr),
+                         song: Empty,
+                         newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
+                         updateSong: Tuple (serializeSong exampleSong) (Right exampleSong)
+                     },
+                     ui: UIState { searchQuery: maybe "" id q, showSongMeta: true, showDuplicatedChorus: true }
+                  })
       Nothing -> nextThrow $ error "missing query param"
 
 songPageHandler :: forall e. ConnectionInfo -> HandlerM ( express :: EXPRESS, db :: DB, console :: CONSOLE | e ) Unit
@@ -232,7 +237,11 @@ searchApiHandler c = do
     case q of
       Just q' -> do
           result <- liftAff $ getSearchResults c q'
-          send $ toJSONGeneric defaultOptions $ result
+          case result of
+            Left e -> do
+                setStatus 400
+                send $ show e
+            Right sr -> send $ toJSONGeneric defaultOptions $ sr
       Nothing -> nextThrow $ error "missing query param"
 
 

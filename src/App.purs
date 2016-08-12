@@ -8,7 +8,7 @@ import Data.Foreign.Class (class IsForeign)
 import Data.Generic (class Generic, gEq, gShow)
 import Data.Foreign.Generic (readGeneric, defaultOptions)
 
-import Model (SearchResults, SearchResult, Song, serializeSong, exampleSong)
+import Model (SearchResults, Song, serializeSong, exampleSong, DBSong)
 import Route (Route(HomePage))
 
 import Test.StrongCheck.Arbitrary (class Arbitrary)
@@ -78,7 +78,7 @@ derive instance genericUIState :: Generic UIState
 instance isForeignUIState :: IsForeign UIState where
     read = readGeneric defaultOptions
 
-derive instance genericAsyncDataSearchResult :: Generic (AsyncData (Array SearchResult))
+derive instance genericAsyncDataSearchResult :: Generic (AsyncData (Array DBSong))
 derive instance genericAsyncDataSong :: Generic (AsyncData Song)
 
 instance isForeignAsyncDataSong :: IsForeign (AsyncData Song) where

@@ -11,7 +11,7 @@ import Pux.Html.Events (onSubmit, onChange, onClick)
 import Pux.Html.Attributes (id_, htmlFor, checked, name, placeholder, type_, value, data_, action, method, className, disabled)
 import Pux.Router (link)
 
-import Model (Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(ChordAndLyric, OnlyChord, OnlyLyric), SearchResult(SearchResult), Year(Year), serializeSongSectionName, ChordPlacement(InsideWord, BetweenWord))
+import Model (DBSong(DBSong), Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(ChordAndLyric, OnlyChord, OnlyLyric), Year(Year), serializeSongSectionName, ChordPlacement(InsideWord, BetweenWord))
 import Action (Action(UIAction, PageView, IOAction), UIAction(ToggleShowDuplicatedChorus, ToggleShowSongMeta, MkSongFullscreen, SearchChange, NewSongChange, UpdateSongChange), IOAction(SubmitNewSong, SubmitUpdateSong, SubmitDeleteSong))
 import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage, NewSongPage, UpdateSongPage))
 import App (State(State), AsyncData(Loading, Loaded, Empty, LoadError), UIState(UIState), IOState(IOState))
@@ -91,15 +91,14 @@ searchResultPageContent (IOState { searchResults: Loaded s }) _ = ul [] (searchR
 searchResultPageContent (IOState { searchResults: (LoadError e) }) _ = ul # text e
 
 
-searchResult :: SearchResult -> Html Action
-searchResult (SearchResult { meta: SongMeta { title, artist, album, year: Year(y) }, desc, id}) =
+searchResult :: DBSong -> Html Action
+searchResult (DBSong { id, song: Song { meta: SongMeta { title, artist, album, year: Year(y) } } }) =
     li # do
-        link ("/song/" <> show id) # do
+        link ("/song/" <> id) # do
             h3 # text title
             h4 # text artist
             h5 # text album
             h6 # text (show y)
-            i # text desc
 
 searchForm :: String -> Html Action
 searchForm q =

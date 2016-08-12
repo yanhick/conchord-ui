@@ -24,9 +24,7 @@ import Parser (SongChord, exampleChord, parseChord)
 
 --- Search Model
 
-newtype SearchResult = SearchResult { id :: Int, meta :: SongMeta, desc :: String }
-
-type SearchResults = Array SearchResult
+type SearchResults = Array DBSong
 
 --- Song Model
 
@@ -200,14 +198,6 @@ derive instance genericDBSong :: Generic DBSong
 
 instance isForeignDBSong :: IsForeign DBSong where
     read = readGeneric defaultOptions
-
-derive instance genericSearchResult :: Generic SearchResult
-
-instance isForeignSearchResult :: IsForeign SearchResult where
-    read = readGeneric defaultOptions
-
-instance showSearchResult :: Show SearchResult where
-    show = gShow
 
 derive instance genericSong :: Generic Song
 

@@ -5,9 +5,10 @@ import Prelude (bind, ($), pure, (<<<), class Show, (<$>), Unit)
 import Control.Monad.Aff (Aff)
 
 import Data.String (fromCharArray)
+import Data.Traversable (traverse)
 import Data.Array (fromFoldable)
 import Data.Int (fromString)
-import Data.Maybe (Maybe(Nothing, Just), maybe)
+import Data.Maybe (Maybe(Nothing, Just))
 import Data.Either (Either())
 import Data.Generic (class Generic, gShow)
 import Data.Foreign.Class (class IsForeign, readProp)
@@ -19,7 +20,7 @@ import Text.Parsing.StringParser.Combinators (manyTill)
 import Database.Postgres (ConnectionInfo(), DB, query, queryOne, queryValue, execute, withConnection, Query(Query))
 import Database.Postgres.SqlValue (toSql)
 
-import Model (SearchResult(SearchResult), SongMeta(SongMeta), Year(Year), Song(Song), serializeSong, parseSong, DBSong(DBSong))
+import Model (SongMeta(SongMeta), Year(Year), Song(Song), serializeSong, parseSong, DBSong(DBSong))
 
 localConnectionInfo :: ConnectionInfo
 localConnectionInfo = {
@@ -68,13 +69,11 @@ getSongByIdQuery = Query ("""
 
 """)
 
-getSearchResults :: forall e. ConnectionInfo -> String -> Aff ( db :: DB | e ) (Array SearchResult)
+getSearchResults :: forall e. ConnectionInfo -> String -> Aff ( db :: DB | e ) (Either ParseError (Array DBSong))
 getSearchResults c q =
     withConnection c \client -> do
         rows <- query getSearchResultsQuery [toSql q] client
-        pure $ rowToSearchResult <$> rows
-          where
-            rowToSearchResult (SongTableRow { id, title, artist, album, year, content }) = SearchResult { id: 1, meta: SongMeta { artist, album, year: Year year, title }, desc: content }
+        pure $ traverse songTableRowToDBSong rows
 
 getSearchResultsQuery :: Query SongTableRow
 getSearchResultsQuery = Query ("""
@@ -103,12 +102,8 @@ createSong c s@(Song { meta: SongMeta m@{ year: Year y } }) =
           toSql y,
           toSql $ serializeSong s
         ] client
-        pure $ maybe Nothing (Just <<< songTableRowToDBSong) songTableRow
+        pure $ songTableRowToDBSong <$> songTableRow
 
-songTableRowToDBSong :: SongTableRow -> Either ParseError DBSong
-songTableRowToDBSong (SongTableRow { id, content }) = do
-    song <- runParser parseSong content
-    pure $ DBSong { id, song }
 
 createSongQuery :: Query SongTableRow
 createSongQuery = Query ("""
@@ -167,6 +162,11 @@ newtype SongTableRow = SongTableRow {
     year :: Int,
     content :: String
 }
+
+songTableRowToDBSong :: SongTableRow -> Either ParseError DBSong
+songTableRowToDBSong (SongTableRow { id, content }) = do
+    song <- runParser parseSong content
+    pure $ DBSong { id, song }
 
 --- Generic boilerplate
 
