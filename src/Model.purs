@@ -64,10 +64,12 @@ data SongSectionName = Intro | Chorus | Verse | Outro | Bridge
 --- Song parser
 
 parseNewline :: Parser String
-parseNewline = string "\n"
+parseNewline = string "\r\n" <|> string "\n"
 
 parseCarriageReturn :: Parser String
-parseCarriageReturn = string "\n\n"
+parseCarriageReturn = do
+    parseNewline
+    parseNewline
 
 parseSongMeta :: Parser SongMeta
 parseSongMeta = do
