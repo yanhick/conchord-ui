@@ -3,6 +3,8 @@ module Action where
 import Prelude (($), bind, (<>), pure, show, (+), (-), (==), (<<<), not)
 
 import Data.Argonaut (class EncodeJson, (~>), (:=), jsonEmptyObject, encodeJson)
+import Data.FormURLEncoded (fromArray, encode)
+import Data.Maybe (Maybe(Just))
 import Data.Either (Either (Left, Right), either)
 import Data.Foreign (F)
 import Data.Foreign.Generic (toJSONGeneric, defaultOptions)
@@ -10,7 +12,10 @@ import Data.Tuple (Tuple(Tuple))
 import Data.Foreign.Class (readJSON)
 import Control.Monad.Aff (Aff())
 import Control.Monad.Eff.Console (CONSOLE)
-import Network.HTTP.Affjax (AJAX(), get, post, put, delete)
+import Network.HTTP.Affjax (AJAX(), get, post, put, delete, affjax, defaultRequest)
+import Network.HTTP.RequestHeader (RequestHeader(ContentType))
+import Data.HTTP.Method (Method(POST, PUT))
+import Data.MediaType.Common (applicationFormURLEncoded)
 import Network.HTTP.StatusCode (StatusCode(..))
 import Control.Monad.Eff.Class (liftEff)
 import DOM (DOM())
@@ -226,7 +231,7 @@ instance postSongEncodeJson :: EncodeJson PostSong where
 
 postSong :: forall eff. PostSong -> Aff (ajax :: AJAX | eff) PostNewSongResponse
 postSong s@(PostSong s') = do
-    result <- post "/api/song" $ encodeJson s
+    result <- affjax $ defaultRequest { method = Left POST, url = "/api/song", content = Just $ encode (fromArray [ Tuple "song" (Just s')]), headers = [ ContentType applicationFormURLEncoded ] }
     pure case result.status of
         (StatusCode 200) -> case readJSON result.response of
                               Right s -> Right s
@@ -234,10 +239,10 @@ postSong s@(PostSong s') = do
         _ -> Left result.response
 
 updateSong' :: forall eff. Int -> PostSong -> Aff (ajax :: AJAX | eff) PostResponse
-updateSong' id s = do
-    result <- put ("/api/song/" <> show id )  $ encodeJson s
+updateSong' id (PostSong s') = do
+    result <- affjax $ defaultRequest { method = Left PUT, url = ("/api/song/" <> show id), content = Just $ encode (fromArray [ Tuple "song" (Just s')]), headers = [ ContentType applicationFormURLEncoded ] }
     pure case result.status of
-        (StatusCode 204) -> Ok
+        (StatusCode 200) -> Ok
         _ -> Ko result.response
 
 deleteSong :: forall eff. Int -> Aff (ajax :: AJAX | eff) PostResponse

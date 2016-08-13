@@ -37,7 +37,7 @@ import Text.Parsing.StringParser (runParser)
 import Model (parseSong, serializeSong, exampleSong)
 import DB (mkConnection, localConnectionInfo, getSongById, getSearchResults, createSong, updateSong, deleteSong)
 
-foreign import jsonBodyParser :: forall e. Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit)
+foreign import urlencodedBodyParser :: forall e. Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit)
 
 main :: Eff (
     console :: CONSOLE,
@@ -59,7 +59,7 @@ main = do
 appSetup :: forall e. ConnectionInfo -> App (console :: CONSOLE, db :: DB, err :: EXCEPTION | e)
 appSetup c = do
     liftEff $ log "Setting up"
-    useExternal jsonBodyParser
+    useExternal urlencodedBodyParser
     get "/search"   (searchPageHandler c)
     get "/api/search"   (searchApiHandler c)
     get "/new"         getNewSongPageHandler
@@ -136,9 +136,16 @@ putUpdateSongPageHandler c = do
                           setStatus 400
                           send e
                       Right s' -> do
-                          liftEff $ launchAff $ updateSong c id' s'
-                          setStatus 204
-                          send ""
+                          song' <- liftAff $ updateSong c id' s'
+                          case song' of
+                            Nothing -> do
+                                setStatus 400
+                                send "No song"
+                            Just song'' -> case song'' of
+                                            Left e' -> do
+                                                setStatus 400
+                                                send e'
+                                            Right song''' -> send $ toJSONGeneric defaultOptions song'''
                   Nothing -> do
                       setStatus 400
                       send "No Song was sent"

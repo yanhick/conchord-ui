@@ -27,7 +27,7 @@ page (SongPage _) (State { ui, io, currentPage }) = songPage currentPage io ui
 page (SearchResultPage _) state = searchResultPage state
 page HomePage state = homePage state
 page NewSongPage state = newSongPage state
-page (UpdateSongPage _) state = updateSongPage state
+page (UpdateSongPage id) state = updateSongPage id state
 page NotFoundPage _ = notFoundPage
 
 --- Common
@@ -135,11 +135,11 @@ newSongForm disable song =
 
 --- Update Song views
 
-updateSongPage :: State -> Html Action
-updateSongPage (State { io: IOState { updateSong } }) =
+updateSongPage :: Int -> State -> Html Action
+updateSongPage id (State { io: IOState { updateSong } }) =
     div ! className "editor" # do
         aside # do
-            updateSongForm (isLeft (snd updateSong)) (fst updateSong)
+            updateSongForm id (isLeft (snd updateSong)) (fst updateSong)
         main # do
             render $ snd updateSong
     where
@@ -148,9 +148,9 @@ updateSongPage (State { io: IOState { updateSong } }) =
             songContent content
         render (Left e) = text e
 
-updateSongForm :: Boolean -> String -> Html Action
-updateSongForm disable song =
-    form ! action "/update" ! method "PUT" ! onSubmit (const $ IOAction SubmitUpdateSong) # do
+updateSongForm :: Int -> Boolean -> String -> Html Action
+updateSongForm id disable song =
+    form ! action ("/update/" <> show id) ! method "POST" ! onSubmit (const $ IOAction SubmitUpdateSong) # do
         textarea [ name "song", type_ "text", onChange (\e -> UIAction (UpdateSongChange e)), value song ] []
         input [ type_ "submit", value "edit this song", disabled disable ] []
 

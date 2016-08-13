@@ -129,10 +129,10 @@ deleteSongQuery = Query ("""
 
 """)
 
-updateSong :: forall e. ConnectionInfo -> Int -> Song -> Aff ( db :: DB | e ) Unit
+updateSong :: forall e. ConnectionInfo -> Int -> Song -> Aff ( db :: DB | e ) (Maybe (Either ParseError DBSong))
 updateSong c id s@(Song { meta: SongMeta m@{ year: Year y } }) =
     withConnection c \client -> do
-        execute updateSongQuery [
+        songTableRow <- queryOne updateSongQuery [
           toSql m.title,
           toSql m.artist,
           toSql m.album,
@@ -140,8 +140,9 @@ updateSong c id s@(Song { meta: SongMeta m@{ year: Year y } }) =
           toSql $ serializeSong s,
           toSql id
         ] client
+        pure $ songTableRowToDBSong <$> songTableRow
 
-updateSongQuery :: Query String
+updateSongQuery :: Query SongTableRow
 updateSongQuery = Query ("""
 
     UPDATE song
@@ -151,6 +152,7 @@ updateSongQuery = Query ("""
         year = $4,
         content = $5
     WHERE id = $6
+    RETURNING *
 
 """)
 

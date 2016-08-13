@@ -67,7 +67,7 @@ parseNewline :: Parser String
 parseNewline = string "\r\n" <|> string "\n"
 
 parseCarriageReturn :: Parser String
-parseCarriageReturn = do
+parseCarriageReturn = try $ do
     parseNewline
     parseNewline
 
