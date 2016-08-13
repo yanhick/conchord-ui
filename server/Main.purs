@@ -20,7 +20,7 @@ import Node.Express.App (App(), listenHttp, get, post, put, delete, useOnError, 
 import Node.Express.Types (EXPRESS, ExpressM, Request, Response)
 import Node.Express.Handler (Handler(), nextThrow, HandlerM)
 import Node.Express.Request (getRouteParam, getQueryParam, getBodyParam)
-import Node.Express.Response (send, sendJson, sendFile, setStatus)
+import Node.Express.Response (send, sendJson, sendFile, setStatus, redirect)
 import Node.HTTP (Server())
 import Network.HTTP.Affjax (AJAX())
 import DOM (DOM())
@@ -34,7 +34,7 @@ import Action (update)
 import View (view)
 import Text.Parsing.StringParser (runParser)
 
-import Model (parseSong, serializeSong, exampleSong)
+import Model (parseSong, serializeSong, exampleSong, DBSong(DBSong))
 import DB (mkConnection, localConnectionInfo, getSongById, getSearchResults, createSong, updateSong, deleteSong)
 
 foreign import urlencodedBodyParser :: forall e. Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit)
@@ -71,9 +71,9 @@ appSetup c = do
     get "/:file"       fileHandler
     get "/"            homePageHandler
     get "/api/song/:id" (songApiHandler c)
-    put "/api/song/:id" (putUpdateSongPageHandler c)
+    put "/api/song/:id" (putUpdateSongApiHandler c)
     delete "/api/song/:id" (deleteSongPageHandler c)
-    post "/api/song"   (postNewSongPageHandler c)
+    post "/api/song"   (postNewSongApiHandler c)
     useOnError         errorHandler
 
 
@@ -145,6 +145,39 @@ putUpdateSongPageHandler c = do
                                             Left e' -> do
                                                 setStatus 400
                                                 send e'
+                                            Right (DBSong { id: id''' }) -> do
+                                                redirect $ "/song/" <> id'''
+
+                  Nothing -> do
+                      setStatus 400
+                      send "No Song was sent"
+            Nothing -> nextThrow $ error "Id is not a valid integer"
+
+putUpdateSongApiHandler :: forall e. ConnectionInfo -> HandlerM ( express :: EXPRESS, db :: DB, console :: CONSOLE, err :: EXCEPTION | e ) Unit
+putUpdateSongApiHandler c = do
+    idParam <- getRouteParam "id"
+    case idParam of
+      Nothing -> nextThrow $ error "Id is required"
+      Just id ->
+        case fromString id of
+            Just id' -> do
+                song <- getBodyParam "song"
+                case song of
+                  Just s ->
+                    case runParser parseSong s of
+                      Left e -> do
+                          setStatus 400
+                          send e
+                      Right s' -> do
+                          song' <- liftAff $ updateSong c id' s'
+                          case song' of
+                            Nothing -> do
+                                setStatus 400
+                                send "No song"
+                            Just song'' -> case song'' of
+                                            Left e' -> do
+                                                setStatus 400
+                                                send e'
                                             Right song''' -> send $ toJSONGeneric defaultOptions song'''
                   Nothing -> do
                       setStatus 400
@@ -165,6 +198,31 @@ getNewSongPageHandler = do
         ui: UIState { searchQuery: "", showSongMeta: true, showDuplicatedChorus: true }
     })
 
+postNewSongApiHandler :: forall e. ConnectionInfo -> HandlerM ( express :: EXPRESS, db :: DB, console :: CONSOLE | e ) Unit
+postNewSongApiHandler c = do
+    song <- getBodyParam "song"
+    case song of
+      Just s ->
+        case runParser parseSong s of
+          Left e -> do
+              setStatus 400
+              send e
+          Right s' -> do
+              song' <- liftAff $ createSong c s'
+              case song' of
+                Nothing -> do
+                    setStatus 400
+                    send "No song"
+                Just song'' -> case song'' of
+                                Left e' -> do
+                                    setStatus 400
+                                    send e'
+                                Right song''' -> send $ toJSONGeneric defaultOptions song'''
+
+      Nothing -> do
+          setStatus 400
+          send "No Song was sent"
+
 postNewSongPageHandler :: forall e. ConnectionInfo -> HandlerM ( express :: EXPRESS, db :: DB, console :: CONSOLE | e ) Unit
 postNewSongPageHandler c = do
     song <- getBodyParam "song"
@@ -184,7 +242,8 @@ postNewSongPageHandler c = do
                                 Left e' -> do
                                     setStatus 400
                                     send e'
-                                Right song''' -> send $ toJSONGeneric defaultOptions song'''
+                                Right (DBSong { id }) -> do
+                                    redirect $ "/song/" <> id
 
       Nothing -> do
           setStatus 400
