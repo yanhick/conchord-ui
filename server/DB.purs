@@ -88,7 +88,7 @@ getSearchResultsQuery = Query ("""
             song.content as content,
             to_tsvector(song.content) as document
             FROM song) as doc
-    WHERE document @@ to_tsquery($1)
+    WHERE document @@ plainto_tsquery($1)
 
 """)
 
