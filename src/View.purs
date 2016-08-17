@@ -6,7 +6,7 @@ import Data.Either (Either(Left, Right), isLeft)
 
 import Pux.Html (Html, section, div, main, p, text, header, article
                 , h1, h2, h3, h4, h5, h6, span, i, nav, li, ul, form
-                , input, textarea, aside, (#), (!), bind, label)
+                , input, textarea, aside, (#), (!), bind, label, footer)
 import Pux.Html.Events (onSubmit, onChange, onClick)
 import Pux.Html.Attributes (id_, htmlFor, checked, name, placeholder, type_, value, data_, action, method, className, disabled)
 import Pux.Router (link)
@@ -23,7 +23,7 @@ view state@(State { currentPage } ) = div [] [ page currentPage state ]
 --- App Routing
 
 page :: Route -> State -> Html Action
-page (SongPage _) (State { ui, io, currentPage }) = songPage currentPage io ui
+page (SongPage id) (State { ui, io, currentPage }) = songPage id io ui
 page (SearchResultPage _) state = searchResultPage state
 page HomePage state = homePage state
 page NewSongPage state = newSongPage state
@@ -42,8 +42,17 @@ header_ (IOState { searchResults }) (UIState { searchQuery }) =
             link "/new" # do
                 text "add a new song"
 
-songPageHeader :: Route -> UIState -> Html Action
-songPageHeader (SongPage id) (UIState { searchQuery, showSongMeta, showDuplicatedChorus }) =
+songPageFooter :: Int -> Html Action
+songPageFooter id =
+    footer # do
+        link ("/update/" <> show id) # do
+            text "edit this song"
+        link ("/new") # do
+            text "add a new song"
+        deleteSongForm id
+
+songPageHeader :: Int -> UIState -> Html Action
+songPageHeader id (UIState { searchQuery, showSongMeta, showDuplicatedChorus }) =
     header # do
         nav # do
             searchForm searchQuery
@@ -58,11 +67,6 @@ songPageHeader (SongPage id) (UIState { searchQuery, showSongMeta, showDuplicate
                 label [ htmlFor "song-meta-toggle" ] [ text "show song meta" ]
                 input [ type_ "checkbox", id_ "duplicated-chords-toggle", checked showDuplicatedChorus, onChange (\_ -> UIAction ToggleShowDuplicatedChorus) ] []
                 label [ htmlFor "duplicated-chords-toggle" ] [ text "show song duplicated chorus" ]
-
-songPageHeader _ (UIState { searchQuery }) =
-    header # do
-        nav # do
-            searchForm searchQuery
 
 --- NotFound view
 
@@ -163,11 +167,12 @@ deleteSongForm id =
 
 --- Song Views
 
-songPage :: Route -> IOState -> UIState -> Html Action
-songPage r io ui =
+songPage :: Int -> IOState -> UIState -> Html Action
+songPage id io ui =
     div # do
-        songPageHeader r ui
+        songPageHeader id ui
         songPageContent io ui
+        songPageFooter id
 
 songPageContent :: IOState -> UIState -> Html Action
 songPageContent (IOState { song: Empty }) _ = main # text ""
