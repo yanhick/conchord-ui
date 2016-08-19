@@ -39,28 +39,29 @@ header_ (IOState { searchResults }) (UIState { searchQuery }) =
     header # do
         nav # do
             searchForm searchQuery
-            link "/new" # do
+
+footer_ :: Html Action
+footer_ =
+    footer # do
+        nav # do
+            link ("/new") # do
                 text "add a new song"
 
 songPageFooter :: Int -> Html Action
 songPageFooter id =
     footer # do
-        link ("/update/" <> show id) # do
-            text "edit this song"
-        link ("/new") # do
-            text "add a new song"
-        deleteSongForm id
-
-songPageHeader :: Int -> UIState -> Html Action
-songPageHeader id (UIState { searchQuery, showSongMeta, showDuplicatedChorus }) =
-    header # do
         nav # do
-            searchForm searchQuery
             link ("/update/" <> show id) # do
                 text "edit this song"
             link ("/new") # do
                 text "add a new song"
             deleteSongForm id
+
+songPageHeader :: UIState -> Html Action
+songPageHeader (UIState { searchQuery, showSongMeta, showDuplicatedChorus }) =
+    header # do
+        nav # do
+            searchForm searchQuery
             input [ type_ "button", value "fullscreen", onClick (\_ -> UIAction MkSongFullscreen) ] []
             div # do
                 input [ type_ "checkbox", id_ "song-meta-toggle", checked showSongMeta, onChange (\_ -> UIAction ToggleShowSongMeta) ] []
@@ -81,12 +82,14 @@ homePage :: State -> Html Action
 homePage (State { io, ui }) =
     div # do
         header_ io ui
+        footer_
 
 searchResultPage :: State -> Html Action
 searchResultPage (State { io, ui }) =
     div # do
         header_ io ui
         searchResultPageContent io ui
+        footer_
 
 searchResultPageContent :: IOState -> UIState -> Html Action
 searchResultPageContent (IOState { searchResults: Empty }) _ = ul # text ""
@@ -170,7 +173,7 @@ deleteSongForm id =
 songPage :: Int -> IOState -> UIState -> Html Action
 songPage id io ui =
     div # do
-        songPageHeader id ui
+        songPageHeader ui
         songPageContent io ui
         songPageFooter id
 
