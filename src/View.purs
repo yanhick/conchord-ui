@@ -57,17 +57,18 @@ songPageFooter id =
                 text "add a new song"
             deleteSongForm id
 
-songPageHeader :: UIState -> Html Action
-songPageHeader (UIState { searchQuery, showSongMeta, showDuplicatedChorus }) =
+songPageHeader :: Int -> UIState -> Html Action
+songPageHeader id (UIState { searchQuery, showSongMeta, showDuplicatedChorus }) =
     header # do
         nav # do
             searchForm searchQuery
             input [ type_ "button", value "fullscreen", onClick (\_ -> UIAction MkSongFullscreen) ] []
-            div # do
-                input [ type_ "checkbox", id_ "song-meta-toggle", checked showSongMeta, onChange (\_ -> UIAction ToggleShowSongMeta) ] []
+            form ! action ("/song/" <> show id) ! method "GET" # do
+                input [ name "song-meta", type_ "checkbox", id_ "song-meta-toggle", checked showSongMeta, onChange (\_ -> UIAction ToggleShowSongMeta) ] []
                 label [ htmlFor "song-meta-toggle" ] [ text "show song meta" ]
-                input [ type_ "checkbox", id_ "duplicated-chords-toggle", checked showDuplicatedChorus, onChange (\_ -> UIAction ToggleShowDuplicatedChorus) ] []
+                input [ name "duplicated-chords", type_ "checkbox", id_ "duplicated-chords-toggle", checked showDuplicatedChorus, onChange (\_ -> UIAction ToggleShowDuplicatedChorus) ] []
                 label [ htmlFor "duplicated-chords-toggle" ] [ text "show song duplicated chorus" ]
+                input [ type_ "submit", value "update" ] []
 
 --- NotFound view
 
@@ -173,7 +174,7 @@ deleteSongForm id =
 songPage :: Int -> IOState -> UIState -> Html Action
 songPage id io ui =
     div # do
-        songPageHeader ui
+        songPageHeader id ui
         songPageContent io ui
         songPageFooter id
 
