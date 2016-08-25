@@ -29,7 +29,7 @@ import Signal.Channel (CHANNEL())
 import Pux (renderToString, start)
 import Signal ((~>))
 import Route (Route(SearchResultPage, SongPage, NewSongPage, UpdateSongPage))
-import App (init, AsyncData(LoadError, Loaded, Empty), State(State), UIState(UIState), IOState(IOState))
+import App (init, AsyncData(LoadError, Loaded, Empty), State(State), UIState(UIState), IOState(IOState), SongUIState(SongUIState))
 import Action (update)
 import View (view)
 import Text.Parsing.StringParser (runParser)
@@ -102,7 +102,7 @@ getUpdateSongPageHandler c = do
                         newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
                         updateSong: s'
                     },
-                    ui: UIState { searchQuery: "", showSongMeta: true, showDuplicatedChorus: true }
+                    ui: UIState { searchQuery: "", songUIState: SongUIState { showSongMeta: true, showDuplicatedChorus: true } }
                 })
             Nothing -> nextThrow $ error "Id is not a valid integer"
 
@@ -195,7 +195,7 @@ getNewSongPageHandler = do
             newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
             updateSong: Tuple (serializeSong exampleSong) (Right exampleSong)
         },
-        ui: UIState { searchQuery: "", showSongMeta: true, showDuplicatedChorus: true }
+        ui: UIState { searchQuery: "", songUIState: SongUIState { showSongMeta: true, showDuplicatedChorus: true } }
     })
 
 postNewSongApiHandler :: forall e. ConnectionInfo -> HandlerM ( express :: EXPRESS, db :: DB, console :: CONSOLE | e ) Unit
@@ -268,7 +268,7 @@ searchPageHandler c = do
                          newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
                          updateSong: Tuple (serializeSong exampleSong) (Right exampleSong)
                      },
-                     ui: UIState { searchQuery: maybe "" id q, showSongMeta: true, showDuplicatedChorus: true }
+                     ui: UIState { searchQuery: maybe "" id q, songUIState: SongUIState { showSongMeta: true, showDuplicatedChorus: true } }
                   })
       Nothing -> nextThrow $ error "missing query param"
 
@@ -289,7 +289,7 @@ songPageHandler c = do
                     newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
                     updateSong: Tuple (serializeSong exampleSong) (Right exampleSong)
                 },
-                ui: UIState { searchQuery: "", showSongMeta: true, showDuplicatedChorus: true }
+                ui: UIState { searchQuery: "", songUIState: SongUIState { showSongMeta: true, showDuplicatedChorus: true } }
             })
           Nothing -> nextThrow $ error "Id is not a valid integer"
 

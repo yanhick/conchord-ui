@@ -14,7 +14,7 @@ import Pux.Router (link)
 import Model (DBSong(DBSong), Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(ChordAndLyric, OnlyChord, OnlyLyric), Year(Year), serializeSongSectionName, ChordPlacement(InsideWord, BetweenWord))
 import Action (Action(UIAction, PageView, IOAction), UIAction(ToggleShowDuplicatedChorus, ToggleShowSongMeta, MkSongFullscreen, SearchChange, NewSongChange, UpdateSongChange), IOAction(SubmitNewSong, SubmitUpdateSong, SubmitDeleteSong))
 import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage, NewSongPage, UpdateSongPage))
-import App (State(State), AsyncData(Loading, Loaded, Empty, LoadError), UIState(UIState), IOState(IOState))
+import App (State(State), AsyncData(Loading, Loaded, Empty, LoadError), SongUIState(SongUIState), UIState(UIState), IOState(IOState))
 
 
 view :: State -> Html Action
@@ -58,7 +58,7 @@ songPageFooter id =
             deleteSongForm id
 
 songPageHeader :: Int -> UIState -> Html Action
-songPageHeader id (UIState { searchQuery, showSongMeta, showDuplicatedChorus }) =
+songPageHeader id (UIState { searchQuery, songUIState: SongUIState { showSongMeta, showDuplicatedChorus } } ) =
     header # do
         nav # do
             searchForm searchQuery
@@ -182,7 +182,7 @@ songPageContent :: IOState -> UIState -> Html Action
 songPageContent (IOState { song: Empty }) _ = main # text ""
 songPageContent (IOState { song: Loading }) _ = main # text "Loading Song"
 songPageContent (IOState { song: (LoadError e) }) _ = main # text e
-songPageContent (IOState { song: Loaded (Song { meta, content })}) (UIState { searchQuery, showSongMeta, showDuplicatedChorus }) =
+songPageContent (IOState { song: Loaded (Song { meta, content })}) (UIState { searchQuery, songUIState: SongUIState { showSongMeta, showDuplicatedChorus } } ) =
     main (hideDuplicatedChorusClass (not showDuplicatedChorus)) [content' showSongMeta]
     where
         content' true = do

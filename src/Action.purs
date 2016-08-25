@@ -26,7 +26,7 @@ import Pux.Router (navigateTo)
 
 import Route (Route(SongPage, SearchResultPage, UpdateSongPage, NewSongPage))
 import Model (SearchResults, Song, serializeSong, parseSong, DBSong(DBSong), exampleSong)
-import App (State(State), UIState(UIState), IOState(IOState), AsyncData(Loading, Loaded, LoadError))
+import App (State(State), UIState(UIState), SongUIState(SongUIState), IOState(IOState), AsyncData(Loading, Loaded, LoadError))
 import Text.Parsing.StringParser (runParser)
 import Fullscreen (mkSongFullscreen)
 
@@ -106,11 +106,11 @@ updateUI MkSongFullscreen state = {
     ]
 }
 
-updateUI ToggleShowSongMeta (State state@{ ui: UIState ui@{ showSongMeta } }) =
-    noEffects $ State state { ui = UIState ui { showSongMeta = not showSongMeta } }
+updateUI ToggleShowSongMeta (State state@{ ui: UIState ui@{ songUIState: SongUIState songUI@{ showSongMeta } } }) =
+    noEffects $ State state { ui = UIState ui { songUIState = SongUIState songUI { showSongMeta = not showSongMeta } } }
 
-updateUI ToggleShowDuplicatedChorus (State state@{ ui: UIState ui@{ showDuplicatedChorus } }) =
-    noEffects $ State state { ui = UIState ui { showDuplicatedChorus = not showDuplicatedChorus } }
+updateUI ToggleShowDuplicatedChorus (State state@{ ui: UIState ui@{ songUIState: SongUIState songUI@{ showDuplicatedChorus } } }) =
+    noEffects $ State state { ui = UIState ui { songUIState = SongUIState songUI { showDuplicatedChorus = not showDuplicatedChorus } } }
 
 --- IO Actions
 

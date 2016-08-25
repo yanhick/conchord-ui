@@ -25,6 +25,10 @@ newtype State = State {
 
 newtype UIState = UIState {
     searchQuery :: String,
+    songUIState :: SongUIState
+}
+
+newtype SongUIState = SongUIState {
     showSongMeta :: Boolean,
     showDuplicatedChorus :: Boolean
 }
@@ -46,8 +50,10 @@ init = State {
     currentPage: HomePage
   , ui: UIState {
       searchQuery: "",
-      showSongMeta: true,
-      showDuplicatedChorus: true
+      songUIState: SongUIState {
+          showSongMeta: true,
+          showDuplicatedChorus: true
+      }
   }
   , io: IOState {
       searchResults: Empty
@@ -76,6 +82,11 @@ instance showState :: Show State where
 derive instance genericUIState :: Generic UIState
 
 instance isForeignUIState :: IsForeign UIState where
+    read = readGeneric defaultOptions
+
+derive instance genericSongUIState :: Generic SongUIState
+
+instance isForeignSongUIState :: IsForeign SongUIState where
     read = readGeneric defaultOptions
 
 derive instance genericAsyncDataSearchResult :: Generic (AsyncData (Array DBSong))
