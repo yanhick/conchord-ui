@@ -64,10 +64,10 @@ songPageHeader id (UIState { searchQuery, songUIState: SongUIState { showSongMet
             searchForm searchQuery
             input [ type_ "button", value "fullscreen", onClick (\_ -> UIAction MkSongFullscreen) ] []
             form ! action ("/song/" <> show id) ! method "GET" # do
-                input [ name "song-meta", type_ "checkbox", id_ "song-meta-toggle", checked showSongMeta, onChange (\_ -> UIAction ToggleShowSongMeta) ] []
-                label [ htmlFor "song-meta-toggle" ] [ text "show song meta" ]
-                input [ name "duplicated-chords", type_ "checkbox", id_ "duplicated-chords-toggle", checked showDuplicatedChorus, onChange (\_ -> UIAction ToggleShowDuplicatedChorus) ] []
-                label [ htmlFor "duplicated-chords-toggle" ] [ text "show song duplicated chorus" ]
+                input [ name "hide-song-meta", type_ "checkbox", id_ "song-meta-toggle", checked $ not showSongMeta, onChange (\_ -> UIAction ToggleShowSongMeta) ] []
+                label [ htmlFor "song-meta-toggle" ] [ text "hide song meta" ]
+                input [ name "hide-duplicated-chords", type_ "checkbox", id_ "duplicated-chords-toggle", checked $ not showDuplicatedChorus, onChange (\_ -> UIAction ToggleShowDuplicatedChorus) ] []
+                label [ htmlFor "duplicated-chords-toggle" ] [ text "hide song duplicated chorus" ]
                 input [ type_ "submit", value "update" ] []
 
 --- NotFound view

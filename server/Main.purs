@@ -1,7 +1,7 @@
 module Main where
 
 import Prelude ((<>), ($), bind, pure, Unit, id, show, (<<<))
-import Data.Maybe (maybe, Maybe(..))
+import Data.Maybe (maybe, Maybe(..), isNothing)
 import Data.Int (fromString)
 import Data.Function.Uncurried (Fn3)
 import Data.Tuple (Tuple(Tuple))
@@ -275,6 +275,8 @@ searchPageHandler c = do
 songPageHandler :: forall e. ConnectionInfo -> HandlerM ( express :: EXPRESS, db :: DB, console :: CONSOLE | e ) Unit
 songPageHandler c = do
     idParam <- getRouteParam "id"
+    hideSongMeta <- getQueryParam "hide-song-meta"
+    hideDuplicatedChords <- getQueryParam "hide-duplicated-chords"
     case idParam of
       Nothing -> nextThrow $ error "Id is required"
       Just id ->
@@ -289,7 +291,7 @@ songPageHandler c = do
                     newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
                     updateSong: Tuple (serializeSong exampleSong) (Right exampleSong)
                 },
-                ui: UIState { searchQuery: "", songUIState: SongUIState { showSongMeta: true, showDuplicatedChorus: true } }
+                ui: UIState { searchQuery: "", songUIState: SongUIState { showSongMeta: isNothing hideSongMeta, showDuplicatedChorus: isNothing hideDuplicatedChords } }
             })
           Nothing -> nextThrow $ error "Id is not a valid integer"
 
