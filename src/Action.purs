@@ -28,7 +28,6 @@ import Route (Route(SongPage, SearchResultPage, UpdateSongPage, NewSongPage))
 import Model (SearchResults, Song, serializeSong, parseSong, DBSong(DBSong), exampleSong)
 import App (State(State), UIState(UIState), SongUIState(SongUIState), IOState(IOState), AsyncData(Loading, Loaded, LoadError))
 import Text.Parsing.StringParser (runParser)
-import Fullscreen (mkSongFullscreen)
 
 
 data Action =
@@ -41,7 +40,6 @@ data UIAction =
     SearchChange FormEvent |
     NewSongChange FormEvent |
     UpdateSongChange FormEvent |
-    MkSongFullscreen |
     ToggleShowSongMeta |
     ToggleShowDuplicatedChorus |
     ToggleShowSongSectionName
@@ -98,14 +96,6 @@ updateUI (NewSongChange { target: { value } }) (State state@{ io: IOState { sear
 
 updateUI (UpdateSongChange { target: { value } }) (State state@{ io: IOState { newSong, song, searchResults } }) =
     noEffects $ State state { io = IOState { song, searchResults, newSong, updateSong: Tuple value (either (Left <<< show) Right $ runParser parseSong value) } }
-
-updateUI MkSongFullscreen state = {
-    state: state,
-    effects: [ do
-        liftEff $ mkSongFullscreen
-        pure Noop
-    ]
-}
 
 updateUI ToggleShowSongMeta (State state@{ ui: UIState ui@{ songUIState: SongUIState songUI@{ showSongMeta } } }) =
     noEffects $ State state { ui = UIState ui { songUIState = SongUIState songUI { showSongMeta = not showSongMeta } } }

@@ -12,7 +12,7 @@ import Pux.Html.Attributes (id_, htmlFor, checked, name, placeholder, type_, val
 import Pux.Router (link)
 
 import Model (DBSong(DBSong), Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(ChordAndLyric, OnlyChord, OnlyLyric), Year(Year), serializeSongSectionName, ChordPlacement(InsideWord, BetweenWord))
-import Action (Action(UIAction, PageView, IOAction), UIAction(ToggleShowSongSectionName, ToggleShowDuplicatedChorus, ToggleShowSongMeta, MkSongFullscreen, SearchChange, NewSongChange, UpdateSongChange), IOAction(SubmitNewSong, SubmitUpdateSong, SubmitDeleteSong))
+import Action (Action(UIAction, PageView, IOAction), UIAction(ToggleShowSongSectionName, ToggleShowDuplicatedChorus, ToggleShowSongMeta, SearchChange, NewSongChange, UpdateSongChange), IOAction(SubmitNewSong, SubmitUpdateSong, SubmitDeleteSong))
 import Route (Route (SongPage, SongPageZen, SearchResultPage, HomePage, NotFoundPage, NewSongPage, UpdateSongPage))
 import App (State(State), AsyncData(Loading, Loaded, Empty, LoadError), SongUIState(SongUIState), UIState(UIState), IOState(IOState))
 
@@ -63,7 +63,6 @@ songPageHeader id (UIState { searchQuery, songUIState: SongUIState { showSongMet
     header # do
         nav # do
             searchForm searchQuery
-            input [ type_ "button", value "fullscreen", onClick (\_ -> UIAction MkSongFullscreen) ] []
             form ! action ("/song/" <> show id) ! method "GET" # do
                 input [ name "hide-song-meta", type_ "checkbox", id_ "song-meta-toggle", checked $ not showSongMeta, onChange (\_ -> UIAction ToggleShowSongMeta) ] []
                 label [ htmlFor "song-meta-toggle" ] [ text "hide song meta" ]
