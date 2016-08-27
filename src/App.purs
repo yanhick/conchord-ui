@@ -30,7 +30,8 @@ newtype UIState = UIState {
 
 newtype SongUIState = SongUIState {
     showSongMeta :: Boolean,
-    showDuplicatedChorus :: Boolean
+    showDuplicatedChorus :: Boolean,
+    showSongSectionName :: Boolean
 }
 
 type Error = String
@@ -52,7 +53,8 @@ init = State {
       searchQuery: "",
       songUIState: SongUIState {
           showSongMeta: true,
-          showDuplicatedChorus: true
+          showDuplicatedChorus: true,
+          showSongSectionName: true
       }
   }
   , io: IOState {

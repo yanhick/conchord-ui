@@ -43,7 +43,8 @@ data UIAction =
     UpdateSongChange FormEvent |
     MkSongFullscreen |
     ToggleShowSongMeta |
-    ToggleShowDuplicatedChorus
+    ToggleShowDuplicatedChorus |
+    ToggleShowSongSectionName
 
 data IOAction =
     RequestSong Int |
@@ -111,6 +112,9 @@ updateUI ToggleShowSongMeta (State state@{ ui: UIState ui@{ songUIState: SongUIS
 
 updateUI ToggleShowDuplicatedChorus (State state@{ ui: UIState ui@{ songUIState: SongUIState songUI@{ showDuplicatedChorus } } }) =
     noEffects $ State state { ui = UIState ui { songUIState = SongUIState songUI { showDuplicatedChorus = not showDuplicatedChorus } } }
+
+updateUI ToggleShowSongSectionName (State state@{ ui: UIState ui@{ songUIState: SongUIState songUI@{ showSongSectionName } } }) =
+    noEffects $ State state { ui = UIState ui { songUIState = SongUIState songUI { showSongSectionName = not showSongSectionName } } }
 
 --- IO Actions
 

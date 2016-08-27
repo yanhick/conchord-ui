@@ -12,7 +12,7 @@ import Pux.Html.Attributes (id_, htmlFor, checked, name, placeholder, type_, val
 import Pux.Router (link)
 
 import Model (DBSong(DBSong), Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(ChordAndLyric, OnlyChord, OnlyLyric), Year(Year), serializeSongSectionName, ChordPlacement(InsideWord, BetweenWord))
-import Action (Action(UIAction, PageView, IOAction), UIAction(ToggleShowDuplicatedChorus, ToggleShowSongMeta, MkSongFullscreen, SearchChange, NewSongChange, UpdateSongChange), IOAction(SubmitNewSong, SubmitUpdateSong, SubmitDeleteSong))
+import Action (Action(UIAction, PageView, IOAction), UIAction(ToggleShowSongSectionName, ToggleShowDuplicatedChorus, ToggleShowSongMeta, MkSongFullscreen, SearchChange, NewSongChange, UpdateSongChange), IOAction(SubmitNewSong, SubmitUpdateSong, SubmitDeleteSong))
 import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage, NewSongPage, UpdateSongPage))
 import App (State(State), AsyncData(Loading, Loaded, Empty, LoadError), SongUIState(SongUIState), UIState(UIState), IOState(IOState))
 
@@ -58,7 +58,7 @@ songPageFooter id =
             deleteSongForm id
 
 songPageHeader :: Int -> UIState -> Html Action
-songPageHeader id (UIState { searchQuery, songUIState: SongUIState { showSongMeta, showDuplicatedChorus } } ) =
+songPageHeader id (UIState { searchQuery, songUIState: SongUIState { showSongMeta, showDuplicatedChorus, showSongSectionName } } ) =
     header # do
         nav # do
             searchForm searchQuery
@@ -68,6 +68,8 @@ songPageHeader id (UIState { searchQuery, songUIState: SongUIState { showSongMet
                 label [ htmlFor "song-meta-toggle" ] [ text "hide song meta" ]
                 input [ name "hide-duplicated-chords", type_ "checkbox", id_ "duplicated-chords-toggle", checked $ not showDuplicatedChorus, onChange (\_ -> UIAction ToggleShowDuplicatedChorus) ] []
                 label [ htmlFor "duplicated-chords-toggle" ] [ text "hide song duplicated chorus" ]
+                input [ name "hide-song-section-name", type_ "checkbox", id_ "song-section-name-toggle", checked $ not showSongSectionName, onChange (\_ -> UIAction ToggleShowSongSectionName) ] []
+                label [ htmlFor "song-section-name-toggle" ] [ text "hide song section name" ]
                 input [ type_ "submit", value "update" ] []
 
 --- NotFound view
@@ -131,7 +133,7 @@ newSongPage (State { io: IOState { newSong }, ui }) =
     where
         render (Right (Song { meta, content })) = do
             songMeta meta
-            songContent content
+            songContent true content
         render (Left e) = text e
 
 newSongForm :: Boolean -> String -> Html Action
@@ -153,7 +155,7 @@ updateSongPage id (State { io: IOState { updateSong } }) =
     where
         render (Right (Song { meta, content })) = do
             songMeta meta
-            songContent content
+            songContent true content
         render (Left e) = text e
 
 updateSongForm :: Int -> Boolean -> String -> Html Action
@@ -182,14 +184,14 @@ songPageContent :: IOState -> UIState -> Html Action
 songPageContent (IOState { song: Empty }) _ = main # text ""
 songPageContent (IOState { song: Loading }) _ = main # text "Loading Song"
 songPageContent (IOState { song: (LoadError e) }) _ = main # text e
-songPageContent (IOState { song: Loaded (Song { meta, content })}) (UIState { searchQuery, songUIState: SongUIState { showSongMeta, showDuplicatedChorus } } ) =
+songPageContent (IOState { song: Loaded (Song { meta, content })}) (UIState { searchQuery, songUIState: SongUIState { showSongMeta, showDuplicatedChorus, showSongSectionName } } ) =
     main (hideDuplicatedChorusClass (not showDuplicatedChorus)) [content' showSongMeta]
     where
         content' true = do
             songMeta meta
-            songContent content
+            songContent showSongSectionName content
         content' false = do
-            songContent content
+            songContent showSongSectionName content
         hideDuplicatedChorusClass true = [ className "hide-duplicated-chorus" ]
         hideDuplicatedChorusClass false = []
 
@@ -200,13 +202,17 @@ songMeta (SongMeta { title, artist, album }) =
        h2 # text artist
        h3 # text album
 
-songContent :: SongContent -> Html Action
-songContent (SongContent s) = article [] (songSection <$> s)
+songContent :: Boolean -> SongContent -> Html Action
+songContent showSongSectionName (SongContent s) = article [] ((songSection showSongSectionName) <$> s)
 
-songSection :: SongSection -> Html Action
-songSection (SongSection {name, lyrics}) =
+songSection :: Boolean -> SongSection -> Html Action
+songSection true (SongSection {name, lyrics}) =
     section ! data_ "section" (serializeSongSectionName name) # do
         h4 # text (serializeSongSectionName name)
+        p [] (songLyric <$> lyrics)
+
+songSection false (SongSection {name, lyrics}) =
+    section ! data_ "section" (serializeSongSectionName name) # do
         p [] (songLyric <$> lyrics)
 
 songLyric :: SongLyric -> Html Action

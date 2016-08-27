@@ -102,7 +102,7 @@ getUpdateSongPageHandler c = do
                         newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
                         updateSong: s'
                     },
-                    ui: UIState { searchQuery: "", songUIState: SongUIState { showSongMeta: true, showDuplicatedChorus: true } }
+                    ui: UIState { searchQuery: "", songUIState: SongUIState { showSongMeta: true, showDuplicatedChorus: true, showSongSectionName: true } }
                 })
             Nothing -> nextThrow $ error "Id is not a valid integer"
 
@@ -195,7 +195,7 @@ getNewSongPageHandler = do
             newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
             updateSong: Tuple (serializeSong exampleSong) (Right exampleSong)
         },
-        ui: UIState { searchQuery: "", songUIState: SongUIState { showSongMeta: true, showDuplicatedChorus: true } }
+        ui: UIState { searchQuery: "", songUIState: SongUIState { showSongMeta: true, showDuplicatedChorus: true, showSongSectionName: true } }
     })
 
 postNewSongApiHandler :: forall e. ConnectionInfo -> HandlerM ( express :: EXPRESS, db :: DB, console :: CONSOLE | e ) Unit
@@ -268,7 +268,7 @@ searchPageHandler c = do
                          newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
                          updateSong: Tuple (serializeSong exampleSong) (Right exampleSong)
                      },
-                     ui: UIState { searchQuery: maybe "" id q, songUIState: SongUIState { showSongMeta: true, showDuplicatedChorus: true } }
+                     ui: UIState { searchQuery: maybe "" id q, songUIState: SongUIState { showSongMeta: true, showDuplicatedChorus: true, showSongSectionName: true } }
                   })
       Nothing -> nextThrow $ error "missing query param"
 
@@ -277,6 +277,7 @@ songPageHandler c = do
     idParam <- getRouteParam "id"
     hideSongMeta <- getQueryParam "hide-song-meta"
     hideDuplicatedChords <- getQueryParam "hide-duplicated-chords"
+    hideSongSectionName <- getQueryParam "hide-song-section-name"
     case idParam of
       Nothing -> nextThrow $ error "Id is required"
       Just id ->
@@ -291,7 +292,7 @@ songPageHandler c = do
                     newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
                     updateSong: Tuple (serializeSong exampleSong) (Right exampleSong)
                 },
-                ui: UIState { searchQuery: "", songUIState: SongUIState { showSongMeta: isNothing hideSongMeta, showDuplicatedChorus: isNothing hideDuplicatedChords } }
+                ui: UIState { searchQuery: "", songUIState: SongUIState { showSongMeta: isNothing hideSongMeta, showDuplicatedChorus: isNothing hideDuplicatedChords, showSongSectionName: isNothing hideSongSectionName } }
             })
           Nothing -> nextThrow $ error "Id is not a valid integer"
 
