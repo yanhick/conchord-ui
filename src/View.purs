@@ -8,12 +8,12 @@ import Pux.Html (Html, section, div, main, p, text, header, article
                 , h1, h2, h3, h4, h5, h6, span, i, nav, li, ul, form
                 , input, textarea, aside, (#), (!), bind, label, footer)
 import Pux.Html.Events (onSubmit, onChange, onClick)
-import Pux.Html.Attributes (id_, htmlFor, checked, name, placeholder, type_, value, data_, action, method, className, disabled)
+import Pux.Html.Attributes (id_, htmlFor, checked, name, placeholder, type_, value, data_, action, method, className, disabled, formAction)
 import Pux.Router (link)
 
 import Model (DBSong(DBSong), Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(ChordAndLyric, OnlyChord, OnlyLyric), Year(Year), serializeSongSectionName, ChordPlacement(InsideWord, BetweenWord))
 import Action (Action(UIAction, PageView, IOAction), UIAction(ToggleShowSongSectionName, ToggleShowDuplicatedChorus, ToggleShowSongMeta, MkSongFullscreen, SearchChange, NewSongChange, UpdateSongChange), IOAction(SubmitNewSong, SubmitUpdateSong, SubmitDeleteSong))
-import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage, NewSongPage, UpdateSongPage))
+import Route (Route (SongPage, SongPageZen, SearchResultPage, HomePage, NotFoundPage, NewSongPage, UpdateSongPage))
 import App (State(State), AsyncData(Loading, Loaded, Empty, LoadError), SongUIState(SongUIState), UIState(UIState), IOState(IOState))
 
 
@@ -24,6 +24,7 @@ view state@(State { currentPage } ) = div [] [ page currentPage state ]
 
 page :: Route -> State -> Html Action
 page (SongPage id) (State { ui, io, currentPage }) = songPage id io ui
+page (SongPageZen id) (State { ui, io, currentPage }) = songPageZen id io ui
 page (SearchResultPage _) state = searchResultPage state
 page HomePage state = homePage state
 page NewSongPage state = newSongPage state
@@ -71,6 +72,7 @@ songPageHeader id (UIState { searchQuery, songUIState: SongUIState { showSongMet
                 input [ name "hide-song-section-name", type_ "checkbox", id_ "song-section-name-toggle", checked $ not showSongSectionName, onChange (\_ -> UIAction ToggleShowSongSectionName) ] []
                 label [ htmlFor "song-section-name-toggle" ] [ text "hide song section name" ]
                 input [ type_ "submit", value "update" ] []
+                input [ type_ "submit", value "zen mode", formAction ("/song-zen/" <> show id) ] []
 
 --- NotFound view
 
@@ -179,6 +181,11 @@ songPage id io ui =
         songPageHeader id ui
         songPageContent io ui
         songPageFooter id
+
+songPageZen :: Int -> IOState -> UIState -> Html Action
+songPageZen id io ui =
+    div # do
+        songPageContent io ui
 
 songPageContent :: IOState -> UIState -> Html Action
 songPageContent (IOState { song: Empty }) _ = main # text ""

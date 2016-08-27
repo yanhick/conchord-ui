@@ -28,7 +28,7 @@ import Signal.Channel (CHANNEL())
 
 import Pux (renderToString, start)
 import Signal ((~>))
-import Route (Route(SearchResultPage, SongPage, NewSongPage, UpdateSongPage))
+import Route (Route(SearchResultPage, SongPage, SongPageZen, NewSongPage, UpdateSongPage))
 import App (init, AsyncData(LoadError, Loaded, Empty), State(State), UIState(UIState), IOState(IOState), SongUIState(SongUIState))
 import Action (update)
 import View (view)
@@ -67,6 +67,7 @@ appSetup c = do
     get "/update/:id"      (getUpdateSongPageHandler c)
     post "/update/:id"      (putUpdateSongPageHandler c)
     delete "/api/song/:id" (deleteSongPageHandler c)
+    get "/song-zen/:id"    (songZenPageHandler c)
     get "/song/:id"    (songPageHandler c)
     get "/:file"       fileHandler
     get "/"            homePageHandler
@@ -286,6 +287,30 @@ songPageHandler c = do
             s <- liftAff $ getSongById c validId
             send $ index (State {
                 currentPage: (SongPage validId),
+                io: IOState {
+                    searchResults: Empty,
+                    song: either (LoadError <<< show) Loaded $ runParser parseSong s,
+                    newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
+                    updateSong: Tuple (serializeSong exampleSong) (Right exampleSong)
+                },
+                ui: UIState { searchQuery: "", songUIState: SongUIState { showSongMeta: isNothing hideSongMeta, showDuplicatedChorus: isNothing hideDuplicatedChords, showSongSectionName: isNothing hideSongSectionName } }
+            })
+          Nothing -> nextThrow $ error "Id is not a valid integer"
+
+songZenPageHandler :: forall e. ConnectionInfo -> HandlerM ( express :: EXPRESS, db :: DB, console :: CONSOLE | e ) Unit
+songZenPageHandler c = do
+    idParam <- getRouteParam "id"
+    hideSongMeta <- getQueryParam "hide-song-meta"
+    hideDuplicatedChords <- getQueryParam "hide-duplicated-chords"
+    hideSongSectionName <- getQueryParam "hide-song-section-name"
+    case idParam of
+      Nothing -> nextThrow $ error "Id is required"
+      Just id ->
+        case fromString id of
+          Just validId -> do
+            s <- liftAff $ getSongById c validId
+            send $ index (State {
+                currentPage: (SongPageZen validId),
                 io: IOState {
                     searchResults: Empty,
                     song: either (LoadError <<< show) Loaded $ runParser parseSong s,
