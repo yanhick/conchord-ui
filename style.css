@@ -13,17 +13,26 @@ h1, h2 {
     color: black;
 }
 
+.site {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+}
+
+.site main {
+    flex: 1;
+}
+
 nav {
     padding: 0 1rem;
     display: flex;
     flex-flow: row wrap;
-    border-right: solid 0.25rem #222222;
-    border-left: solid 0.25rem #222222;
     width: 100%;
+    background: black;
 }
 
 nav form {
-    padding-right: 1rem;
+    display: flex;
 }
 
 nav a, input[type=submit], input[type=button], input[type=checkbox] + label {

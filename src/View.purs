@@ -1,12 +1,12 @@
 module View where
 
-import Prelude (($), (<$>), show, const, (<>), not)
+import Prelude (($), (<$>), show, const, (<>), not, pure)
 import Data.Tuple (fst, snd)
 import Data.Either (Either(Left, Right), isLeft)
 
 import Pux.Html (Html, section, div, main, p, text, header, article
                 , h1, h2, h3, h4, h5, h6, span, i, nav, li, ul, form
-                , input, textarea, aside, (#), (!), bind, label, footer)
+                , input, textarea, aside, (#), (##), (!), bind, label, footer)
 import Pux.Html.Events (onSubmit, onChange, onClick)
 import Pux.Html.Attributes (id_, htmlFor, checked, name, placeholder, type_, value, data_, action, method, className, disabled, formAction)
 import Pux.Router (link)
@@ -23,13 +23,16 @@ view state@(State { currentPage } ) = div [] [ page currentPage state ]
 --- App Routing
 
 page :: Route -> State -> Html Action
-page (SongPage id) (State { ui, io, currentPage }) = songPage id io ui
-page (SongPageZen id) (State { ui, io, currentPage }) = songPageZen id io ui
-page (SearchResultPage _) state = searchResultPage state
-page HomePage state = homePage state
-page NewSongPage state = newSongPage state
-page (UpdateSongPage id) state = updateSongPage id state
-page NotFoundPage _ = notFoundPage
+page r s = do
+    div ! className "site" ## page' r s
+    where
+        page' (SongPage id) (State { ui, io, currentPage }) = songPage id io ui
+        page' (SongPageZen id) (State { ui, io, currentPage }) = songPageZen id io ui
+        page' (SearchResultPage _) state = searchResultPage state
+        page' HomePage state = homePage state
+        page' NewSongPage state = newSongPage state
+        page' (UpdateSongPage id) state = updateSongPage id state
+        page' NotFoundPage _ = notFoundPage
 
 --- Common
 
@@ -75,25 +78,23 @@ songPageHeader id (UIState { searchQuery, songUIState: SongUIState { showSongMet
 
 --- NotFound view
 
-notFoundPage :: Html Action
-notFoundPage =
-    div # do
-        text "not found"
+notFoundPage :: Array (Html Action)
+notFoundPage = pure $ text "not found"
 
 --- Search Views
 
-homePage :: State -> Html Action
-homePage (State { io, ui }) =
-    div # do
-        header_ io ui
+homePage :: State -> Array (Html Action)
+homePage (State { io, ui }) = [
+        header_ io ui,
         footer_
+    ]
 
-searchResultPage :: State -> Html Action
-searchResultPage (State { io, ui }) =
-    div # do
-        header_ io ui
-        searchResultPageContent io ui
+searchResultPage :: State -> Array (Html Action)
+searchResultPage (State { io, ui }) = [
+        header_ io ui,
+        searchResultPageContent io ui,
         footer_
+    ]
 
 searchResultPageContent :: IOState -> UIState -> Html Action
 searchResultPageContent (IOState { searchResults: Empty }) _ = ul # text ""
@@ -124,13 +125,13 @@ newSongPageHeader = do
     nav # do
         h1 # text "Add a new song"
 
-newSongPage :: State -> Html Action
+newSongPage :: State -> Array (Html Action)
 newSongPage (State { io: IOState { newSong }, ui }) =
-    div ! className "editor" # do
-        aside # do
-            newSongForm (isLeft (snd newSong)) (fst newSong)
-        main # do
-            render $ snd newSong
+        pure $ div ! className "editor" # do
+            aside # do
+                newSongForm (isLeft (snd newSong)) (fst newSong)
+            main # do
+                render $ snd newSong
     where
         render (Right (Song { meta, content })) = do
             songMeta meta
@@ -146,9 +147,9 @@ newSongForm disable song =
 
 --- Update Song views
 
-updateSongPage :: Int -> State -> Html Action
+updateSongPage :: Int -> State -> Array (Html Action)
 updateSongPage id (State { io: IOState { updateSong } }) =
-    div ! className "editor" # do
+    pure $ div ! className "editor" # do
         aside # do
             updateSongForm id (isLeft (snd updateSong)) (fst updateSong)
         main # do
@@ -174,17 +175,17 @@ deleteSongForm id =
 
 --- Song Views
 
-songPage :: Int -> IOState -> UIState -> Html Action
-songPage id io ui =
-    div # do
-        songPageHeader id ui
-        songPageContent io ui
+songPage :: Int -> IOState -> UIState -> Array (Html Action)
+songPage id io ui = [
+        songPageHeader id ui,
+        songPageContent io ui,
         songPageFooter id
+    ]
 
-songPageZen :: Int -> IOState -> UIState -> Html Action
-songPageZen id io ui =
-    div # do
+songPageZen :: Int -> IOState -> UIState -> Array (Html Action)
+songPageZen id io ui = [
         songPageContent io ui
+    ]
 
 songPageContent :: IOState -> UIState -> Html Action
 songPageContent (IOState { song: Empty }) _ = main # text ""
