@@ -65,7 +65,6 @@ songPageHeader :: Int -> UIState -> Html Action
 songPageHeader id (UIState { searchQuery, songUIState: SongUIState { showSongMeta, showDuplicatedChorus, showSongSectionName } } ) =
     header # do
         nav # do
-            searchForm searchQuery
             form ! action ("/song/" <> show id) ! method "GET" # do
                 input [ name "hide-song-meta", type_ "checkbox", id_ "song-meta-toggle", checked $ not showSongMeta, onChange (\_ -> UIAction ToggleShowSongMeta) ] []
                 label [ htmlFor "song-meta-toggle" ] [ text "hide song meta" ]
@@ -74,7 +73,7 @@ songPageHeader id (UIState { searchQuery, songUIState: SongUIState { showSongMet
                 input [ name "hide-song-section-name", type_ "checkbox", id_ "song-section-name-toggle", checked $ not showSongSectionName, onChange (\_ -> UIAction ToggleShowSongSectionName) ] []
                 label [ htmlFor "song-section-name-toggle" ] [ text "hide song section name" ]
                 input [ type_ "submit", value "update" ] []
-                input [ type_ "submit", value "zen mode", formAction ("/song-zen/" <> show id) ] []
+                input [ type_ "submit", value "hide menus", formAction ("/song-zen/" <> show id) ] []
 
 --- NotFound view
 

@@ -20,11 +20,10 @@ body {
 }
 
 nav {
-    padding: 0.25rem;
     display: flex;
     flex-flow: row wrap;
     width: 100%;
-    background: black;
+    background: #222;
 }
 
 nav form {
@@ -34,50 +33,43 @@ nav form {
 nav a, input[type=submit], input[type=button], input[type=checkbox] + label {
     background: none;
     display: block;
-    height: 2.5rem;
-    font-size: 1rem;
+    font-size: 0.75rem;
     border: none;
-    vertical-align: middle;
     text-decoration: none;
     color: white;
-    margin: 0 0.25rem;
     text-align: center;
     text-transform: uppercase;
-    padding: 1rem;
-    padding-top: 0.5rem;
+    padding: 0.75rem;
     outline: none;
     cursor: pointer;
 }
 
 input[type=submit] {
-    border: solid 1px #1c5d99;
+    border-left: solid 1px #1c5d99;
     color: #1c5d99;
-    text-shadow: 1px 1px 0 #222;
 }
 
 form[method=DELETE] input[type=submit] {
-    box-shadow: 0 0.25em 0 red;
+    color: #f93943;
     background: none;
     border: none;
 }
 
 input[type=checkbox]:checked + label {
-    box-shadow: 0 0.25em 0 #1c5d99;
     color: #1c5d99;
 }
 
 
-nav a:hover, input[type=submit]:hover, input[type=button]:hover,
-nav a:focus, input[type=submit]:focus, input[type=button]:focus,
+nav a:hover, form input[type=submit]:hover, input[type=button]:hover,
+nav a:focus, form input[type=submit]:focus, input[type=button]:focus,
 input[type=checkbox] + label:hover, input[type=checkbox] + label:focus {
     background: #1c5d99;
     color: white;
 }
 
-nav a:active, input[type=submit]:active,
+nav a:active, form input[type=submit]:active,
 input[type=button]:active, input[type=checkbox] + label:active {
     background: #bbcde5;
-    box-shadow: 0 0.25em 0 white;
     color: white;
 }
 
@@ -205,6 +197,7 @@ main article section i:after {
     display: inline-block;
     width: 0;
     top: -1.25rem;
+    color: #1c5d99;
 }
 
 main article section span:not([data-lyrics]) i:after {
