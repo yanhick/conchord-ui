@@ -9,10 +9,6 @@ body {
     line-height: 1.5;
 }
 
-h1, h2 {
-    color: black;
-}
-
 .site {
     display: flex;
     min-height: 100vh;
@@ -54,12 +50,15 @@ nav a, input[type=submit], input[type=button], input[type=checkbox] + label {
 }
 
 input[type=submit] {
-    background: grey;
+    border: solid 1px #1c5d99;
+    color: #1c5d99;
+    text-shadow: 1px 1px 0 #222;
 }
 
 form[method=DELETE] input[type=submit] {
     box-shadow: 0 0.25em 0 red;
     background: none;
+    border: none;
 }
 
 input[type=checkbox]:checked + label {
@@ -138,15 +137,40 @@ input[type="search"] {
     border: solid 1px #222222;
 }
 
+main {
+    padding: 1rem;
+    font-family: 'Georgia', serif;
+}
+
 main header {
-    text-align: center;
+    line-height: 1.5;
+    text-align: right;
+    border-bottom: solid 1px #222;
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+main header h1, main header h2, main header h3 {
+    color: #222;
+    font-size: 1.5rem;
+    font-weight: normal;
+}
+
+main header h2, main header h3 {
+    font-size: 1rem;
+    display: inline;
+}
+
+main header h2::after {
+    content: ' - ';
 }
 
 main.hide-duplicated-chorus section[data-section=Chorus] ~ section[data-section=Chorus] p {
     display: none;
 }
 
-main article {
+
+main {
     padding: 1rem;
     margin: 1rem;
     column-width: 30rem;
