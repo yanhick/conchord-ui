@@ -30,6 +30,20 @@ nav form {
     display: flex;
 }
 
+nav a[href="/"] {
+    background: white;
+    color: #222;
+}
+
+footer nav {
+    background: white;
+    border-top: solid 1px #222;
+}
+
+footer nav a {
+    color: #222;
+}
+
 nav a, input[type=submit], input[type=button], input[type=checkbox] + label {
     background: none;
     display: block;

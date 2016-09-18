@@ -278,6 +278,7 @@ songPageHandler c = do
     hideSongMeta <- getQueryParam "hide-song-meta"
     hideDuplicatedChords <- getQueryParam "hide-duplicated-chords"
     hideSongSectionName <- getQueryParam "hide-song-section-name"
+    hideMenus <- getQueryParam "hide-menus"
     case idParam of
       Nothing -> nextThrow $ error "Id is required"
       Just id ->
@@ -292,7 +293,7 @@ songPageHandler c = do
                     newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
                     updateSong: Tuple (serializeSong exampleSong) (Right exampleSong)
                 },
-                ui: UIState { searchQuery: "", songUIState: SongUIState { showMenus: true, showSongMeta: isNothing hideSongMeta, showDuplicatedChorus: isNothing hideDuplicatedChords, showSongSectionName: isNothing hideSongSectionName } }
+                ui: UIState { searchQuery: "", songUIState: SongUIState { showMenus: isNothing hideMenus, showSongMeta: isNothing hideSongMeta, showDuplicatedChorus: isNothing hideDuplicatedChords, showSongSectionName: isNothing hideSongSectionName } }
             })
           Nothing -> nextThrow $ error "Id is not a valid integer"
 

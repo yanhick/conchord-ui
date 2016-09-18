@@ -64,6 +64,8 @@ songPageHeader :: Int -> UIState -> Html Action
 songPageHeader id (UIState { searchQuery, songUIState: SongUIState { showSongMeta, showDuplicatedChorus, showSongSectionName, showMenus } } ) =
     header # do
         nav # do
+            link ("/") # do
+                text "<<"
             form ! action ("/song/" <> show id) ! method "GET" # do
                 input [ name "hide-song-meta", type_ "checkbox", id_ "song-meta-toggle", checked $ not showSongMeta, onChange (\_ -> UIAction ToggleShowSongMeta) ] []
                 label [ htmlFor "song-meta-toggle" ] [ text "hide song meta" ]
