@@ -129,6 +129,14 @@ input[type="search"] {
     border: solid 1px #222222;
 }
 
+.js header nav input[type="submit"] {
+    display: none;
+}
+
+header nav.minimal {
+    background: none;
+}
+
 main {
     padding: 1rem;
     font-family: 'Georgia', serif;

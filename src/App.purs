@@ -31,7 +31,8 @@ newtype UIState = UIState {
 newtype SongUIState = SongUIState {
     showSongMeta :: Boolean,
     showDuplicatedChorus :: Boolean,
-    showSongSectionName :: Boolean
+    showSongSectionName :: Boolean,
+    showMenus :: Boolean
 }
 
 type Error = String
@@ -54,7 +55,8 @@ init = State {
       songUIState: SongUIState {
           showSongMeta: true,
           showDuplicatedChorus: true,
-          showSongSectionName: true
+          showSongSectionName: true,
+          showMenus: true
       }
   }
   , io: IOState {

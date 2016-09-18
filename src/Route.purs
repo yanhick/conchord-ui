@@ -16,7 +16,7 @@ import Data.Foreign.Generic (readGeneric, defaultOptions)
 import Pux.Router (router, lit, int, end, param)
 
 
-data Route = HomePage | SearchResultPage String | SongPage Int | NewSongPage | UpdateSongPage Int | NotFoundPage | SongPageZen Int
+data Route = HomePage | SearchResultPage String | SongPage Int | NewSongPage | UpdateSongPage Int | NotFoundPage
 
 derive instance genericRoute :: Generic Route
 
@@ -31,8 +31,6 @@ match url = fromMaybe NotFoundPage $ router url $
             HomePage <$ end
             <|>
             SongPage <$> (lit "song" *> int) <* end
-            <|>
-            SongPageZen <$> (lit "song-zen" *> int) <* end
             <|>
             NewSongPage <$ (lit "new") <* end
             <|>

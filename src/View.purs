@@ -12,8 +12,8 @@ import Pux.Html.Attributes (id_, htmlFor, checked, name, placeholder, type_, val
 import Pux.Router (link)
 
 import Model (DBSong(DBSong), Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(ChordAndLyric, OnlyChord, OnlyLyric), Year(Year), serializeSongSectionName, ChordPlacement(InsideWord, BetweenWord))
-import Action (Action(UIAction, PageView, IOAction), UIAction(ToggleShowSongSectionName, ToggleShowDuplicatedChorus, ToggleShowSongMeta, SearchChange, NewSongChange, UpdateSongChange), IOAction(SubmitNewSong, SubmitUpdateSong, SubmitDeleteSong))
-import Route (Route (SongPage, SongPageZen, SearchResultPage, HomePage, NotFoundPage, NewSongPage, UpdateSongPage))
+import Action (Action(UIAction, PageView, IOAction), UIAction(ToggleShowMenus, ToggleShowSongSectionName, ToggleShowDuplicatedChorus, ToggleShowSongMeta, SearchChange, NewSongChange, UpdateSongChange), IOAction(SubmitNewSong, SubmitUpdateSong, SubmitDeleteSong))
+import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage, NewSongPage, UpdateSongPage))
 import App (State(State), AsyncData(Loading, Loaded, Empty, LoadError), SongUIState(SongUIState), UIState(UIState), IOState(IOState))
 
 
@@ -27,7 +27,6 @@ page r s = do
     div ! className "site" ## page' r s
     where
         page' (SongPage id) (State { ui, io, currentPage }) = songPage id io ui
-        page' (SongPageZen id) (State { ui, io, currentPage }) = songPageZen id io ui
         page' (SearchResultPage _) state = searchResultPage state
         page' HomePage state = homePage state
         page' NewSongPage state = newSongPage state
@@ -62,7 +61,7 @@ songPageFooter id =
             deleteSongForm id
 
 songPageHeader :: Int -> UIState -> Html Action
-songPageHeader id (UIState { searchQuery, songUIState: SongUIState { showSongMeta, showDuplicatedChorus, showSongSectionName } } ) =
+songPageHeader id (UIState { searchQuery, songUIState: SongUIState { showSongMeta, showDuplicatedChorus, showSongSectionName, showMenus } } ) =
     header # do
         nav # do
             form ! action ("/song/" <> show id) ! method "GET" # do
@@ -72,8 +71,18 @@ songPageHeader id (UIState { searchQuery, songUIState: SongUIState { showSongMet
                 label [ htmlFor "duplicated-chords-toggle" ] [ text "hide song duplicated chorus" ]
                 input [ name "hide-song-section-name", type_ "checkbox", id_ "song-section-name-toggle", checked $ not showSongSectionName, onChange (\_ -> UIAction ToggleShowSongSectionName) ] []
                 label [ htmlFor "song-section-name-toggle" ] [ text "hide song section name" ]
+                input [ name "hide-menus", type_ "checkbox", id_ "menus-toggle", checked $ not showMenus, onChange (\_ -> UIAction ToggleShowMenus) ] []
+                label [ htmlFor "menus-toggle" ] [ text "hide menus" ]
                 input [ type_ "submit", value "update" ] []
-                input [ type_ "submit", value "hide menus", formAction ("/song-zen/" <> show id) ] []
+
+songPageMinimalHeader :: Int -> UIState -> Html Action
+songPageMinimalHeader id (UIState { searchQuery, songUIState: SongUIState { showSongMeta, showDuplicatedChorus, showSongSectionName, showMenus } } ) =
+    header # do
+        nav ! className "minimal" # do
+            form ! action ("/song/" <> show id) ! method "GET" # do
+                input [ name "hide-menus", type_ "checkbox", id_ "menus-toggle", checked $ not showMenus, onChange (\_ -> UIAction ToggleShowMenus) ] []
+                label [ htmlFor "menus-toggle" ] [ text "show menus" ]
+                input [ type_ "submit", value "update" ] []
 
 --- NotFound view
 
@@ -175,16 +184,17 @@ deleteSongForm id =
 --- Song Views
 
 songPage :: Int -> IOState -> UIState -> Array (Html Action)
-songPage id io ui = [
-        songPageHeader id ui,
-        songPageContent io ui,
-        songPageFooter id
-    ]
-
-songPageZen :: Int -> IOState -> UIState -> Array (Html Action)
-songPageZen id io ui = [
-        songPageContent io ui
-    ]
+songPage id io ui@(UIState { songUIState: SongUIState { showMenus } }) = songPage' showMenus
+    where
+        songPage' true = [
+            songPageHeader id ui,
+            songPageContent io ui,
+            songPageFooter id
+        ]
+        songPage' false = [
+            songPageMinimalHeader id ui,
+            songPageContent io ui
+        ]
 
 songPageContent :: IOState -> UIState -> Html Action
 songPageContent (IOState { song: Empty }) _ = main # text ""

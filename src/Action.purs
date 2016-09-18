@@ -42,7 +42,8 @@ data UIAction =
     UpdateSongChange FormEvent |
     ToggleShowSongMeta |
     ToggleShowDuplicatedChorus |
-    ToggleShowSongSectionName
+    ToggleShowSongSectionName |
+    ToggleShowMenus
 
 data IOAction =
     RequestSong Int |
@@ -105,6 +106,9 @@ updateUI ToggleShowDuplicatedChorus (State state@{ ui: UIState ui@{ songUIState:
 
 updateUI ToggleShowSongSectionName (State state@{ ui: UIState ui@{ songUIState: SongUIState songUI@{ showSongSectionName } } }) =
     noEffects $ State state { ui = UIState ui { songUIState = SongUIState songUI { showSongSectionName = not showSongSectionName } } }
+
+updateUI ToggleShowMenus (State state@{ ui: UIState ui@{ songUIState: SongUIState songUI@{ showMenus } } }) =
+    noEffects $ State state { ui = UIState ui { songUIState = SongUIState songUI { showMenus = not showMenus } } }
 
 --- IO Actions
 
