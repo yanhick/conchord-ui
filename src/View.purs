@@ -1,5 +1,6 @@
 module View where
 
+import Data.Foldable (foldMap)
 import Prelude (($), (<$>), show, const, (<>), not, pure)
 import Data.Tuple (fst, snd)
 import Data.Either (Either(Left, Right), isLeft)
@@ -116,11 +117,18 @@ searchResultPageContent (IOState { searchResults: (LoadError e) }) _ = ul # text
 
 
 searchResult :: DBSong -> Html Action
-searchResult (DBSong { id, song: Song { meta: SongMeta { title, artist, album, year: Year(y) } } }) =
+searchResult (DBSong { id, song: Song { meta: SongMeta { title, artist, album, year: Year(y) }, content: SongContent (content) } }) =
     li # do
         link ("/song/" <> id) # do
             h1 # text title
             h2 # text artist
+            p  # text (content' content)
+    where
+        content' = foldMap (\(SongSection {lyrics}) -> foldMap serializeLyric lyrics)
+        serializeLyric (ChordAndLyric _ l) = l
+        serializeLyric (OnlyLyric l) = l
+        serializeLyric (OnlyChord _) = ""
+
 
 searchForm :: String -> Html Action
 searchForm q =

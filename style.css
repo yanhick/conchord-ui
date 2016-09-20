@@ -27,6 +27,12 @@ nav {
     background: #222;
 }
 
+ul h1, ul h2 {
+    background: #222;
+    color: white;
+    padding: 0.5rem;
+}
+
 nav form {
     display: flex;
 }
@@ -134,7 +140,14 @@ ul li a {
     padding: 1.5rem;
     color: #222;
     outline: none;
-    border-bottom: solid 1px #222;
+}
+
+ul li a p {
+    text-overflow: ellipsis;
+    width: 200px;
+    height: 100px;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 ul li a:hover, ul li a:focus {
