@@ -40,8 +40,7 @@ type ToolBar = Html Action
 header_:: IOState -> UIState -> Html Action
 header_ (IOState { searchResults }) (UIState { searchQuery }) =
     header # do
-        nav # do
-            searchForm searchQuery
+        searchForm searchQuery
 
 footer_ :: Html Action
 footer_ =
@@ -96,6 +95,7 @@ notFoundPage = pure $ text "not found"
 homePage :: State -> Array (Html Action)
 homePage (State { io, ui }) = [
         header_ io ui,
+        main [] [],
         footer_
     ]
 
@@ -108,7 +108,9 @@ searchResultPage (State { io, ui }) = [
 
 searchResultPageContent :: IOState -> UIState -> Html Action
 searchResultPageContent (IOState { searchResults: Empty }) _ = ul # text ""
-searchResultPageContent (IOState { searchResults: Loading }) _ = ul # text "Loading..."
+searchResultPageContent (IOState { searchResults: Loading }) _ = ul # do
+    h1 # do
+        text "LOADING..."
 searchResultPageContent (IOState { searchResults: Loaded s }) _ = ul [] (searchResult <$> s)
 searchResultPageContent (IOState { searchResults: (LoadError e) }) _ = ul # text e
 
@@ -117,10 +119,8 @@ searchResult :: DBSong -> Html Action
 searchResult (DBSong { id, song: Song { meta: SongMeta { title, artist, album, year: Year(y) } } }) =
     li # do
         link ("/song/" <> id) # do
-            h3 # text title
-            h4 # text artist
-            h5 # text album
-            h6 # text (show y)
+            h1 # text title
+            h2 # text artist
 
 searchForm :: String -> Html Action
 searchForm q =
@@ -200,7 +200,9 @@ songPage id io ui@(UIState { songUIState: SongUIState { showMenus } }) = songPag
 
 songPageContent :: IOState -> UIState -> Html Action
 songPageContent (IOState { song: Empty }) _ = main # text ""
-songPageContent (IOState { song: Loading }) _ = main # text "Loading Song"
+songPageContent (IOState { song: Loading }) _ = main # do
+    h1 # do
+        text "LOADING..."
 songPageContent (IOState { song: (LoadError e) }) _ = main # text e
 songPageContent (IOState { song: Loaded (Song { meta, content })}) (UIState { searchQuery, songUIState: SongUIState { showSongMeta, showDuplicatedChorus, showSongSectionName } } ) =
     main (hideDuplicatedChorusClass (not showDuplicatedChorus)) [content' showSongMeta]

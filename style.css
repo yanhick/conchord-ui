@@ -7,6 +7,7 @@
 body {
     font-family: "Helvetica", "Arial", sans-serif;
     line-height: 1.5;
+    color: #222;
 }
 
 .site {
@@ -15,7 +16,7 @@ body {
     flex-direction: column;
 }
 
-.site main {
+.site main, .site ul {
     flex: 1;
 }
 
@@ -28,6 +29,12 @@ nav {
 
 nav form {
     display: flex;
+}
+
+form[action="/search"] {
+    display: flex;
+    width: 100vw;
+    justify-content: center;
 }
 
 nav a[href="/"] {
@@ -104,13 +111,16 @@ input[type=checkbox] {
 
 ul {
     list-style: none;
-    padding: 1rem;
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
+}
+
+main ul {
 }
 
 ul li {
-    width: 30rem;
+    float: left;
 }
 
 ul li i {
@@ -121,13 +131,15 @@ ul li a {
     display: inline-block;
     text-decoration: none;
     margin: 1rem;
-    padding: 0.5rem;
+    padding: 1.5rem;
     color: #222;
     outline: none;
+    border-bottom: solid 1px #222;
 }
 
 ul li a:hover, ul li a:focus {
-    box-shadow: -0.25em -0.25em 0 #222222;
+    color: white;
+    background: #222;
 }
 
 ul li a:active {
@@ -135,12 +147,14 @@ ul li a:active {
 }
 
 input[type="search"] {
+    display: block;
+    width: 50vw;
     font-size: 1rem;
     border: none;
     border-radius: 1.5rem ;
-    padding-left: 1rem;
-    width: 100%;
+    padding: 0.75rem;
     border: solid 1px #222222;
+    margin: 2rem;
 }
 
 .js header nav input[type="submit"] {
@@ -151,7 +165,7 @@ header nav.minimal {
     background: none;
 }
 
-main {
+main, ul {
     padding: 1rem;
     font-family: 'Georgia', serif;
 }
@@ -164,18 +178,17 @@ main header {
     margin-bottom: 0.75rem;
 }
 
-main header h1, main header h2, main header h3 {
-    color: #222;
+h1, h2, h3 {
     font-size: 1.5rem;
     font-weight: normal;
 }
 
-main header h2, main header h3 {
+h2, h3 {
     font-size: 1rem;
     display: inline;
 }
 
-main header h2::after {
+main h2::after {
     content: ' - ';
 }
 
@@ -208,6 +221,7 @@ main article section h4 {
 }
 
 main article section p {
+    color: black;
     margin-left: 1rem;
     text-align: justify;
 }
