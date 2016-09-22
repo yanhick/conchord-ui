@@ -33,6 +33,10 @@ ul h1, ul h2 {
     padding: 0.5rem;
 }
 
+ul h1 {
+    margin-bottom: 0.5rem;
+}
+
 nav form {
     display: flex;
 }
@@ -127,10 +131,16 @@ main ul {
 
 ul li {
     float: left;
+    max-width: 25vw;
 }
 
 ul li i {
-    text-align: justify;
+    display: block;
+    padding: 1.5rem 0;
+}
+
+ul li i:after {
+    content: '...';
 }
 
 ul li a {
@@ -140,14 +150,6 @@ ul li a {
     padding: 1.5rem;
     color: #222;
     outline: none;
-}
-
-ul li a p {
-    text-overflow: ellipsis;
-    width: 200px;
-    height: 100px;
-    white-space: nowrap;
-    overflow: hidden;
 }
 
 ul li a:hover, ul li a:focus {

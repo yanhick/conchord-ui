@@ -1,5 +1,6 @@
 module View where
 
+import Data.String (take)
 import Data.Foldable (foldMap)
 import Prelude (($), (<$>), show, const, (<>), not, pure)
 import Data.Tuple (fst, snd)
@@ -122,9 +123,9 @@ searchResult (DBSong { id, song: Song { meta: SongMeta { title, artist, album, y
         link ("/song/" <> id) # do
             h1 # text title
             h2 # text artist
-            p  # text (content' content)
+            i  # text (content' content)
     where
-        content' = foldMap (\(SongSection {lyrics}) -> foldMap serializeLyric lyrics)
+        content' c = take 200 (foldMap (\(SongSection {lyrics}) -> foldMap serializeLyric lyrics) c)
         serializeLyric (ChordAndLyric _ l) = l
         serializeLyric (OnlyLyric l) = l
         serializeLyric (OnlyChord _) = ""
