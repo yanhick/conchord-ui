@@ -364,9 +364,10 @@ index s =
     <!doctype html>
     <html>
         <head>
+            <link rel="stylesheet" href="https://unpkg.com/basscss@8.0.2/css/basscss.min.css">
             <link rel="stylesheet" href="/style.css">
         </head>
-        <body>
+        <body class="font-family-sans-serifs">
             <div id="app">""" <> renderAppHandler s <> """</div>
             <script>document.body.className = 'js';</script>
             <script>window.puxLastState =  JSON.stringify(""" <> (toJSONGeneric defaultOptions s) <> """);</script>
