@@ -48,7 +48,7 @@ footer_ :: Html Action
 footer_ =
     footer # do
         nav ! className footerContainer # do
-            link ("/new") ! className "dark-gray" # do
+            link ("/new") ! className linkUI # do
                 text "add a new song"
 
 songPageFooter :: Int -> Html Action
@@ -67,7 +67,7 @@ songPageHeader id (UIState { searchQuery, songUIState: SongUIState { showSongMet
         nav ! className "flex flex-wrap bg-dark-gray" # do
             link ("/") ! className (linkUI <> " bg-white") # do
                 text "<<"
-            form ! className "flex" ! action ("/song/" <> show id) ! method "GET" # do
+            form ! className "flex flex-wrap" ! action ("/song/" <> show id) ! method "GET" # do
                 input [ className "dn", name "hide-song-meta", type_ "checkbox", id_ "song-meta-toggle", checked $ not showSongMeta, onChange (\_ -> UIAction ToggleShowSongMeta) ] []
                 label [ className checkboxUI, htmlFor "song-meta-toggle" ] [ text "hide song meta" ]
                 input [ className "dn", name "hide-duplicated-chords", type_ "checkbox", id_ "duplicated-chords-toggle", checked $ not showDuplicatedChorus, onChange (\_ -> UIAction ToggleShowDuplicatedChorus) ] []
@@ -132,7 +132,7 @@ searchResult (DBSong { id, song: Song { meta: SongMeta { title, artist, album, y
 searchForm :: String -> Html Action
 searchForm q =
     form ! className "flex justify-center" ! action "/search" ! method "GET" ! onSubmit (const $ PageView (SearchResultPage q)) # do
-        input [ className "h4 block pa3 m3 border b--dark-gray rounded-2", name "q", type_ "search", placeholder "Search a song, artist or album", value q, onChange (\f -> UIAction (SearchChange f))] []
+        input [ className "w-50 f5 pa3 ma3 ba b--dark-gray br-pill", name "q", type_ "search", placeholder "Search a song, artist or album", value q, onChange (\f -> UIAction (SearchChange f))] []
 
 
 --- New Song views

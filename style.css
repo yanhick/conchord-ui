@@ -30,14 +30,6 @@ ul li a:active {
     color: #1c5d99;
 }
 
-.rounded-2 {
-    border-radius: 1.5rem;
-}
-
-input[type="search"] {
-    width: 50vw;
-}
-
 .js header nav input[type="submit"] {
     display: none;
 }
