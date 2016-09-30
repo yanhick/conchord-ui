@@ -47,17 +47,17 @@ header_ (IOState { searchResults }) (UIState { searchQuery }) =
 footer_ :: Html Action
 footer_ =
     footer # do
-        nav ! className "flex flex-wrap bg-white border-top border-dark-gray" # do
+        nav ! className footerContainer # do
             link ("/new") ! className "dark-gray" # do
                 text "add a new song"
 
 songPageFooter :: Int -> Html Action
 songPageFooter id =
     footer # do
-        nav ! className "flex flex-wrap" # do
-            link ("/update/" <> show id) # do
+        nav ! className footerContainer # do
+            link ("/update/" <> show id) ! className linkUI # do
                 text "edit this song"
-            link ("/new") # do
+            link ("/new") ! className linkUI # do
                 text "add a new song"
             deleteSongForm id
 
@@ -68,22 +68,22 @@ songPageHeader id (UIState { searchQuery, songUIState: SongUIState { showSongMet
             link ("/") ! className (linkUI <> " bg-white") # do
                 text "<<"
             form ! className "flex" ! action ("/song/" <> show id) ! method "GET" # do
-                input [ className "display-none", name "hide-song-meta", type_ "checkbox", id_ "song-meta-toggle", checked $ not showSongMeta, onChange (\_ -> UIAction ToggleShowSongMeta) ] []
+                input [ className "dn", name "hide-song-meta", type_ "checkbox", id_ "song-meta-toggle", checked $ not showSongMeta, onChange (\_ -> UIAction ToggleShowSongMeta) ] []
                 label [ className checkboxUI, htmlFor "song-meta-toggle" ] [ text "hide song meta" ]
-                input [ className "display-none", name "hide-duplicated-chords", type_ "checkbox", id_ "duplicated-chords-toggle", checked $ not showDuplicatedChorus, onChange (\_ -> UIAction ToggleShowDuplicatedChorus) ] []
+                input [ className "dn", name "hide-duplicated-chords", type_ "checkbox", id_ "duplicated-chords-toggle", checked $ not showDuplicatedChorus, onChange (\_ -> UIAction ToggleShowDuplicatedChorus) ] []
                 label [ className checkboxUI, htmlFor "duplicated-chords-toggle" ] [ text "hide song duplicated chorus" ]
-                input [ className "display-none", name "hide-song-section-name", type_ "checkbox", id_ "song-section-name-toggle", checked $ not showSongSectionName, onChange (\_ -> UIAction ToggleShowSongSectionName) ] []
+                input [ className "dn", name "hide-song-section-name", type_ "checkbox", id_ "song-section-name-toggle", checked $ not showSongSectionName, onChange (\_ -> UIAction ToggleShowSongSectionName) ] []
                 label [ className checkboxUI, htmlFor "song-section-name-toggle" ] [ text "hide song section name" ]
-                input [ className "display-none", name "hide-menus", type_ "checkbox", id_ "menus-toggle", checked $ not showMenus, onChange (\_ -> UIAction ToggleShowMenus) ] []
+                input [ className "dn", name "hide-menus", type_ "checkbox", id_ "menus-toggle", checked $ not showMenus, onChange (\_ -> UIAction ToggleShowMenus) ] []
                 label [ className checkboxUI, htmlFor "menus-toggle" ] [ text "hide menus" ]
-                input [ className "cursor-pointer h6 p2 bg-transparent light-blue border-none caps", type_ "submit", value "update" ] []
+                input [ className (linkUI <> resetInput <> "blue"), type_ "submit", value "update" ] []
 
 songPageMinimalHeader :: Int -> UIState -> Html Action
 songPageMinimalHeader id (UIState { searchQuery, songUIState: SongUIState { showSongMeta, showDuplicatedChorus, showSongSectionName, showMenus } } ) =
     header # do
         nav ! className "flex flex-wrap" # do
             form !className "flex" ! action ("/song/" <> show id) ! method "GET" # do
-                input [ className "display-none", name "hide-menus", type_ "checkbox", id_ "menus-toggle", checked $ not showMenus, onChange (\_ -> UIAction ToggleShowMenus) ] []
+                input [ className "dn", name "hide-menus", type_ "checkbox", id_ "menus-toggle", checked $ not showMenus, onChange (\_ -> UIAction ToggleShowMenus) ] []
                 label [ htmlFor "menus-toggle" ] [ text "show menus" ]
                 input [ type_ "submit", value "update" ] []
 
@@ -104,7 +104,7 @@ homePage (State { io, ui }) = [
 searchResultPage :: State -> Array (Html Action)
 searchResultPage (State { io, ui }) = [
         header_ io ui,
-        ul ! className "flex flex-wrap justify-center list-reset p2 font-family-serifs" ## searchResultPageContent io ui,
+        ul ! className "flex flex-wrap justify-center list-reset pa3 serif" ## searchResultPageContent io ui,
         footer_
     ]
 
@@ -118,9 +118,9 @@ searchResultPageContent (IOState { searchResults: (LoadError e) }) _ = [text e]
 searchResult :: DBSong -> Html Action
 searchResult (DBSong { id, song: Song { meta: SongMeta { title, artist, album, year: Year(y) }, content: SongContent (content) } }) =
     li ! className "max-width-1 left" # do
-        link ("/song/" <> id) ! className "dark-gray inline-block text-decoration-none m2 p2" # do
-            h1 ! className "font-family-sans-serifs regular h3 p1 mb1 white bg-dark-gray white" # text title
-            h2 ! className "font-family-sans-serifs regular h5 p1 white bg-dark-gray white" # text artist
+        link ("/song/" <> id) ! className "dark-gray dib no-underline m2 pa3" # do
+            h1 ! className "sans-serif normal f3 p1 mb1 white bg-dark-gray white" # text title
+            h2 ! className "sans-serif normal f5 p1 white bg-dark-gray white" # text artist
             i  ! className "block py3 content-ellipsis-after" # text (content' content)
     where
         content' c = take 200 (foldMap (\(SongSection {lyrics}) -> foldMap serializeLyric lyrics) c)
@@ -132,7 +132,7 @@ searchResult (DBSong { id, song: Song { meta: SongMeta { title, artist, album, y
 searchForm :: String -> Html Action
 searchForm q =
     form ! className "flex justify-center" ! action "/search" ! method "GET" ! onSubmit (const $ PageView (SearchResultPage q)) # do
-        input [ className "h4 block p2 m3 border border-dark-gray rounded-2", name "q", type_ "search", placeholder "Search a song, artist or album", value q, onChange (\f -> UIAction (SearchChange f))] []
+        input [ className "h4 block pa3 m3 border b--dark-gray rounded-2", name "q", type_ "search", placeholder "Search a song, artist or album", value q, onChange (\f -> UIAction (SearchChange f))] []
 
 
 --- New Song views
@@ -158,7 +158,7 @@ newSongPage (State { io: IOState { newSong }, ui }) =
 newSongForm :: Boolean -> String -> Html Action
 newSongForm disable song =
     form ! className "flex" ! action "/new" ! method "POST" ! onSubmit (const $ IOAction SubmitNewSong) # do
-        textarea [ className "p2 h4 bg-dark-gray white border-none", name "song", type_ "text", value song, onChange (\e -> UIAction (NewSongChange e)) ] []
+        textarea [ className "pa3 h4 bg-dark-gray white bn", name "song", type_ "text", value song, onChange (\e -> UIAction (NewSongChange e)) ] []
         input [ type_ "submit", value "add this new song", disabled disable ] []
 
 
@@ -180,7 +180,7 @@ updateSongPage id (State { io: IOState { updateSong } }) =
 updateSongForm :: Int -> Boolean -> String -> Html Action
 updateSongForm id disable song =
     form ! className "flex flex-column" ! action ("/update/" <> show id) ! method "POST" ! onSubmit (const $ IOAction SubmitUpdateSong) # do
-        textarea [ className "p2 h4 bg-dark-gray white border-none", name "song", type_ "text", onChange (\e -> UIAction (UpdateSongChange e)), value song ] []
+        textarea [ className "pa3 h4 bg-dark-gray white bn", name "song", type_ "text", onChange (\e -> UIAction (UpdateSongChange e)), value song ] []
         input [ type_ "submit", value "edit this song", disabled disable ] []
 
 --- Delete Song views
@@ -188,7 +188,7 @@ updateSongForm id disable song =
 deleteSongForm :: Int -> Html Action
 deleteSongForm id =
     form ! className "flex" ! action "/song/api" ! method "DELETE" ! onSubmit (const $ IOAction (SubmitDeleteSong id)) # do
-        input [ className "light-red", type_ "submit", value "delete this song" ] []
+        input [ className (linkUI <> "red " <> resetInput), type_ "submit", value "delete this song" ] []
 
 --- Song Views
 
@@ -212,7 +212,7 @@ songPageContent (IOState { song: Loading }) _ = main # do
         text "LOADING..."
 songPageContent (IOState { song: (LoadError e) }) _ = main # text e
 songPageContent (IOState { song: Loaded (Song { meta, content })}) (UIState { searchQuery, songUIState: SongUIState { showSongMeta, showDuplicatedChorus, showSongSectionName } } ) =
-    main [className $ "line-height-5 p2 m2 font-family-serifs" <> hideChorusesClass (not showDuplicatedChorus)] [content' showSongMeta]
+    main [className $ "line-height-5 pa3 ma2 serif" <> hideChorusesClass (not showDuplicatedChorus)] [content' showSongMeta]
     where
         content' true = do
             songMeta meta
@@ -225,11 +225,11 @@ songPageContent (IOState { song: Loaded (Song { meta, content })}) (UIState { se
 songMeta :: SongMeta -> Html Action
 songMeta (SongMeta { title, artist, album }) =
     header
-        ! className "line-height-4 right-align pb2 mb2 border-bottom border-dark-gray"
+        ! className "lh-title tr pb2 mb2 bb b--dark-gray"
         # do
-            h1 ! className "h2 regular" # text title
-            h2 ! className "h4 regular inline content-dash-after" # text artist
-            h3 ! className "h4 regular inline" # text album
+            h1 ! className "f3 normal ma0" # text title
+            h2 ! className "f5 normal di content-dash-after" # text artist
+            h3 ! className "f5 normal di" # text album
 
 songContent :: Boolean -> SongContent -> Html Action
 songContent showSongSectionName (SongContent s) = article [] ((songSection showSongSectionName) <$> s)
@@ -242,14 +242,14 @@ songSection showName (SongSection {name, lyrics}) =
         ## sectionContent showName
     where
         sectionContent true = [
-            h4 ! className "caps" # text (serializeSongSectionName name),
+            h4 ! className "ma0 ttu" # text (serializeSongSectionName name),
             sectionText
         ]
         sectionContent false = [
             sectionText
         ]
         sectionText = p
-            ! className "ml2 justify"
+            ! className "ma0 ml2 justify"
             ## (songLyric <$> lyrics)
 
 songLyric :: SongLyric -> Html Action
@@ -275,16 +275,22 @@ songLyric (OnlyLyric lyric) =
 --- Style Utils
 
 textUI :: String
-textUI = " caps h6 text-decoration-none "
+textUI = " ttu f6 no-underline"
 
 boxUI :: String
-boxUI = " p2 "
+boxUI = " pa3 "
 
 interactiveUI :: String
-interactiveUI = " cursor-pointer "
+interactiveUI = " pointer hover-bg-blue hover-white link "
 
 linkUI :: String
 linkUI = textUI <> boxUI <> interactiveUI
 
 checkboxUI :: String
 checkboxUI = linkUI <> " white"
+
+resetInput :: String
+resetInput = " bn bg-transparent "
+
+footerContainer :: String
+footerContainer = " flex flex-wrap bt b--dark-gray "

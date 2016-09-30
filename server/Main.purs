@@ -364,7 +364,7 @@ index s =
     <!doctype html>
     <html>
         <head>
-            <link rel="stylesheet" href="https://unpkg.com/basscss@8.0.2/css/basscss.min.css">
+            <link rel="stylesheet" href="https://unpkg.com/tachyons@4.5.3/css/tachyons.min.css">
             <link rel="stylesheet" href="/style.css">
         </head>
         <body class="font-family-sans-serifs">
