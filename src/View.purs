@@ -84,7 +84,7 @@ songPageMinimalHeader id (UIState { searchQuery, songUIState: SongUIState { show
         nav ! className "flex flex-wrap" # do
             form !className "flex" ! action ("/song/" <> show id) ! method "GET" # do
                 input [ className "dn", name "hide-menus", type_ "checkbox", id_ "menus-toggle", checked $ not showMenus, onChange (\_ -> UIAction ToggleShowMenus) ] []
-                label [ htmlFor "menus-toggle" ] [ text "show menus" ]
+                label [ className checkboxUI, htmlFor "menus-toggle" ] [ text "show menus" ]
                 input [ type_ "submit", value "update" ] []
 
 --- NotFound view
