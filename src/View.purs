@@ -110,7 +110,7 @@ searchResultPage (State { io, ui }) = [
 
 searchResultPageContent :: IOState -> UIState -> Array (Html Action)
 searchResultPageContent (IOState { searchResults: Empty }) _ = [text ""]
-searchResultPageContent (IOState { searchResults: Loading }) _ = [h1 # text "LOADING..."]
+searchResultPageContent (IOState { searchResults: Loading }) _ = [h1 ! className loadingText # text "LOADING..."]
 searchResultPageContent (IOState { searchResults: Loaded s }) _ = searchResult <$> s
 searchResultPageContent (IOState { searchResults: (LoadError e) }) _ = [text e]
 
@@ -208,7 +208,7 @@ songPage id io ui@(UIState { songUIState: SongUIState { showMenus } }) = songPag
 songPageContent :: IOState -> UIState -> Html Action
 songPageContent (IOState { song: Empty }) _ = main # text ""
 songPageContent (IOState { song: Loading }) _ = main # do
-    h1 # do
+    h1 ! className loadingText # do
         text "LOADING..."
 songPageContent (IOState { song: (LoadError e) }) _ = main # text e
 songPageContent (IOState { song: Loaded (Song { meta, content })}) (UIState { searchQuery, songUIState: SongUIState { showSongMeta, showDuplicatedChorus, showSongSectionName } } ) =
@@ -276,6 +276,9 @@ songLyric (OnlyLyric lyric) =
 
 textUI :: String
 textUI = " ttu f6 no-underline"
+
+loadingText :: String
+loadingText = " f3 normal sans-serif "
 
 boxUI :: String
 boxUI = " pa3 "
