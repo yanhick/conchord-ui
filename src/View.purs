@@ -144,10 +144,10 @@ newSongPageHeader = do
 
 newSongPage :: State -> Array (Html Action)
 newSongPage (State { io: IOState { newSong }, ui }) =
-        pure $ div ! className "editor" # do
-            aside ! className "flex" # do
+        pure $ div ! className "flex flex-row" # do
+            aside ! className "vh-100 w-50 flex" # do
                 newSongForm (isLeft (snd newSong)) (fst newSong)
-            main # do
+            main ! className songContainer # do
                 render $ snd newSong
     where
         render (Right (Song { meta, content })) = do
@@ -157,19 +157,19 @@ newSongPage (State { io: IOState { newSong }, ui }) =
 
 newSongForm :: Boolean -> String -> Html Action
 newSongForm disable song =
-    form ! className "flex" ! action "/new" ! method "POST" ! onSubmit (const $ IOAction SubmitNewSong) # do
-        textarea [ className "pa3 h4 bg-dark-gray white bn", name "song", type_ "text", value song, onChange (\e -> UIAction (NewSongChange e)) ] []
-        input [ type_ "submit", value "add this new song", disabled disable ] []
+    form ! className "flex flex-column flex-auto" ! action "/new" ! method "POST" ! onSubmit (const $ IOAction SubmitNewSong) # do
+        textarea [ className "flex-auto pa3 bg-dark-gray white bn", name "song", type_ "text", value song, onChange (\e -> UIAction (NewSongChange e)) ] []
+        input [ className (linkUI <> resetInput), type_ "submit", value "add this new song", disabled disable ] []
 
 
 --- Update Song views
 
 updateSongPage :: Int -> State -> Array (Html Action)
 updateSongPage id (State { io: IOState { updateSong } }) =
-    pure $ div ! className "editor flex flex-wrap" # do
-        aside ! className "flex flex-column" # do
+    pure $ div ! className "flex flex-row" # do
+        aside ! className "vh-100 w-50 flex" # do
             updateSongForm id (isLeft (snd updateSong)) (fst updateSong)
-        main # do
+        main ! className (songContainer <> " w-50") # do
             render $ snd updateSong
     where
         render (Right (Song { meta, content })) = do
@@ -179,9 +179,9 @@ updateSongPage id (State { io: IOState { updateSong } }) =
 
 updateSongForm :: Int -> Boolean -> String -> Html Action
 updateSongForm id disable song =
-    form ! className "flex flex-column" ! action ("/update/" <> show id) ! method "POST" ! onSubmit (const $ IOAction SubmitUpdateSong) # do
-        textarea [ className "pa3 h4 bg-dark-gray white bn", name "song", type_ "text", onChange (\e -> UIAction (UpdateSongChange e)), value song ] []
-        input [ type_ "submit", value "edit this song", disabled disable ] []
+    form ! className "flex flex-column flex-auto" ! action ("/update/" <> show id) ! method "POST" ! onSubmit (const $ IOAction SubmitUpdateSong) # do
+        textarea [ className "flex-auto pa3 bg-dark-gray white bn", name "song", type_ "text", onChange (\e -> UIAction (UpdateSongChange e)), value song ] []
+        input [ className (linkUI <> resetInput), type_ "submit", value "edit this song", disabled disable ] []
 
 --- Delete Song views
 
@@ -212,7 +212,7 @@ songPageContent (IOState { song: Loading }) _ = main # do
         text "LOADING..."
 songPageContent (IOState { song: (LoadError e) }) _ = main # text e
 songPageContent (IOState { song: Loaded (Song { meta, content })}) (UIState { searchQuery, songUIState: SongUIState { showSongMeta, showDuplicatedChorus, showSongSectionName } } ) =
-    main [className $ "column-container flex-auto song-content-line-height pa3 ma2 serif " <> hideChorusesClass (not showDuplicatedChorus)] [content' showSongMeta]
+    main [className $ songContainer <> hideChorusesClass (not showDuplicatedChorus)] [content' showSongMeta]
     where
         content' true = do
             songMeta meta
@@ -294,3 +294,6 @@ resetInput = " bn bg-transparent "
 
 footerContainer :: String
 footerContainer = " flex flex-wrap bt b--dark-gray "
+
+songContainer :: String
+songContainer = " column-container flex-auto song-content-line-height pa3 ma2 serif "

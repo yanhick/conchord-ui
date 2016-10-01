@@ -2,13 +2,6 @@
     color: #1c5d99;
 }
 
-
-input[type=submit]:disabled, input[type=button]:disabled {
-    color: #222222;
-    background: none;
-    cursor: default;
-}
-
 .content-ellipsis-after:after {
     content: '...';
 }
@@ -24,7 +17,6 @@ input[type=submit]:disabled, input[type=button]:disabled {
 .hide-duplicated-chorus [data-section=Chorus] ~ [data-section=Chorus] p {
     display: none;
 }
-
 
 .column-container {
     column-width: 30rem;
@@ -73,22 +65,4 @@ input[type=submit]:disabled, input[type=button]:disabled {
 
 [data-lyrics$="."]:after {
     content: '\A';
-}
-
-.editor main {
-    flex-grow: 2;
-}
-
-aside {
-    flex-grow: 1;
-    height: 100vh;
-}
-
-aside form {
-    flex-grow: 1;
-}
-
-aside textarea {
-    width: 100%;
-    flex-grow: 1;
 }
