@@ -26,7 +26,7 @@ view state@(State { currentPage } ) = div [] [ page currentPage state ]
 
 page :: Route -> State -> Html Action
 page r s = do
-    div ! className "site flex flex-column" ## page' r s
+    div ! className "min-vh-100 site flex flex-column" ## page' r s
     where
         page' (SongPage id) (State { ui, io, currentPage }) = songPage id io ui
         page' (SearchResultPage _) state = searchResultPage state
@@ -97,14 +97,14 @@ notFoundPage = pure $ text "not found"
 homePage :: State -> Array (Html Action)
 homePage (State { io, ui }) = [
         header_ io ui,
-        main [] [],
+        main [ className "flex-auto" ] [],
         footer_
     ]
 
 searchResultPage :: State -> Array (Html Action)
 searchResultPage (State { io, ui }) = [
         header_ io ui,
-        ul ! className "flex flex-wrap justify-center list-reset pa3 serif" ## searchResultPageContent io ui,
+        ul ! className "flex flex-wrap flex-auto justify-center list pa3 serif" ## searchResultPageContent io ui,
         footer_
     ]
 
@@ -117,11 +117,11 @@ searchResultPageContent (IOState { searchResults: (LoadError e) }) _ = [text e]
 
 searchResult :: DBSong -> Html Action
 searchResult (DBSong { id, song: Song { meta: SongMeta { title, artist, album, year: Year(y) }, content: SongContent (content) } }) =
-    li ! className "max-width-1 left" # do
-        link ("/song/" <> id) ! className "dark-gray dib no-underline m2 pa3" # do
-            h1 ! className "sans-serif normal f3 p1 mb1 white bg-dark-gray white" # text title
-            h2 ! className "sans-serif normal f5 p1 white bg-dark-gray white" # text artist
-            i  ! className "block py3 content-ellipsis-after" # text (content' content)
+    li ! className "dim mw6 left hover-white" # do
+        link ("/song/" <> id) ! className "dark-gray dib no-underline ma2 pa3" # do
+            h1 ! className "sans-serif normal f3 pamax-width-1 pa2 ma0 mb1 white bg-dark-gray white" # text title
+            h2 ! className "sans-serif normal f5 pa1 white pa2 bg-dark-gray ma0 white" # text artist
+            i  ! className "block py3 content-ellipsis-after pv2 db" # text (content' content)
     where
         content' c = take 200 (foldMap (\(SongSection {lyrics}) -> foldMap serializeLyric lyrics) c)
         serializeLyric (ChordAndLyric _ l) = l
@@ -212,7 +212,7 @@ songPageContent (IOState { song: Loading }) _ = main # do
         text "LOADING..."
 songPageContent (IOState { song: (LoadError e) }) _ = main # text e
 songPageContent (IOState { song: Loaded (Song { meta, content })}) (UIState { searchQuery, songUIState: SongUIState { showSongMeta, showDuplicatedChorus, showSongSectionName } } ) =
-    main [className $ "line-height-5 pa3 ma2 serif" <> hideChorusesClass (not showDuplicatedChorus)] [content' showSongMeta]
+    main [className $ "column-container flex-auto song-content-line-height pa3 ma2 serif " <> hideChorusesClass (not showDuplicatedChorus)] [content' showSongMeta]
     where
         content' true = do
             songMeta meta
@@ -254,8 +254,8 @@ songSection showName (SongSection {name, lyrics}) =
 
 songLyric :: SongLyric -> Html Action
 songLyric (ChordAndLyric chord lyric) =
-    span ! data_ "lyrics" lyric ! data_ "chord-placement" (chordPlacement chord) # do
-        i ! data_ "chord" (showChord chord) # text ""
+    span ! className "chord-and-lyrics" ! data_ "lyrics" lyric ! data_ "chord-placement" (chordPlacement chord) # do
+        i ! className "chord-name" ! data_ "chord" (showChord chord) # text ""
         text lyric
     where
         showChord (InsideWord c) = show c
@@ -266,10 +266,10 @@ songLyric (ChordAndLyric chord lyric) =
 
 
 songLyric (OnlyChord chord) =
-    span ! data_ "chord" (show chord) # do
-        i ! data_ "chord" (show chord) # text ""
+    span ! className "chord-and-lyrics" ! data_ "chord" (show chord) # do
+        i ! className "chord-name" ! data_ "chord" (show chord) # text ""
 songLyric (OnlyLyric lyric) =
-    span ! data_ "lyrics" lyric # do
+    span ! className "chord-and-lyrics" ! data_ "lyrics" lyric # do
         text lyric
 
 --- Style Utils
