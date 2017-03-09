@@ -13,7 +13,7 @@ import Pux.Html.Events (onSubmit, onChange, onClick)
 import Pux.Html.Attributes (id_, htmlFor, checked, name, placeholder, type_, value, data_, action, method, className, disabled, formAction)
 import Pux.Router (link)
 
-import Model (DBSong(DBSong), Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(ChordAndLyric, OnlyChord, OnlyLyric), Year(Year), serializeSongSectionName, ChordPlacement(InsideWord, BetweenWord))
+import Model (DBSong(DBSong), Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(ChordAndLyric, OnlyChord, OnlyLyric), Year(Year), serializeSongSectionName, ChordPlacement(InsideWord, BetweenWord), SongsList, SearchResults)
 import Action (Action(UIAction, PageView, IOAction), UIAction(ToggleShowMenus, ToggleShowSongSectionName, ToggleShowDuplicatedChorus, ToggleShowSongMeta, SearchChange, NewSongChange, UpdateSongChange), IOAction(SubmitNewSong, SubmitUpdateSong, SubmitDeleteSong))
 import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage, NewSongPage, UpdateSongPage))
 import App (State(State), AsyncData(Loading, Loaded, Empty, LoadError), SongUIState(SongUIState), UIState(UIState), IOState(IOState))
@@ -95,24 +95,29 @@ notFoundPage = pure $ text "not found"
 --- Search Views
 
 homePage :: State -> Array (Html Action)
-homePage (State { io, ui }) = [
+homePage (State { io: io@IOState { songsList }, ui }) = [
         header_ io ui,
-        main [ className "flex-auto" ] [],
+        homepageBody songsList,
         footer_
     ]
+
+homepageBody :: AsyncData SongsList -> Html Action
+homepageBody songsList =
+    main ! className "flex-auto" # do
+        ul ! className "flex flex-wrap flex-auto justify-center list pa3 serif" ## searchResultPageContent songsList
 
 searchResultPage :: State -> Array (Html Action)
-searchResultPage (State { io, ui }) = [
+searchResultPage (State { io: io@IOState { searchResults }, ui }) = [
         header_ io ui,
-        ul ! className "flex flex-wrap flex-auto justify-center list pa3 serif" ## searchResultPageContent io ui,
+        ul ! className "flex flex-wrap flex-auto justify-center list pa3 serif" ## searchResultPageContent searchResults,
         footer_
     ]
 
-searchResultPageContent :: IOState -> UIState -> Array (Html Action)
-searchResultPageContent (IOState { searchResults: Empty }) _ = [text ""]
-searchResultPageContent (IOState { searchResults: Loading }) _ = [h1 ! className loadingText # text "LOADING..."]
-searchResultPageContent (IOState { searchResults: Loaded s }) _ = searchResult <$> s
-searchResultPageContent (IOState { searchResults: (LoadError e) }) _ = [text e]
+searchResultPageContent :: AsyncData SearchResults -> Array (Html Action)
+searchResultPageContent Empty = [text ""]
+searchResultPageContent Loading = [h1 ! className loadingText # text "LOADING..."]
+searchResultPageContent (Loaded s) = searchResult <$> s
+searchResultPageContent (LoadError e) = [text e]
 
 
 searchResult :: DBSong -> Html Action

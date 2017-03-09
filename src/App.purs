@@ -8,7 +8,7 @@ import Data.Foreign.Class (class IsForeign)
 import Data.Generic (class Generic, gEq, gShow)
 import Data.Foreign.Generic (readGeneric, defaultOptions)
 
-import Model (SearchResults, Song, serializeSong, exampleSong, DBSong)
+import Model (SearchResults, SongsList, Song, serializeSong, exampleSong, DBSong)
 import Route (Route(HomePage))
 
 import Test.StrongCheck.Arbitrary (class Arbitrary)
@@ -42,6 +42,7 @@ type ValidatedSong = Tuple String (Either Error Song)
 
 newtype IOState = IOState {
     searchResults :: AsyncData SearchResults
+  , songsList :: AsyncData SongsList
   , song :: AsyncData Song
   , newSong :: ValidatedSong
   , updateSong :: ValidatedSong
@@ -61,6 +62,7 @@ init = State {
   }
   , io: IOState {
       searchResults: Empty
+    , songsList: Empty
     , song: Empty
     , newSong: Tuple (serializeSong exampleSong) (Right exampleSong)
     , updateSong: Tuple (serializeSong exampleSong) (Right exampleSong)
