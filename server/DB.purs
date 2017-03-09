@@ -92,6 +92,20 @@ getSearchResultsQuery = Query ("""
 
 """)
 
+getSongsList :: forall e. ConnectionInfo -> Aff ( db :: DB | e) (Either ParseError (Array DBSong))
+getSongsList c =
+    withConnection c \client -> do
+        rows <- query getSongsListQuery [] client
+        pure $ traverse songTableRowToDBSong rows
+
+getSongsListQuery :: Query SongTableRow
+getSongsListQuery = Query ("""
+
+    SELECT id, title, artist, album, year, content
+    FROM song
+
+""")
+
 createSong :: forall e. ConnectionInfo -> Song -> Aff ( db :: DB | e ) (Maybe (Either ParseError DBSong))
 createSong c s@(Song { meta: SongMeta m@{ year: Year y } }) =
     withConnection c \client -> do

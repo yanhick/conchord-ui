@@ -26,6 +26,10 @@ import Parser (SongChord, exampleChord, parseChord)
 
 type SearchResults = Array DBSong
 
+--- Songs list Model
+
+type SongsList = Array DBSong
+
 --- Song Model
 
 newtype DBSong = DBSong {

@@ -28,14 +28,14 @@ import Signal.Channel (CHANNEL())
 
 import Pux (renderToString, start)
 import Signal ((~>))
-import Route (Route(SearchResultPage, SongPage, NewSongPage, UpdateSongPage))
+import Route (Route(SearchResultPage, SongPage, NewSongPage, UpdateSongPage, HomePage))
 import App (init, AsyncData(LoadError, Loaded, Empty), State(State), UIState(UIState), IOState(IOState), SongUIState(SongUIState))
 import Action (update)
 import View (view)
 import Text.Parsing.StringParser (runParser)
 
 import Model (parseSong, serializeSong, exampleSong, DBSong(DBSong))
-import DB (mkConnection, localConnectionInfo, getSongById, getSearchResults, createSong, updateSong, deleteSong)
+import DB (mkConnection, localConnectionInfo, getSongById, getSongsList, getSearchResults, createSong, updateSong, deleteSong)
 
 foreign import urlencodedBodyParser :: forall e. Fn3 Request Response (ExpressM e Unit) (ExpressM e Unit)
 
@@ -69,7 +69,7 @@ appSetup c = do
     delete "/api/song/:id" (deleteSongPageHandler c)
     get "/song/:id"    (songPageHandler c)
     get "/:file"       fileHandler
-    get "/"            homePageHandler
+    get "/"            (homePageHandler c)
     get "/api/song/:id" (songApiHandler c)
     put "/api/song/:id" (putUpdateSongApiHandler c)
     delete "/api/song/:id" (deleteSongPageHandler c)
@@ -98,6 +98,7 @@ getUpdateSongPageHandler c = do
                     currentPage: UpdateSongPage id',
                     io: IOState {
                         searchResults: Empty,
+                        songsList: Empty,
                         song: either (LoadError <<< show) Loaded $ runParser parseSong s,
                         newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
                         updateSong: s'
@@ -191,6 +192,7 @@ getNewSongPageHandler = do
         currentPage: NewSongPage,
         io: IOState {
             searchResults: Empty,
+            songsList: Empty,
             song: Empty,
             newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
             updateSong: Tuple (serializeSong exampleSong) (Right exampleSong)
@@ -264,6 +266,7 @@ searchPageHandler c = do
                     currentPage: (SearchResultPage $ maybe "" id q),
                      io: IOState {
                          searchResults: Loaded (sr),
+                         songsList: Empty,
                          song: Empty,
                          newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
                          updateSong: Tuple (serializeSong exampleSong) (Right exampleSong)
@@ -289,6 +292,7 @@ songPageHandler c = do
                 currentPage: (SongPage validId),
                 io: IOState {
                     searchResults: Empty,
+                    songsList: Empty,
                     song: either (LoadError <<< show) Loaded $ runParser parseSong s,
                     newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
                     updateSong: Tuple (serializeSong exampleSong) (Right exampleSong)
@@ -297,8 +301,34 @@ songPageHandler c = do
             })
           Nothing -> nextThrow $ error "Id is not a valid integer"
 
-homePageHandler :: forall e. Handler e
-homePageHandler = send $ index init
+homePageHandler :: forall e. ConnectionInfo -> HandlerM ( express :: EXPRESS, db :: DB, console :: CONSOLE | e ) Unit
+homePageHandler c = do
+    sl <- liftAff $ getSongsList c
+    case sl of 
+      Left e ->
+        send $ index (State {
+            currentPage: HomePage,
+            io: IOState {
+                searchResults: Empty,
+                songsList: Empty,
+                song: Empty,
+                newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
+                updateSong: Tuple (serializeSong exampleSong) (Right exampleSong)
+            },
+            ui: UIState { searchQuery: "", songUIState: SongUIState { showMenus: true, showSongMeta: true, showDuplicatedChorus: true, showSongSectionName: true } }
+        })
+      Right songsList -> do
+        send $ index (State {
+            currentPage: HomePage,
+            io: IOState {
+                searchResults: Empty,
+                songsList: Loaded songsList,
+                song: Empty,
+                newSong: Tuple (serializeSong exampleSong) (Right exampleSong),
+                updateSong: Tuple (serializeSong exampleSong) (Right exampleSong)
+            },
+            ui: UIState { searchQuery: "", songUIState: SongUIState { showMenus: true, showSongMeta: true, showDuplicatedChorus: true, showSongSectionName: true } }
+        })
 
 searchApiHandler :: forall e. ConnectionInfo -> HandlerM ( express :: EXPRESS, db :: DB, console :: CONSOLE | e ) Unit
 searchApiHandler c = do
