@@ -13,7 +13,7 @@ import Pux.Html.Events (onSubmit, onChange, onClick)
 import Pux.Html.Attributes (id_, htmlFor, checked, name, placeholder, type_, value, data_, action, method, className, disabled, formAction)
 import Pux.Router (link)
 
-import Model (DBSong(DBSong), Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(ChordAndLyric, OnlyChord, OnlyLyric), Year(Year), serializeSongSectionName, ChordPlacement(InsideWord, BetweenWord), SongsList, SearchResults)
+import Model (DBSong(DBSong), Song(Song), SongMeta(SongMeta), SongContent(SongContent), SongSection(SongSection), SongLyric(ChordAndLyric, OnlyChord, OnlyLyric), Year(Year), SongSectionName(Chorus), serializeSongSectionName, ChordPlacement(InsideWord, BetweenWord), SongsList, SearchResults)
 import Action (Action(UIAction, PageView, IOAction), UIAction(ToggleShowMenus, ToggleShowSongSectionName, ToggleShowDuplicatedChorus, ToggleShowSongMeta, SearchChange, NewSongChange, UpdateSongChange), IOAction(SubmitNewSong, SubmitUpdateSong, SubmitDeleteSong))
 import Route (Route (SongPage, SearchResultPage, HomePage, NotFoundPage, NewSongPage, UpdateSongPage))
 import App (State(State), AsyncData(Loading, Loaded, Empty, LoadError), SongUIState(SongUIState), UIState(UIState), IOState(IOState))
@@ -242,12 +242,12 @@ songContent showSongSectionName (SongContent s) = article [] ((songSection showS
 songSection :: Boolean -> SongSection -> Html Action
 songSection showName (SongSection {name, lyrics}) =
     section
-        ! className "column-break-inside-avoid"
+        ! className ("column-break-inside-avoid " <> sectionClassNames name)
         ! data_ "section" (serializeSongSectionName name)
         ## sectionContent showName
     where
         sectionContent true = [
-            h4 ! className "ma0 ttu" # text (serializeSongSectionName name),
+            h4 ! className "ma0 ttu f6" # text (serializeSongSectionName name),
             sectionText
         ]
         sectionContent false = [
@@ -256,6 +256,9 @@ songSection showName (SongSection {name, lyrics}) =
         sectionText = p
             ! className "ma0 ml2 justify"
             ## (songLyric <$> lyrics)
+
+        sectionClassNames Chorus = "bg-near-white pa2"
+        sectionClassNames _ = ""
 
 songLyric :: SongLyric -> Html Action
 songLyric (ChordAndLyric chord lyric) =
@@ -304,4 +307,4 @@ footerContainer :: String
 footerContainer = " flex flex-wrap bt b--dark-gray "
 
 songContainer :: String
-songContainer = " column-container flex-auto song-content-line-height pa3 ma2 serif "
+songContainer = " column-container flex-auto song-content-line-height pa3 ma2 "
