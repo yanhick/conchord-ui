@@ -24,8 +24,8 @@ import Pux (EffModel, noEffects)
 import Pux.Html.Events (FormEvent)
 import Pux.Router (navigateTo)
 
-import Route (Route(SongPage, SearchResultPage, UpdateSongPage, NewSongPage))
-import Model (SearchResults, Song, serializeSong, parseSong, DBSong(DBSong), exampleSong)
+import Route (Route(SongPage, SearchResultPage, UpdateSongPage, NewSongPage, HomePage))
+import Model (SearchResults, SongsList, Song, serializeSong, parseSong, DBSong(DBSong), exampleSong)
 import App (State(State), UIState(UIState), SongUIState(SongUIState), IOState(IOState), AsyncData(Loading, Loaded, LoadError))
 import Text.Parsing.StringParser (runParser)
 
@@ -46,6 +46,8 @@ data UIAction =
     ToggleShowMenus
 
 data IOAction =
+    RequestSongsList |
+    ReceiveSongsList (F SongsList) |
     RequestSong Int |
     ReceiveSong (F Song) |
     RequestSearch String |
@@ -82,6 +84,8 @@ updatePage p@(UpdateSongPage _) (State state@{ io: IOState { song: song@Loaded(s
     noEffects $ State state { currentPage = p, io = IOState { updateSong: Tuple (serializeSong song') (Right song'), song, searchResults, songsList, newSong } }
 updatePage p@(NewSongPage) (State state@{ io: IOState io }) =
     noEffects $ State state { currentPage = p, io = IOState io { newSong = Tuple (serializeSong exampleSong) (Right exampleSong) } }
+updatePage p@(HomePage) (State state) =
+    updateIO RequestSongsList (State state { currentPage = p })
 updatePage p (State state) = noEffects $ State state { currentPage = p }
 
 
@@ -113,6 +117,23 @@ updateUI ToggleShowMenus (State state@{ ui: UIState ui@{ songUIState: SongUIStat
 --- IO Actions
 
 updateIO :: IOAction -> State -> Affction
+
+updateIO RequestSongsList (State state@{ io: IOState { searchResults, song, newSong, updateSong }}) = {
+    state: State $ state { io = IOState { searchResults, song, newSong, updateSong, songsList: Loading } }
+    , effects: [ do
+        res <- fetchSongsList
+        let results = (readJSON res) :: F SongsList
+        pure $ IOAction $ ReceiveSongsList results
+    ]
+}
+
+updateIO (ReceiveSongsList (Right r)) (State state@{ io: IOState { song, newSong, updateSong, searchResults } }) =
+    noEffects $ State $ state { io = IOState { searchResults, song, newSong, updateSong, songsList: Loaded r } }
+
+updateIO (ReceiveSongsList (Left e)) (State state@{ io: IOState { song, newSong, updateSong, searchResults } }) =
+    noEffects $ State $ state { io = IOState { searchResults, song, newSong, updateSong, songsList: LoadError (show e) } }
+
+
 updateIO (RequestSearch q) (State state@{ ui: UIState { searchQuery }, io: IOState { song, newSong, updateSong, songsList }}) = {
     state: State $ state { io = IOState { searchResults: Loading, song, newSong, updateSong, songsList } }
   , effects: [ do
@@ -219,6 +240,13 @@ fetchSong id = do
     pure case result.status of
              (StatusCode 200) -> result.response
              _ -> "fail"
+
+fetchSongsList :: forall eff. Aff (ajax :: AJAX | eff) String
+fetchSongsList = do
+    result <- get $ "/api/song"
+    pure case result.status of
+           (StatusCode 200) -> result.response
+           _ -> "fail"
 
 newtype PostSong = PostSong String
 

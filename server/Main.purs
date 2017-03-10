@@ -71,6 +71,7 @@ appSetup c = do
     get "/:file"       fileHandler
     get "/"            (homePageHandler c)
     get "/api/song/:id" (songApiHandler c)
+    get "/api/song" (songsListApiHandler c)
     put "/api/song/:id" (putUpdateSongApiHandler c)
     delete "/api/song/:id" (deleteSongPageHandler c)
     post "/api/song"   (postNewSongApiHandler c)
@@ -358,6 +359,14 @@ songApiHandler c = do
               Right s'' -> send $ toJSONGeneric defaultOptions s''
               Left e -> err (show e)
           Nothing -> err "Id is not a valid integer"
+    where err = nextThrow <<< error
+
+songsListApiHandler :: forall e. ConnectionInfo -> HandlerM ( express :: EXPRESS, db :: DB, console :: CONSOLE | e ) Unit
+songsListApiHandler c = do
+    sl <- liftAff $ getSongsList c
+    case sl of
+        Left e -> err (show e)
+        Right songsList -> send $ toJSONGeneric defaultOptions songsList
     where err = nextThrow <<< error
 
 errorHandler :: forall e. Error -> Handler e
